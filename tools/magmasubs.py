@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+# Substitutions used in codegen.py
+#
 # Substitutions are applied in the order listed. This is important in cases
 # where multiple substitutions could match, or when one substitution matches
 # the result of a previous substitution. For example, these rules are correct
@@ -10,7 +11,7 @@
 # but if switched would translate 'double precision' -> 'float precision',
 # which is wrong.
 #
-# Reorganized 5/2012 Mark Gates
+# @author Mark Gates
 
 
 
@@ -26,49 +27,58 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
 
-# --------------------
-# maps double-nested list of strings to upper case.
-# [ ['Foo', 'bar'], ['baz', 'ZAB'] ]
-# becomes
-# [ ['FOO', 'BAR'], ['BAZ', 'ZAB'] ]
-def upper( lcase ):
-    ucase = map( lambda outer: map( lambda inner: inner.upper(), outer ), lcase )
+# ===========================================================================
+# utilitiy functions
+
+# ----------------------------------------
+def upper( txt ):
+    '''
+    maps double-nested list of strings to upper case.
+    [ ['Foo', 'bar'], ['baz', 'ZAB'] ]
+    becomes
+    [ ['FOO', 'BAR'], ['BAZ', 'ZAB'] ]
+    '''
+    ucase = map( lambda outer: map( lambda inner: inner.upper(), outer ), txt )
     return ucase
 # end
 
 
-# --------------------
-# maps double-nested list of strings to lower case.
-# [ ['Foo', 'BAR'], ['BAZ', 'zab'] ]
-# becomes
-# [ ['foo', 'bar'], ['baz', 'zab'] ]
-def lower( ucase ):
-    lcase = map( lambda outer: map( lambda inner: inner.lower(), outer ), ucase )
+# ----------------------------------------
+def lower( txt ):
+    '''
+    maps double-nested list of strings to lower case.
+    [ ['Foo', 'BAR'], ['BAZ', 'zab'] ]
+    becomes
+    [ ['foo', 'bar'], ['baz', 'zab'] ]
+    '''
+    lcase = map( lambda outer: map( lambda inner: inner.lower(), outer ), txt )
     return lcase
 # end
 
 
-# --------------------
-# maps double-nested list of strings to Title case.
-# [ ['FOO', 'bar'], ['Baz', 'Zab'] ]
-# becomes
-# [ ['Foo', 'Bar'], ['Baz', 'Zab'] ]
-def title( ucase ):
-    lcase = map( lambda outer: map( lambda inner: inner.title(), outer ), ucase )
+# ----------------------------------------
+def title( txt ):
+    '''
+    Maps double-nested list of strings to Title case. Useful for cuBLAS.
+    [ ['FOO', 'bar'], ['Baz', 'Zab'] ]
+    becomes
+    [ ['Foo', 'Bar'], ['Baz', 'Zab'] ]
+    '''
+    lcase = map( lambda outer: map( lambda inner: inner.title(), outer ), txt )
     return lcase
 # end
 
 
-
-# --------------------
+# ===========================================================================
 # BLAS and LAPACK routines need both lower and uppercase, for example:
 # in filenames:              zgetrf.cpp
 # in magma_zlapack.h:        FORTRAN_NAME( zaxpy, ZAXAPY )
 # in doxygen documentation:  ZGETRF computes ...
 # BLAS also needs Titlecase: cublasZaxpy
-# The easiest way to maintain this is to pull these lists out here,
+# The easiest way to maintain this is to separate these lists here,
 # and use them later with the above lower, upper, and title routines.
 
+# ----------------------------------------
 blas_mixed = [
     # BLAS and LAPACK, lowercase, alphabetic order
     # for mixed precision
@@ -92,8 +102,6 @@ blas_mixed = [
     ('dormqr',         'zunmqr'          ),
     ('dpotrf',         'zpotrf'          ),
     ('dpotrs',         'zpotrs'          ),
-    ('dsaxpy',         'zcaxpy'          ),
-    ('dslaswp',        'zclaswp'         ),
     ('dsymm',          'zhemm'           ),
     ('dsymv',          'zhemv'           ),
     ('dsyrk',          'zherk'           ),
@@ -110,6 +118,8 @@ blas_mixed = [
     ('strsv',          'ctrsv'           ),
 ]
 
+
+# ----------------------------------------
 blas = [
     # BLAS, lowercase, alphabetic order
     ('isamax',         'idamax',         'icamax',         'izamax'          ),
@@ -145,17 +155,18 @@ blas = [
     ('strsv',          'dtrsv',          'ctrsv',          'ztrsv'           ),
 ]
 
+
+# ----------------------------------------
 lapack = [
     # LAPACK, lowercase, alphabetic order
     ('sbdsdc',         'dbdsdc',         'sbdsdc',         'dbdsdc'          ),
     ('sbdsqr',         'dbdsqr',         'cbdsqr',         'zbdsqr'          ),
     ('sbdt01',         'dbdt01',         'cbdt01',         'zbdt01'          ),
-    ('scheck',         'dcheck',         'ccheck',         'zcheck'          ),
+    ('sgbbrd',         'dgbbrd',         'cgbbrd',         'zgbbrd'          ),
     ('sgebak',         'dgebak',         'cgebak',         'zgebak'          ),
     ('sgebal',         'dgebal',         'cgebal',         'zgebal'          ),
     ('sgebd2',         'dgebd2',         'cgebd2',         'zgebd2'          ),
     ('sgebrd',         'dgebrd',         'cgebrd',         'zgebrd'          ),
-    ('sgbbrd',         'dgbbrd',         'cgbbrd',         'zgbbrd'          ),
     ('sgeev',          'dgeev',          'cgeev',          'zgeev'           ),
     ('sgegqr',         'dgegqr',         'cgegqr',         'zgegqr'          ),
     ('sgehd2',         'dgehd2',         'cgehd2',         'zgehd2'          ),
@@ -170,8 +181,6 @@ lapack = [
     ('sgeqrf',         'dgeqrf',         'cgeqrf',         'zgeqrf'          ),
     ('sgeqrs',         'dgeqrs',         'cgeqrs',         'zgeqrs'          ),
     ('sgeqrt',         'dgeqrt',         'cgeqrt',         'zgeqrt'          ),
-    ('sgerbt',         'dgerbt',         'cgerbt',         'zgerbt'          ),
-    ('ssyrbt',         'dsyrbt',         'cherbt',         'zherbt'          ),
     ('sgerfs',         'dgerfs',         'cgerfs',         'zgerfs'          ),
     ('sgesdd',         'dgesdd',         'cgesdd',         'zgesdd'          ),
     ('sgessm',         'dgessm',         'cgessm',         'zgessm'          ),
@@ -253,7 +262,6 @@ lapack = [
     ('sqpt01',         'dqpt01',         'cqpt01',         'zqpt01'          ),
     ('sqrt02',         'dqrt02',         'cqrt02',         'zqrt02'          ),
     ('ssbtrd',         'dsbtrd',         'chbtrd',         'zhbtrd'          ),
-    ('strdtype',       'dtrdtype',       'ctrdtype',       'ztrdtype'        ),
     ('sshift',         'dshift',         'cshift',         'zshift'          ),
     ('sssssm',         'dssssm',         'cssssm',         'zssssm'          ),
     ('sstebz',         'dstebz',         'sstebz',         'dstebz'          ),
@@ -275,17 +283,16 @@ lapack = [
     ('ssygvr',         'dsygvr',         'chegvr',         'zhegvr'          ),
     ('ssygvx',         'dsygvx',         'chegvx',         'zhegvx'          ),
     ('ssysv',          'dsysv',          'chesv',          'zhesv'           ),
+    ('ssysv',          'dsysv',          'csysv',          'zsysv'           ),
     ('ssyt21',         'dsyt21',         'chet21',         'zhet21'          ),
     ('ssytd2',         'dsytd2',         'chetd2',         'zhetd2'          ),
+    ('ssytf2',         'dsytf2',         'chetf2',         'zhetf2'          ),
+    ('ssytf2',         'dsytf2',         'csytf2',         'zsytf2'          ),
     ('ssytrd',         'dsytrd',         'chetrd',         'zhetrd'          ),
     ('ssytrf',         'dsytrf',         'chetrf',         'zhetrf'          ),
-    ('ssytf2',         'dsytf2',         'chetf2',         'zhetf2'          ),
-    ('ssytrs',         'dsytrs',         'chetrs',         'zhetrs'          ),
-    ('ssysv',          'dsysv',          'chesv',          'zhesv'           ),
     ('ssytrf',         'dsytrf',         'csytrf',         'zsytrf'          ),
-    ('ssytf2',         'dsytf2',         'csytf2',         'zsytf2'          ),
+    ('ssytrs',         'dsytrs',         'chetrs',         'zhetrs'          ),
     ('ssytrs',         'dsytrs',         'csytrs',         'zsytrs'          ),
-    ('ssysv',          'dsysv',          'csysv',          'zsysv'           ),
     ('strevc',         'dtrevc',         'ctrevc',         'ztrevc'          ),
     ('strsmpl',        'dtrsmpl',        'ctrsmpl',        'ztrsmpl'         ),
     ('strtri',         'dtrtri',         'ctrtri',         'ztrtri'          ),
@@ -295,13 +302,14 @@ lapack = [
 ]
 
 
+# ===========================================================================
 # Dictionary is keyed on substitution type (mixed, normal, etc.)
 subs = {
   # ------------------------------------------------------------
   # replacements applied to mixed precision files.
   'mixed' : [
-    # ----- Special line indicating column types
-    ['ds',                        'zc'                      ],
+    # ----- header
+    ('ds',                        'zc'                      ),
 
     # ----- special cases
     ('dcopy',                     'zcopy'                   ),  # before zc
@@ -314,10 +322,42 @@ subs = {
     # ----- Preprocessor
     ('#define PRECISION_d',       '#define PRECISION_z'     ),
     ('#define PRECISION_s',       '#define PRECISION_c'     ),
+    ('#define REAL',              '#define COMPLEX'         ),
     ('#undef PRECISION_d',        '#undef PRECISION_z'      ),
     ('#undef PRECISION_s',        '#undef PRECISION_c'      ),
+    ('#undef REAL',               '#undef COMPLEX'          ),
 
-    # ----- Data types
+    # ----- Text
+    ('symmetric',                 'hermitian'               ),
+    ('symmetric',                 'Hermitian'               ),
+    ('orthogonal',                'unitary'                 ),
+
+    # ----- CBLAS
+    ('',                          'CBLAS_SADDR'             ),
+
+    # ----- Complex numbers
+    ('(double)',                  'cuComplexFloatToDouble'  ),
+    ('(float)',                   'cuComplexDoubleToFloat'  ),
+    ('',                          'cuCrealf'                ),
+    ('',                          'cuCimagf'                ),
+    ('',                          'cuCreal'                 ),
+    ('',                          'cuCimag'                 ),
+    ('',                          'cuConj'                  ),
+    ('abs',                       'cuCabs'                  ),
+    ('absf',                      'cuCabsf'                 ),
+
+    # ----- Constants
+    # see note in "normal" section below about ConjTrans
+    ('MagmaTrans',                 'Magma_ConjTrans'         ),
+
+    # ----- BLAS & LAPACK
+    ]
+    + title( blas_mixed )  # e.g., Dgemm, as in cuBLAS, before lowercase (e.g., for Zdrot)
+    + lower( blas_mixed )  # e.g., dgemm
+    + upper( blas_mixed )  # e.g., DGEMM
+    + [
+
+    # ----- PLASMA / MAGMA data types
     ('double',                    'double2'                 ),
     ('float',                     'float2'                  ),
     ('double',                    'cuDoubleComplex'         ),
@@ -334,39 +374,10 @@ subs = {
     ('SINGLE PRECISION',          'COMPLEX'                 ),
     ('real',                      'complex'                 ),
 
-    # ----- Text
-    ('symmetric',                 'hermitian',              ),
-    ('symmetric',                 'Hermitian',              ),
-    ('orthogonal',                'unitary',                ),
-
-    # ----- CBLAS
-    ('',                          'CBLAS_SADDR'             ),
-
-    # ----- Complex numbers
-    ('(double)',                  'cuComplexFloatToDouble'  ),
-    ('(float)',                   'cuComplexDoubleToFloat'  ),
-    ('',                          'cuCrealf'                ),
-    ('',                          'cuCimagf'                ),
-    ('',                          'cuCreal'                 ),
-    ('',                          'cuCimag'                 ),
-    ('',                          'cuConj'                  ),
-    ('abs',                       'cuCabs'                  ),
-    ('absf',                      'cuCabsf'                 ),
-
-    # ----- PLASMA / MAGMA
+    # ----- PLASMA / MAGMA functions, alphabetic order
+    ('dsaxpy',                    'zcaxpy'                  ),
+    ('dslaswp',                   'zclaswp'                 ),
     ('magma_sdgetrs',             'magma_czgetrs'           ),
-
-    # ----- Constants
-    # see note in "normal" section about ConjTrans
-    #('CblasTrans',                'CblasConjTrans'          ),
-    #('MagmaTrans',                'MagmaConjTrans'          ),
-    ('MagmaTrans',                 'Magma_ConjTrans'         ),
-
-    ]
-    + blas_mixed             # lowercase
-    + upper( blas_mixed )    # uppercase
-    + title( blas_mixed )    # Titlecase, for cublas
-    + [
 
     # ----- Sparse Stuff
     ('dspgmres',                  'zcpgmres'                ),
@@ -396,14 +407,14 @@ subs = {
 
     # magma_ceildiv -> magma_seildiv, so revert
     ('magma_ceildiv',             'magma_seildiv'           ),
-  ],
+    
+  ], # end mixed
 
   # ------------------------------------------------------------
   # replacements applied to most files.
   'normal' : [
-    # ----- Special line indicating column types
-    # old python (2.4) requires this line to be list [] rather than tuple () to use index() function.
-    ['s',              'd',              'c',              'z'               ],
+    # ----- header
+    ('s',              'd',              'c',              'z'               ),
 
     # ----- Preprocessor
     ('#define PRECISION_s', '#define PRECISION_d', '#define PRECISION_c', '#define PRECISION_z' ),
@@ -413,31 +424,10 @@ subs = {
     ('#define SINGLE',      '#define DOUBLE',      '#define SINGLE',      '#define DOUBLE'      ),
     ('#undef SINGLE',       '#undef DOUBLE',       '#undef SINGLE',       '#undef DOUBLE'       ),
 
-    # ----- Data types
-    ('REAL',                'DOUBLE PRECISION',    'REAL',                'DOUBLE PRECISION'    ),
-    ('real',                'double precision',    'real',                'double precision'    ),  # before double
-    ('float',               'double',              'float _Complex',      'double _Complex'     ),
-    ('float',               'double',              'cuFloatComplex',      'cuDoubleComplex'     ),
-    ('float',               'double',              'MKL_Complex8',        'MKL_Complex16'       ),
-    ('magmaFloat_const_ptr', 'magmaDouble_const_ptr', 'magmaFloatComplex_const_ptr', 'magmaDoubleComplex_const_ptr'),  # before magmaDoubleComplex
-    ('magmaFloat_const_ptr', 'magmaDouble_const_ptr', 'magmaFloat_const_ptr',        'magmaDouble_const_ptr'       ),  # before magmaDoubleComplex
-    ('magmaFloat_ptr',       'magmaDouble_ptr',       'magmaFloatComplex_ptr',       'magmaDoubleComplex_ptr'      ),  # before magmaDoubleComplex
-    ('magmaFloat_ptr',       'magmaDouble_ptr',       'magmaFloat_ptr',              'magmaDouble_ptr'             ),  # before magmaDoubleComplex
-    ('float',               'double',              'magmaFloatComplex',   'magmaDoubleComplex'  ),
-    ('float',               'double',              'PLASMA_Complex32_t',  'PLASMA_Complex64_t'  ),
-    ('PlasmaRealFloat',     'PlasmaRealDouble',    'PlasmaComplexFloat',  'PlasmaComplexDouble' ),
-    ('real',                'double precision',    'complex',             'complex\*16'         ),
-    ('REAL',                'DOUBLE PRECISION',    'COMPLEX',             'COMPLEX_16'          ),
-    ('REAL',                'DOUBLE PRECISION',    'COMPLEX',             'COMPLEX\*16'         ),
-    ('sizeof_real',         'sizeof_double',       'sizeof_complex',      'sizeof_complex_16'   ),  # before complex
-    ('real',                'real',                'complex',             'complex'             ),
-    ('float',               'double',              'float2',              'double2'             ),
-    ('float',               'double',              'float',               'double'              ),
-
     # ----- Text
     ('symmetric',      'symmetric',      'hermitian',      'hermitian'       ),
     ('symmetric',      'symmetric',      'Hermitian',      'Hermitian'       ),
-    ('orthogonal',     'orthogonal',     'unitary',        'unitary',        ),
+    ('orthogonal',     'orthogonal',     'unitary',        'unitary'         ),
     ('%f',             '%lf',            '%f',             '%lf'             ),  # for scanf
 
     # ----- CBLAS
@@ -445,43 +435,86 @@ subs = {
 
     # ----- Complex numbers
     # \b regexp here avoids conjugate -> conjfugate, and fabs -> fabsf -> fabsff.
+    # Note r for raw string literals, otherwise \b is a bell character.
     # The \b is deleted from replacement strings.
-    # conj() is overloaded now; don't substitute.
-    #('',               '',               'conjf',         r'conj\b'          ),
-    ('fabsf',         r'\bfabs\b',       'cabsf',          'cabs'            ),
+    # conj() and fabs() are overloaded in MAGMA, so don't need substitution.
+    #(r'',             r'',              r'\bconjf\b',     r'\bconj\b'        ),
+    #(r'\bfabsf\b',    r'\bfabs\b',      r'\bfabsf\b',     r'\bfabs\b'        ),
+    #(r'\bfabsf\b',    r'\bfabs\b',      r'\bcabsf\b',     r'\bcabs\b'        ),
     ('',               '',               'cuCrealf',       'cuCreal'         ),
     ('',               '',               'cuCimagf',       'cuCimag'         ),
     ('',               '',               'cuConjf',        'cuConj'          ),
     ('fabsf',         r'\bfabs\b',       'cuCabsf',        'cuCabs'          ),
 
-    # ----- PLASMA / MAGMA, alphabetic order
+    # ----- Constants
+    # Do not convert ConjTrans to Trans, since in most cases ConjTrans
+    # must be a valid option to real-precision functions.
+    # E.g., dgemm( ConjTrans, ConjTrans, ... ) should be valid; if ConjTrans is
+    # converted, then dgemm will have 2 Trans cases and no ConjTrans case.
+    # Only for zlarfb and zunm*, convert it using special Magma_ConjTrans alias.
+    ('MagmaTrans',     'MagmaTrans',     'Magma_ConjTrans', 'Magma_ConjTrans'  ),
+
+    # ----- BLAS & LAPACK
+    ]
+    + title( blas )    # e.g., Dgemm, as in cuBLAS, before lowercase (e.g., for Zdrot)
+    + lower( blas )    # e.g., dgemm
+    + upper( blas )    # e.g., DGEMM
+    + lower( lapack )  # e.g., dgetrf
+    + upper( lapack )  # e.g., DGETRF
+    + [
+
+    # ----- PLASMA / MAGMA data types
+    ('REAL',                 'DOUBLE PRECISION',     'REAL',                 'DOUBLE PRECISION'    ),
+    ('real',                 'double precision',     'real',                 'double precision'    ),  # before double
+    ('float',                'double',               'float _Complex',       'double _Complex'     ),
+    ('float',                'double',               'cuFloatComplex',       'cuDoubleComplex'     ),
+    ('float',                'double',               'MKL_Complex8',         'MKL_Complex16'       ),
+    ('magmaFloat_const_ptr', 'magmaDouble_const_ptr','magmaFloatComplex_const_ptr', 'magmaDoubleComplex_const_ptr'),  # before magmaDoubleComplex
+    ('magmaFloat_const_ptr', 'magmaDouble_const_ptr','magmaFloat_const_ptr',        'magmaDouble_const_ptr'       ),  # before magmaDoubleComplex
+    ('magmaFloat_ptr',       'magmaDouble_ptr',      'magmaFloatComplex_ptr',       'magmaDoubleComplex_ptr'      ),  # before magmaDoubleComplex
+    ('magmaFloat_ptr',       'magmaDouble_ptr',      'magmaFloat_ptr',              'magmaDouble_ptr'             ),  # before magmaDoubleComplex
+    ('float',                'double',               'magmaFloatComplex',    'magmaDoubleComplex'  ),
+    ('float',                'double',               'PLASMA_Complex32_t',   'PLASMA_Complex64_t'  ),
+    ('PlasmaRealFloat',      'PlasmaRealDouble',     'PlasmaComplexFloat',   'PlasmaComplexDouble' ),
+    ('real',                 'double precision',     'complex',              'complex\*16'         ),
+    ('REAL',                 'DOUBLE PRECISION',     'COMPLEX',              'COMPLEX_16'          ),
+    ('REAL',                 'DOUBLE PRECISION',     'COMPLEX',              'COMPLEX\*16'         ),
+    ('sizeof_real',          'sizeof_double',        'sizeof_complex',       'sizeof_complex_16'   ),  # before complex
+    ('real',                 'real',                 'complex',              'complex'             ),
+    ('float',                'double',               'float2',               'double2'             ),
+    ('float',                'double',               'float',                'double'              ),
+
+    # ----- PLASMA / MAGMA functions, alphabetic order
     ('bsy2trc',        'bsy2trc',        'bhe2trc',        'bhe2trc'         ),
-    ('magma_ssqrt',    'magma_dsqrt',    'magma_ssqrt',    'magma_dsqrt'     ),
     ('magma_ssqrt',    'magma_dsqrt',    'magma_csqrt',    'magma_zsqrt'     ),
+    ('magma_ssqrt',    'magma_dsqrt',    'magma_ssqrt',    'magma_dsqrt'     ),
     ('SAUXILIARY',     'DAUXILIARY',     'CAUXILIARY',     'ZAUXILIARY'      ),
     ('sauxiliary',     'dauxiliary',     'cauxiliary',     'zauxiliary'      ),
     ('sb2st',          'sb2st',          'hb2st',          'hb2st'           ),
     ('sbcyclic',       'dbcyclic',       'cbcyclic',       'zbcyclic'        ),
-    ('sbulge',         'dbulge',         'cbulge',         'zbulge'          ),
     ('SBULGE',         'DBULGE',         'CBULGE',         'ZBULGE'          ),
+    ('sbulge',         'dbulge',         'cbulge',         'zbulge'          ),
+    ('scheck',         'dcheck',         'ccheck',         'zcheck'          ),
     ('SCODELETS',      'DCODELETS',      'CCODELETS',      'ZCODELETS'       ),
     ('sgeadd',         'dgeadd',         'cgeadd',         'zgeadd'          ),
     ('sgecfi',         'dgecfi',         'cgecfi',         'zgecfi'          ),
+    ('SGERBT',         'DGERBT',         'CGERBT',         'ZGERBT'          ),
+    ('sgerbt',         'dgerbt',         'cgerbt',         'zgerbt'          ),
     ('sgetmatrix',     'dgetmatrix',     'cgetmatrix',     'zgetmatrix'      ),
-    ('sgetvector',     'dgetvector',     'cgetvector',     'zgetvector'      ),
     ('sgetmatrix',     'dgetmatrix',     'sgetmatrix',     'dgetmatrix'      ),
-    ('sgetvector',     'dgetvector',     'sgetvector',     'dgetvector'      ),
     ('sgetrl',         'dgetrl',         'cgetrl',         'zgetrl'          ),
+    ('sgetvector',     'dgetvector',     'cgetvector',     'zgetvector'      ),
+    ('sgetvector',     'dgetvector',     'sgetvector',     'dgetvector'      ),
     ('slocality',      'dlocality',      'clocality',      'zlocality'       ),
     ('smalloc',        'dmalloc',        'cmalloc',        'zmalloc'         ),
     ('smalloc',        'dmalloc',        'smalloc',        'dmalloc'         ),
     ('smove',          'dmove',          'smove',          'dmove'           ),
     ('spanel_to_q',    'dpanel_to_q',    'cpanel_to_q',    'zpanel_to_q'     ),
     ('spermute',       'dpermute',       'cpermute',       'zpermute'        ),
-    ('sprbt',          'dprbt',          'cprbt',          'zprbt'           ),
     ('SPRBT',          'DPRBT',          'CPRBT',          'ZPRBT'           ),
-    ('sprint',         'dprint',         'cprint',         'zprint'          ),
+    ('sprbt',          'dprbt',          'cprbt',          'zprbt'           ),
     ('SPRINT',         'DPRINT',         'CPRINT',         'ZPRINT'          ),
+    ('sprint',         'dprint',         'cprint',         'zprint'          ),
     ('sprint',         'dprint',         'sprint',         'dprint'          ),
     ('sprofiling',     'dprofiling',     'cprofiling',     'zprofiling'      ),
     ('sq_to_panel',    'dq_to_panel',    'cq_to_panel',    'zq_to_panel'     ),
@@ -489,22 +522,14 @@ subs = {
     ('ssign',          'dsign',          'ssign',          'dsign'           ),
     ('SSIZE',          'DSIZE',          'CSIZE',          'ZSIZE'           ),
     ('ssplit',         'dsplit',         'csplit',         'zsplit'          ),
+    ('ssyrbt',         'dsyrbt',         'cherbt',         'zherbt'          ),
     ('stile',          'dtile',          'ctile',          'ztile'           ),
-    ('stranspose',     'dtranspose',     'ctranspose_conj','ztranspose_conj' ),
-    ('stranspose',     'dtranspose',     'ctranspose',     'ztranspose'      ),
     ('STRANSPOSE',     'DTRANSPOSE',     'CTRANSPOSE',     'ZTRANSPOSE'      ),
+    ('stranspose',     'dtranspose',     'ctranspose_conj','ztranspose_conj' ),  # before ztranspose
+    ('stranspose',     'dtranspose',     'ctranspose',     'ztranspose'      ),
+    ('strdtype',       'dtrdtype',       'ctrdtype',       'ztrdtype'        ),
     ('sy2sb',          'sy2sb',          'he2hb',          'he2hb'           ),
     ('szero',          'dzero',          'czero',          'zzero'           ),
-
-    # ----- Constants
-    # Do not convert ConjTrans to Trans, since in most cases ConjTrans
-    # must be a valid option to real-precision function.
-    # E.g., dgemm( ConjTrans, ConjTrans, ... ) is valid.
-    # Only for zlarfb, zun*, zher*k, convert it using special Magma_ConjTrans alias
-    #('CblasTrans',     'CblasTrans',     'CblasConjTrans', 'CblasConjTrans'  ),
-    #('MagmaTrans',     'MagmaTrans',     'MagmaConjTrans', 'MagmaConjTrans'  ),
-    #('PlasmaTrans',    'PlasmaTrans',    'PlasmaConjTrans','PlasmaConjTrans' ),
-    ('MagmaTrans',     'MagmaTrans',     'Magma_ConjTrans', 'Magma_ConjTrans'  ),
 
     # ----- special cases for d -> s that need complex (e.g., testing_dgeev)
     # c/z precisions are effectively disabled for these rules
@@ -514,14 +539,6 @@ subs = {
     ('magmaFloatComplex', 'magmaDoubleComplex', 'cccccccc', 'zzzzzzzz' ),
     ('MAGMA_C',           'MAGMA_Z',            'cccccccc', 'zzzzzzzz' ),
     ('scnrm2',            'dznrm2',             'cccccccc', 'zzzzzzzz' ),
-
-    ]
-    + title( blas )    # Titlecase, for cublas, before lowercase (e.g., for Zdrot)
-    + blas             # lowercase
-    + upper( blas )    # uppercase
-    + lapack           # lowercase
-    + upper( lapack )  # uppercase
-    + [
 
     # ----- SPARSE BLAS
     ('cusparseS',      'cusparseD',      'cusparseC',      'cusparseZ'       ),
@@ -557,9 +574,9 @@ subs = {
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
-    ('slsqr',          'dlsqr',          'clsqr',          'zlsqr',          ),
+    ('slsqr',          'dlsqr',          'clsqr',          'zlsqr'           ),
     ('sgmres',         'dgmres',         'cgmres',         'zgmres'          ),
-    ('sbicg',          'dbicg',          'cbicg',          'zbicg',          ),
+    ('sbicg',          'dbicg',          'cbicg',          'zbicg'           ),
     ('sqmr',           'dqmr',           'cqmr',           'zqmr'            ),
     ('spqmr',          'dpqmr',          'cpqmr',          'zpqmr'           ),
     ('stfqmr',         'dtfqmr',         'ctfqmr',         'ztfqmr'          ),
@@ -620,7 +637,7 @@ subs = {
 
     # ----- Prefixes
     # Most routines have already been renamed by above BLAS/LAPACK rules.
-    # cublas[SDCZ] functions where real == complex name are handled here;
+    # Functions where real == complex name can be handled here;
     # if real != complex name, it must be handled above.
     ('blasf77_s',      'blasf77_d',      'blasf77_c',      'blasf77_z'       ),
     ('blasf77_s',      'blasf77_d',      'blasf77_s',      'blasf77_d'       ),
@@ -695,7 +712,8 @@ subs = {
     ('magma_direct',   'magma_sirect',   'magma_direct',   'magma_sirect'    ),
     ('lapack_diag',    'lapack_siag',    'lapack_diag',    'lapack_siag'     ),
     ('lapack_direct',  'lapack_sirect',  'lapack_direct',  'lapack_sirect'   ),
-  ],
+    
+  ], # end normal
 
   # ------------------------------------------------------------
   # replacements applied for profiling with tau
