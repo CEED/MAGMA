@@ -14,11 +14,6 @@
 
 #ifdef __cplusplus
 
-// including cmath undefs isinf, isnan, etc. macros.
-// doing "using std::isinf" or "using std::isnan" generates conflicts when using icc.
-//#include <cmath>
-//using std::fabs;
-
 // __host__ and __device__ are defined in CUDA headers.
 #include "magma_types.h"
 
