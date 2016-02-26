@@ -9,6 +9,7 @@
 #ifndef MAGMASPARSE_TYPES_H
 #define MAGMASPARSE_TYPES_H
 
+#include "magma_types.h"
 
 #if defined(HAVE_PASTIX)
 //PaStiX include
