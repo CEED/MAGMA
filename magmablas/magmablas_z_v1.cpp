@@ -847,3 +847,103 @@ magmablas_ztrtri_diag(
 {
     magmablas_ztrtri_diag_q( uplo, diag, n, dA, ldda, d_dinvA, magmablasGetQueue() );
 }
+
+
+/**
+    @see magma_zgetmatrix_1D_row_bcyclic_q
+    @ingroup magma_zblas3
+    ********************************************************************/
+extern "C" void
+magma_zgetmatrix_1D_row_bcyclic(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_const_ptr const *dA, magma_int_t ldda,
+    magmaDoubleComplex                 *hA, magma_int_t lda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    magma_queue_t queues[MagmaMaxGPUs];
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_create( &queues[dev] );
+    }
+    magma_zgetmatrix_1D_row_bcyclic_q( m, n, dA, ldda, hA, lda, ngpu, nb, queues );
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
+        magma_queue_destroy( queues[dev] );
+    }
+}
+
+
+/**
+    @see magma_zgetmatrix_1D_col_bcyclic_q
+    @ingroup magma_zblas3
+    ********************************************************************/
+extern "C" void
+magma_zgetmatrix_1D_col_bcyclic(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_const_ptr const *dA, magma_int_t ldda,
+    magmaDoubleComplex                 *hA, magma_int_t lda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    magma_queue_t queues[MagmaMaxGPUs];
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_create( &queues[dev] );
+    }
+    magma_zgetmatrix_1D_col_bcyclic_q( m, n, dA, ldda, hA, lda, ngpu, nb, queues );
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
+        magma_queue_destroy( queues[dev] );
+    }
+}
+
+
+/**
+    @see magma_zsetmatrix_1D_row_bcyclic_q
+    @ingroup magma_zblas3
+    ********************************************************************/
+extern "C" void
+magma_zsetmatrix_1D_row_bcyclic(
+    magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex    *hA, magma_int_t lda,
+    magmaDoubleComplex_ptr      *dA, magma_int_t ldda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    magma_queue_t queues[MagmaMaxGPUs];
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_create( &queues[dev] );
+    }
+    magma_zsetmatrix_1D_row_bcyclic_q( m, n, hA, lda, dA, ldda, ngpu, nb, queues );
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
+        magma_queue_destroy( queues[dev] );
+    }
+}
+
+
+/**
+    @see magma_zsetmatrix_1D_col_bcyclic_q
+    @ingroup magma_zblas3
+    ********************************************************************/
+extern "C" void
+magma_zsetmatrix_1D_col_bcyclic(
+    magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *hA, magma_int_t lda,
+    magmaDoubleComplex_ptr   *dA, magma_int_t ldda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    magma_queue_t queues[MagmaMaxGPUs];
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_create( &queues[dev] );
+    }
+    magma_zsetmatrix_1D_col_bcyclic_q( m, n, hA, lda, dA, ldda, ngpu, nb, queues );
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
+        magma_queue_destroy( queues[dev] );
+    }
+}
