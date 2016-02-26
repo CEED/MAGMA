@@ -72,10 +72,6 @@ Makefile: ;
 
 $(top)/Makefile.subdir: ;
 
-Makefile.local: ;
-
--include Makefile.local
-
 # Disable parallel make for sub-directories, which causes problems,
 # e.g., if two top-level makes try to update a library simultaneously.
 # The first/rest mechanism above should also prevent parallel jobs.
