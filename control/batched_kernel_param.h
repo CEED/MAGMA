@@ -36,4 +36,19 @@
 #define TRI_NB           128        // ztrsm_nb should match the NB in BATRF_NB
 #define TRI_BLOCK_SIZE    16
 
+// TRSM tuning parameters 
+#if     defined(PRECISION_s)
+    #define TRI_BATCHED_NB           (64)
+    #define TRI_BATCHED_BLOCK_SIZE   (16)
+#elif defined(PRECISION_d)
+    #define TRI_BATCHED_NB           (32)
+    #define TRI_BATCHED_BLOCK_SIZE   (16)
+#elif defined(PRECISION_c)
+    #define TRI_BATCHED_NB           (32)
+    #define TRI_BATCHED_BLOCK_SIZE   (16)
+#else         //PRECISION_z
+    #define TRI_BATCHED_NB           (128)
+    #define TRI_BATCHED_BLOCK_SIZE   (16)
+#endif
+
 #endif /* COMMON_CUDA_KERNEL_NB_H */
