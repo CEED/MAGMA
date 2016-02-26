@@ -6,7 +6,6 @@
        @date
  
        @author Mark Gates
-       @precisions normal z -> s d c
 */
 #include <cuda_runtime.h>
 
