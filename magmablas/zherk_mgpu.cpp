@@ -40,7 +40,7 @@ magma_zherk_mgpu(
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
     magma_trans_t transa, transb;
-    if(trans MagmaNoTrans){
+    if(trans == MagmaNoTrans){
         transa = MagmaNoTrans;
         transb = MagmaConjTrans;
     }else{
@@ -138,7 +138,7 @@ magma_zherk_mgpu2(
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
     magma_trans_t transa, transb;
-    if(trans MagmaNoTrans){
+    if(trans == MagmaNoTrans){
         transa = MagmaNoTrans;
         transb = MagmaConjTrans;
     }else{
