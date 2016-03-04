@@ -79,9 +79,8 @@
     @param[in,out]
     dinvA_array    Array of pointers, dimension (batchCount).
             Each is a COMPLEX_16 array dinvA, a workspace on device.
-            If side == MagmaLeft,  dinvA must be of size >= ceil(m/TRI_NB)*TRI_NB*TRI_NB,
-            If side == MagmaRight, dinvA must be of size >= ceil(n/TRI_NB)*TRI_NB*TRI_NB,
-            where TRI_NB = 128.
+            If side == MagmaLeft,  dinvA must be of size >= ceil(m/TRI_BATCHED_NB)*TRI_BATCHED_NB*TRI_BATCHED_NB,
+            If side == MagmaRight, dinvA must be of size >= ceil(n/TRI_BATCHED_NB)*TRI_BATCHED_NB*TRI_BATCHED_NB,
 
     @param[in]
     dinvA_length    INTEGER
