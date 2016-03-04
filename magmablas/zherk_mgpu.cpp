@@ -39,10 +39,20 @@ magma_zherk_mgpu(
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
+    magma_trans_t transa, transb;
+    if(trans MagmaNoTrans){
+        transa = MagmaNoTrans;
+        transb = MagmaConjTrans;
+    }else{
+        transa = MagmaConjTrans;
+        transb = MagmaNoTrans;
+    }
 
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
-    
+   
+
+
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
         id = ((i+c_offset)/nb)%ngpu;
@@ -70,7 +80,7 @@ magma_zherk_mgpu(
             ii = nb*((i+c_offset)/(nb*ngpu));
 
             magma_setdevice(id);
-            magma_zgemm( MagmaNoTrans, MagmaConjTrans, i, ib, k,
+            magma_zgemm( transa, transb, i, ib, k,
                          z_alpha, dB(id, 0, 0 ), lddb,
                                   dB(id, i, 0 ), lddb,
                          z_beta,  dC(id, 0, ii), lddc, queues[id][kk] );
@@ -88,7 +98,7 @@ magma_zherk_mgpu(
             /* zgemm on off-diagonal blocks */
             magma_setdevice(id);
             trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
-            magma_zgemm( MagmaNoTrans, MagmaConjTrans, n1, ib, k,
+            magma_zgemm( transa, transb, n1, ib, k,
                          z_alpha, dB(id, i+ib,           0 ), lddb,
                                   dB(id,  i,             0 ), lddb,
                          z_beta,  dC(id,  i+c_offset+ib, ii), lddc, queues[id][kk] );
@@ -127,6 +137,14 @@ magma_zherk_mgpu2(
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
+    magma_trans_t transa, transb;
+    if(trans MagmaNoTrans){
+        transa = MagmaNoTrans;
+        transb = MagmaConjTrans;
+    }else{
+        transa = MagmaConjTrans;
+        transb = MagmaNoTrans;
+    }
 
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
@@ -152,7 +170,7 @@ magma_zherk_mgpu2(
             magma_setdevice(id);
 
             /* zgemm on diag and off-diagonal blocks */
-            magma_zgemm( MagmaNoTrans, MagmaConjTrans, n1, ib, k,
+            magma_zgemm( transa, transb, n1, ib, k,
                          z_alpha, dB(id, 0, 0 ), lddb,
                                   dB(id, i, 0 ), lddb,
                          z_beta,  dC(id, 0, ii), lddc, queues[id][kk] );
@@ -171,7 +189,7 @@ magma_zherk_mgpu2(
             
             trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
             /* zgemm on diag and off-diagonal blocks */
-            magma_zgemm( MagmaNoTrans, MagmaConjTrans, n1, ib, k,
+            magma_zgemm( transa, transb, n1, ib, k,
                          z_alpha, dB(id, i,           0), lddb,
                                   dB(id, i,           0), lddb,
                          z_beta,  dC(id, i+c_offset, ii), lddc, queues[id][kk] );
