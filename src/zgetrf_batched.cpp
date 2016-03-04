@@ -156,7 +156,7 @@ magma_zgetrf_batched(
     magma_malloc((void**)&dwork_array, batchCount * sizeof(*dwork_array));
 
 
-    magma_int_t invA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
+    magma_int_t invA_msize = magma_roundup( n, TRI_BATCHED_NB )*TRI_BATCHED_NB;
     magma_int_t dwork_msize = n*nb;
     magma_int_t **pivinfo_array    = NULL;
     magma_int_t *pivinfo           = NULL; 
@@ -197,7 +197,7 @@ magma_zgetrf_batched(
     magmablas_zlaset_q( MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue );
     magmablas_zlaset_q( MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue );
     magma_zset_pointer( dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue );
-    magma_zset_pointer( dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue );
+    magma_zset_pointer( dinvA_array, dinvA, TRI_BATCHED_NB, 0, 0, invA_msize, batchCount, queue );
     magma_iset_pointer( pivinfo_array, pivinfo, 1, 0, 0, m, batchCount, queue );
 
     magma_int_t streamid;
