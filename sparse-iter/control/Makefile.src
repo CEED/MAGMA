@@ -12,7 +12,7 @@ cdir      := sparse-iter/control
 # ----------------------------------------------------------------------
 
 
-libsparse_zsrc += \
+libsparse_src += \
 	$(cdir)/error.cpp                     \
 	$(cdir)/magma_zdomainoverlap.cpp      \
 	$(cdir)/magma_zutil_sparse.cpp        \
@@ -28,14 +28,14 @@ libsparse_zsrc += \
 	$(cdir)/magma_zmcsrpass_gpu.cpp       \
 	$(cdir)/magma_zmcsrcompressor.cpp     \
 	$(cdir)/magma_zmscale.cpp             \
-	$(cdir)/magma_zmshrink.cpp	      \
-	$(cdir)/magma_zmslice.cpp	      \
+	$(cdir)/magma_zmshrink.cpp            \
+	$(cdir)/magma_zmslice.cpp             \
 	$(cdir)/magma_zmdiff.cpp              \
 	$(cdir)/magma_zmlumerge.cpp           \
 	$(cdir)/magma_zmtranspose.cpp         \
 	$(cdir)/magma_zmtransfer.cpp          \
 	$(cdir)/magma_zmilustruct.cpp         \
-	$(cdir)/magma_zdummy.cpp  	      \
+	$(cdir)/magma_zdummy.cpp              \
 	$(cdir)/magma_zsort.cpp               \
 	$(cdir)/magma_zvinit.cpp              \
 	$(cdir)/magma_zvio.cpp                \

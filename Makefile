@@ -7,8 +7,8 @@
 include make.inc
 
 # defaults if nothing else is given in make.inc
-CC         ?= gcc
-CXX        ?= g++
+CC         ?= cc
+CXX        ?= c++
 NVCC       ?= nvcc
 FORT       ?= no_fortran
 
@@ -49,7 +49,7 @@ ifeq ($(blas_fix),1)
     LIB := -L./lib -lblas_fix $(LIB)
 endif
 
-LIBEXT     = $(LIBDIR) $(LIB)
+LIBS       = $(LIBDIR) $(LIB)
 
 # preprocessor flags. See below for MAGMA_INC
 CPPFLAGS   = $(INC) $(MAGMA_INC)
@@ -144,16 +144,13 @@ $(PTREXEC): $(PTROBJ)
 # ----------------------------------------
 # include sub-directories
 
-# variables that sub-directories add to.
+# variables that multiple sub-directories add to.
 # these MUST be := defined, not = defined, for $(cdir) to work.
-zhdr                :=
+hdr                 :=
 libmagma_src        :=
-libmagma_zsrc       :=
 libsparse_src       :=
-libsparse_zsrc      :=
 testing_src         :=
-testing_zsrc        :=
-sparse_testing_zsrc :=
+sparse_testing_src  :=
 
 subdirs := \
 	blas_fix        \
@@ -178,91 +175,52 @@ include $(Makefiles)
 -include Makefile.internal
 -include Makefile.local
 -include Makefile.gen
--include Makefile.src
 
 
 # ----------------------------------------
 # objects
 
-# ----- headers
-allhdr := $(shdr) $(dhdr) $(chdr) $(zhdr)
-
-
-# ----- sources & objects
-libmagma_allsrc := \
-	$(libmagma_ssrc)	\
-	$(libmagma_dsrc)	\
-	$(libmagma_csrc)	\
-	$(libmagma_zsrc)	\
-	$(libmagma_src)		\
-
-libsparse_allsrc := \
-	$(libsparse_ssrc)	\
-	$(libsparse_dsrc)	\
-	$(libsparse_csrc)	\
-	$(libsparse_zsrc)	\
-	$(libsparse_src)	\
-
-libtest_allsrc := \
-	$(libtest_ssrc)		\
-	$(libtest_dsrc)		\
-	$(libtest_csrc)		\
-	$(libtest_zsrc)		\
-	$(libtest_src)		\
-
 ifeq ($(FORT),no_fortran)
-liblapacktest_allsrc := \
-	$(liblapacktest_ssrc)	\
-	$(liblapacktest_dsrc)	\
-	$(liblapacktest_csrc)	\
-	$(liblapacktest_zsrc)
+lapacktest_all := $(filter %_no_fortran.cpp, $(lapacktest_all))
 else
-liblapacktest_allsrc := \
-	$(liblapacktest_src)
+lapacktest_all := $(filter-out %_no_fortran.cpp, $(lapacktest_all))
 endif
-
-testing_allsrc := \
-	$(testing_ssrc)		\
-	$(testing_dsrc)		\
-	$(testing_csrc)		\
-	$(testing_zsrc)		\
-
-sparse_testing_allsrc := \
-	$(sparse_testing_ssrc)	\
-	$(sparse_testing_dsrc)	\
-	$(sparse_testing_csrc)	\
-	$(sparse_testing_zsrc)	\
 
 ifeq ($(FORT),no_fortran)
-libmagma_allsrc := $(filter-out %.f %.f90 %.F90, $(libmagma_allsrc))
-testing_allsrc  := $(filter-out %.f %.f90 %.F90, $(testing_allsrc))
+libmagma_all := $(filter-out %.f %.f90 %.F90, $(libmagma_all))
+testing_all  := $(filter-out %.f %.f90 %.F90, $(testing_all))
 endif
 
-libmagma_obj       := $(addsuffix .$(o_ext), $(basename $(libmagma_allsrc)))
-libsparse_obj      := $(addsuffix .$(o_ext), $(basename $(libsparse_allsrc)))
+libmagma_obj       := $(addsuffix .$(o_ext), $(basename $(libmagma_all)))
+libsparse_obj      := $(addsuffix .$(o_ext), $(basename $(libsparse_all)))
 libblas_fix_obj    := $(addsuffix .$(o_ext), $(basename $(libblas_fix_src)))
-libtest_obj        := $(addsuffix .$(o_ext), $(basename $(libtest_allsrc)))
-liblapacktest_obj  := $(addsuffix .$(o_ext), $(basename $(liblapacktest_allsrc)))
-testing_obj        := $(addsuffix .$(o_ext), $(basename $(testing_allsrc)))
-sparse_testing_obj := $(addsuffix .$(o_ext), $(basename $(sparse_testing_allsrc)))
+libtest_obj        := $(addsuffix .$(o_ext), $(basename $(libtest_all)))
+liblapacktest_obj  := $(addsuffix .$(o_ext), $(basename $(liblapacktest_all)))
+testing_obj        := $(addsuffix .$(o_ext), $(basename $(testing_all)))
+sparse_testing_obj := $(addsuffix .$(o_ext), $(basename $(sparse_testing_all)))
+
+libmagma_dynamic_obj  := $(addsuffix .$(o_ext),     $(basename $(libmagma_dynamic_all)))
+libmagma_dlink_obj    := $(addsuffix .link.$(o_ext), $(basename $(libmagma_dynamic_all)))
+
+libmagma_obj += $(libmagma_dynamic_obj) $(libmagma_dlink_obj)
 
 deps :=
-deps += $(addsuffix .d, $(basename $(libmagma_allsrc)))
-deps += $(addsuffix .d, $(basename $(libsparse_allsrc)))
+deps += $(addsuffix .d, $(basename $(libmagma_all)))
+deps += $(addsuffix .d, $(basename $(libsparse_all)))
 deps += $(addsuffix .d, $(basename $(libblas_fix_src)))
-deps += $(addsuffix .d, $(basename $(libtest_allsrc)))
-deps += $(addsuffix .d, $(basename $(liblapacktest_allsrc)))
-deps += $(addsuffix .d, $(basename $(testing_allsrc)))
-deps += $(addsuffix .d, $(basename $(sparse_testing_allsrc)))
+deps += $(addsuffix .d, $(basename $(libtest_all)))
+deps += $(addsuffix .d, $(basename $(lapacktest_all)))
+deps += $(addsuffix .d, $(basename $(testing_all)))
+deps += $(addsuffix .d, $(basename $(sparse_testing_all)))
 
 # headers must exist before compiling objects, but we don't want to require
 # re-compiling the whole library for every minor header change,
 # so use order-only prerequisite (after "|").
-$(libmagma_obj):       | $(allhdr)
-$(libsparse_obj):      | $(allhdr)
-$(libtest_obj):        | $(allhdr)
-$(testing_obj):        | $(allhdr)
-$(sparse_testing_obj): | $(allhdr)
+$(libmagma_obj):       | $(header_all)
+$(libsparse_obj):      | $(header_all)
+$(libtest_obj):        | $(header_all)
+$(testing_obj):        | $(header_all)
+$(sparse_testing_obj): | $(header_all)
 
 # changes to testings.h require re-compiling, e.g., if magma_opts changes
 $(testing_obj):        testing/testings.h
@@ -287,6 +245,17 @@ $(libtest_obj):        MAGMA_INC += -I./testing
 $(testing_obj):        MAGMA_INC += -I./testing
 $(libsparse_obj):      MAGMA_INC += -I./sparse-iter/include -I./sparse-iter/control
 $(sparse_testing_obj): MAGMA_INC += -I./sparse-iter/include -I./sparse-iter/control -I./testing
+
+
+# ----- headers
+# to test that headers are self-contained,
+# pre-compile each into a header.h.gch file using "g++ ... -c header.h"
+header_gch := $(addsuffix .gch, $(filter-out %.cuh, $(header_all)))
+
+test_headers: $(header_gch)
+
+%.h.gch: %.h
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 
 # ----- libraries
@@ -325,12 +294,12 @@ $(libsparse_so): | $(libmagma_so)
 
 
 # ----- testers
-testing_c_src := $(filter %.c %.cpp,       $(testing_allsrc))
-testing_f_src := $(filter %.f %.f90 %.F90, $(testing_allsrc))
+testing_c_src := $(filter %.c %.cpp,       $(testing_all))
+testing_f_src := $(filter %.f %.f90 %.F90, $(testing_all))
 testers       := $(basename $(testing_c_src))
 testers_f     := $(basename $(testing_f_src))
 
-sparse_testers := $(basename $(sparse_testing_allsrc))
+sparse_testers := $(basename $(sparse_testing_all))
 
 # depend on static libraries
 # see below for libmagma, which is either static or shared
@@ -379,7 +348,7 @@ testers_f: $(testers_f)
 
 sparse-test: sparse-iter/testing
 
-# cleangen is defined in Makefile.gen
+# cleangen is defined in Makefile.gen; cleanall also does cleanmake in Makefile.internal
 cleanall: clean cleangen
 
 # TODO: should this do all $(subdirs) clean?
@@ -471,7 +440,7 @@ sparse_src_obj     := $(filter     sparse-iter/src/%.o, $(libsparse_obj))
 
 # ----------
 # sub-directory builds
-include:             $(allhdr)
+include:             $(header_all)
 
 blas_fix:            $(libblas_fix_a)
 
@@ -569,6 +538,12 @@ sparse-iter/testing/clean:
 %.$(o_ext): %.cu
 	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -c -o $@ $<
 
+$(magma_dynamic_obj): %.$(o_ext): %.cu
+	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -dc -o $@ $<
+
+$(magma_dlink_obj): %.link.$(o_ext): %.$(o_ext)
+	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -dlink -o $@ $<
+
 %.i: %.h
 	$(CC) -E $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
@@ -592,17 +567,17 @@ $(libmagma_so):
 	@echo "===== shared library $@"
 	$(CXX) $(LDFLAGS) -shared -o $@ \
 		$^ \
-		$(LIBEXT)
+		$(LIBS)
 	@echo
 
-# Can't add -Llib -lmagma to LIBEXT, because that would apply to libsparse_so's
+# Can't add -Llib -lmagma to LIBS, because that would apply to libsparse_so's
 # prerequisites, namely libmagma_so. So libmagma and libsparse need different rules.
 # See Make section 6.11 Target-specific Variable Values.
 $(libsparse_so):
 	@echo "===== shared library $@"
 	$(CXX) $(LDFLAGS) -shared -o $@ \
 		$^ \
-		$(LIBEXT) -Llib -lmagma
+		$(LIBS) -Llib -lmagma
 	@echo
 else
 # missing -fPIC: "make shared" prints warning
@@ -616,7 +591,7 @@ $(testers): %: %.$(o_ext)
 	-L./lib -lmagma \
 	-L./testing -ltest \
 	-L./testing/lin -llapacktest \
-	$(LIBEXT)
+	$(LIBS)
 
 # link Fortran testing_foo from testing_foo.o
 $(testers_f): %: %.$(o_ext) testing/fortran.o
@@ -625,7 +600,7 @@ $(testers_f): %: %.$(o_ext) testing/fortran.o
 	-L./testing -ltest \
 	-L./testing/lin -llapacktest \
 	-L./lib -lmagma \
-	$(LIBEXT)
+	$(LIBS)
 
 # link sparse testing_foo from testing_foo.o
 $(sparse_testers): %: %.$(o_ext)
@@ -633,7 +608,7 @@ $(sparse_testers): %: %.$(o_ext)
 	-o $@ $< \
 	-L./testing -ltest \
 	-L./lib -lmagma_sparse -lmagma \
-	$(LIBEXT)
+	$(LIBS)
 
 
 # ----------------------------------------
@@ -662,7 +637,7 @@ install: lib sparse-lib install_dirs
 	cat lib/pkgconfig/magma.pc.in                   | \
 	sed -e s:@INSTALL_PREFIX@:"$(prefix)":          | \
 	sed -e s:@CFLAGS@:"$(INSTALL_FLAGS) $(INC)":    | \
-	sed -e s:@LIBS@:"$(INSTALL_LDFLAGS) $(LIBEXT)": | \
+	sed -e s:@LIBS@:"$(INSTALL_LDFLAGS) $(LIBS)":   | \
 	sed -e s:@MAGMA_REQUIRED@::                       \
 	    > $(prefix)/lib/pkgconfig/magma.pc
 
@@ -680,7 +655,7 @@ files.txt: force
 		| egrep -v '^\.$$|obsolete|deprecated|contrib\b|^exp' \
 		| egrep '\w\.\w|Makefile|docs|run' \
 		> files.txt
-	egrep -v '(\.css|\.f|\.in|\.m|\.mtx|\.pl|\.png|\.sh|\.txt)$$|checkdiag|COPYRIGHT|docs|example|make\.|Makefile|quark|README|Release|results|testing_|testing/lin|testing/matgen|tools' files.txt \
+	egrep -v '(\.html|\.css|\.f|\.in|\.m|\.mtx|\.pl|\.png|\.sh|\.txt)$$|checkdiag|COPYRIGHT|docs|example|make\.|Makefile|quark|README|Release|results|testing_|testing/lin|testing/matgen|tools' files.txt \
 		| perl -pe 'chomp; $$_ = sprintf("\t../%-57s\\\n", $$_);' \
 		> files-doxygen.txt
 
@@ -699,72 +674,46 @@ $(subdir_files): force
 # ----------------------------------------
 echo:
 	@echo "====="
-	@echo "shdr   $(shdr)\n"
-	@echo "dhdr   $(dhdr)\n"
-	@echo "chdr   $(chdr)\n"
-	@echo "zhdr   $(zhdr)\n"
-	@echo "allhdr $(allhdr)\n"
+	@echo "hdr                $(hdr)\n"
+	@echo "header_all         $(header_all)\n"
+	@echo "header_gch         $(header_gch)\n"
 	@echo "====="
-	@echo "libmagma_ssrc   $(libmagma_ssrc)\n"
-	@echo "libmagma_dsrc   $(libmagma_dsrc)\n"
-	@echo "libmagma_csrc   $(libmagma_csrc)\n"
-	@echo "libmagma_zsrc   $(libmagma_zsrc)\n"
-	@echo "libmagma_src    $(libmagma_src)\n"
-	@echo "libmagma_allsrc $(libmagma_allsrc)\n"
-	@echo "libmagma_obj    $(libmagma_obj)\n"
-	@echo "libmagma_a      $(libmagma_a)"
-	@echo "libmagma_so     $(libmagma_so)"
+	@echo "libmagma_src       $(libmagma_src)\n"
+	@echo "libmagma_all       $(libmagma_all)\n"
+	@echo "libmagma_obj       $(libmagma_obj)\n"
+	@echo "libmagma_a         $(libmagma_a)"
+	@echo "libmagma_so        $(libmagma_so)"
+	@echo "====="             
+	@echo "libsparse_src      $(libsparse_src)\n"
+	@echo "libsparse_all      $(libsparse_all)\n"
+	@echo "libsparse_obj      $(libsparse_obj)\n"
+	@echo "libsparse_a        $(libsparse_a)"
+	@echo "libsparse_so       $(libsparse_so)"
+	@echo "====="             
+	@echo "blas_fix           $(blas_fix)"
+	@echo "libblas_fix_src    $(libblas_fix_src)"
+	@echo "libblas_fix_a      $(libblas_fix_a)"
+	@echo "====="             
+	@echo "libtest_src        $(libtest_src)\n"
+	@echo "libtest_all        $(libtest_all)\n"
+	@echo "libtest_obj        $(libtest_obj)\n"
+	@echo "libtest_a          $(libtest_a)\n"
 	@echo "====="
-	@echo "libsparse_ssrc   $(libsparse_ssrc)\n"
-	@echo "libsparse_dsrc   $(libsparse_dsrc)\n"
-	@echo "libsparse_csrc   $(libsparse_csrc)\n"
-	@echo "libsparse_zsrc   $(libsparse_zsrc)\n"
-	@echo "libsparse_src    $(libsparse_src)\n"
-	@echo "libsparse_allsrc $(libsparse_allsrc)\n"
-	@echo "libsparse_obj    $(libsparse_obj)\n"
-	@echo "libsparse_a      $(libsparse_a)"
-	@echo "libsparse_so     $(libsparse_so)"
+	@echo "liblapacktest_src  $(liblapacktest_src)\n"
+	@echo "liblapacktest_all  $(liblapacktest_all)\n"
+	@echo "liblapacktest_obj  $(liblapacktest_obj)\n"
+	@echo "liblapacktest_a    $(liblapacktest_a)\n"
 	@echo "====="
-	@echo "blas_fix        $(blas_fix)"
-	@echo "libblas_fix_src $(libblas_fix_src)"
-	@echo "libblas_fix_a   $(libblas_fix_a)"
+	@echo "testing_src        $(testing_src)\n"
+	@echo "testing_all        $(testing_all)\n"
+	@echo "testing_obj        $(testing_obj)\n"
+	@echo "testers            $(testers)\n"
+	@echo "testers_f          $(testers_f)\n"
 	@echo "====="
-	@echo "libtest_ssrc    $(libtest_ssrc)\n"
-	@echo "libtest_dsrc    $(libtest_dsrc)\n"
-	@echo "libtest_csrc    $(libtest_csrc)\n"
-	@echo "libtest_zsrc    $(libtest_zsrc)\n"
-	@echo "libtest_src     $(libtest_src)\n"
-	@echo "libtest_allsrc  $(libtest_allsrc)\n"
-	@echo "libtest_obj     $(libtest_obj)\n"
-	@echo "libtest_a       $(libtest_a)\n"
-	@echo "====="
-	@echo "liblapacktest_ssrc    $(liblapacktest_ssrc)\n"
-	@echo "liblapacktest_dsrc    $(liblapacktest_dsrc)\n"
-	@echo "liblapacktest_csrc    $(liblapacktest_csrc)\n"
-	@echo "liblapacktest_zsrc    $(liblapacktest_zsrc)\n"
-	@echo "liblapacktest_src     $(liblapacktest_src)\n"
-	@echo "liblapacktest_allsrc  $(liblapacktest_allsrc)\n"
-	@echo "liblapacktest_obj     $(liblapacktest_obj)\n"
-	@echo "liblapacktest_a       $(liblapacktest_a)\n"
-	@echo "====="
-	@echo "testing_ssrc    $(testing_ssrc)\n"
-	@echo "testing_dsrc    $(testing_dsrc)\n"
-	@echo "testing_csrc    $(testing_csrc)\n"
-	@echo "testing_zsrc    $(testing_zsrc)\n"
-	@echo "testing_src     $(testing_src)\n"
-	@echo "testing_allsrc  $(testing_allsrc)\n"
-	@echo "testing_obj     $(testing_obj)\n"
-	@echo "testers         $(testers)\n"
-	@echo "testers_f       $(testers_f)\n"
-	@echo "====="
-	@echo "sparse_testing_ssrc    $(sparse_testing_ssrc)\n"
-	@echo "sparse_testing_dsrc    $(sparse_testing_dsrc)\n"
-	@echo "sparse_testing_csrc    $(sparse_testing_csrc)\n"
-	@echo "sparse_testing_zsrc    $(sparse_testing_zsrc)\n"
-	@echo "sparse_testing_src     $(sparse_testing_src)\n"
-	@echo "sparse_testing_allsrc  $(sparse_testing_allsrc)\n"
-	@echo "sparse_testing_obj     $(sparse_testing_obj)\n"
-	@echo "sparse_testers         $(sparse_testers)\n"
+	@echo "sparse_testing_src $(sparse_testing_src)\n"
+	@echo "sparse_testing_all $(sparse_testing_all)\n"
+	@echo "sparse_testing_obj $(sparse_testing_obj)\n"
+	@echo "sparse_testers     $(sparse_testers)\n"
 	@echo "====="
 	@echo "dep     $(dep)"
 	@echo "deps    $(deps)\n"
@@ -773,7 +722,7 @@ echo:
 	@echo "libs_a  $(libs_a)"
 	@echo "libs_so $(libs_so)"
 	@echo "====="
-	@echo "LIBEXT  $(LIBEXT)"
+	@echo "LIBS    $(LIBS)"
 
 
 # ----------------------------------------

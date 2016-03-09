@@ -13,7 +13,7 @@ cdir      := sparse-iter/blas
 
 
 # alphabetic order by base name (ignoring precision)
-libsparse_zsrc += \
+libsparse_src += \
 	$(cdir)/magma_z_blaswrapper.cpp       \
 	$(cdir)/zbajac_csr.cu                 \
 	$(cdir)/zbajac_csr_overlap.cu         \
@@ -28,8 +28,8 @@ libsparse_zsrc += \
 	$(cdir)/zlobpcg_shift.cu              \
 	$(cdir)/zlobpcg_residuals.cu          \
 	$(cdir)/zlobpcg_maxpy.cu              \
-    $(cdir)/zmdotc.cu                     \
-    $(cdir)/zgemvmdot.cu                  \
+	$(cdir)/zmdotc.cu                     \
+	$(cdir)/zgemvmdot.cu                  \
 	$(cdir)/zmdot_shfl.cu                 \
 	$(cdir)/zmergebicgstab2.cu            \
 	$(cdir)/zmergebicgstab3.cu            \
@@ -46,12 +46,12 @@ libsparse_zsrc += \
 	$(cdir)/zpipelinedgmres.cu            \
 
 # Iterative factorizations
-libsparse_zsrc += \
+libsparse_src += \
 	$(cdir)/ziterilu_kernels.cu           \
 	$(cdir)/ziteric.cu                    \
 
 # Auxiliary routines
-libsparse_zsrc += \
+libsparse_src += \
 	$(cdir)/zcompact.cu                   \
 	$(cdir)/magma_zmcsrcompressor_gpu.cu  \
 	$(cdir)/magma_zdiagcheck.cu           \
@@ -60,7 +60,7 @@ libsparse_zsrc += \
 	$(cdir)/magma_zmconjugate.cu          \
 
 # Tester routines
-libsparse_zsrc += \
+libsparse_src += \
 	$(cdir)/zmergeblockkrylov.cu          \
 
 

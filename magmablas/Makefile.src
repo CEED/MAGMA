@@ -12,7 +12,7 @@ cdir      := magmablas
 # ----------------------------------------------------------------------
 
 
-zhdr += \
+hdr += \
 	$(cdir)/commonblas_z.h		\
 	$(cdir)/ztrtri.cuh		\
 	$(cdir)/zgerbt.h		\
@@ -43,15 +43,18 @@ $(cdir)/ztrtri_diag_batched.$(o_ext): $(cdir)/ztrtri.cuh
 
 
 # alphabetic order by base name (ignoring precision)
-libmagma_zsrc += \
+libmagma_src += \
 	$(cdir)/zaxpycp.cu		\
 	$(cdir)/zcaxpycp.cu		\
 	$(cdir)/zgeadd.cu		\
 	$(cdir)/zgeadd2.cu		\
+	$(cdir)/zgemm_fermi.cu		\
 	$(cdir)/zgemm_reduce.cu		\
 	$(cdir)/zgemv_conj.cu		\
-	$(cdir)/zgerbt_kernels.cu	\
+	$(cdir)/zgemv_fermi.cu		\
 	$(cdir)/zgerbt.cu		\
+	$(cdir)/zgerbt_kernels.cu	\
+	$(cdir)/zgetmatrix_transpose.cpp	\
 	$(cdir)/zhemv.cu		\
 	$(cdir)/zhemv_upper.cu		\
 	$(cdir)/zlacpy.cu		\
@@ -65,10 +68,11 @@ libmagma_zsrc += \
 	$(cdir)/zlaqps2_gpu.cu		\
 	$(cdir)/zlarf.cu		\
 	$(cdir)/zlarfbx.cu		\
-	$(cdir)/zlarfx.cu		\
-	$(cdir)/zlarfg.cu		\
 	$(cdir)/zlarfg-v2.cu		\
+	$(cdir)/zlarfg.cu		\
 	$(cdir)/zlarfgx-v2.cu		\
+	$(cdir)/zlarft_kernels.cu		\
+	$(cdir)/zlarfx.cu		\
 	$(cdir)/zlascl.cu		\
 	$(cdir)/zlascl2.cu		\
 	$(cdir)/zlascl_2x2.cu		\
@@ -76,40 +80,33 @@ libmagma_zsrc += \
 	$(cdir)/zlaset.cu		\
 	$(cdir)/zlaset_band.cu		\
 	$(cdir)/zlaswp.cu		\
-	$(cdir)/zlaswp_sym.cu		\
 	$(cdir)/zclaswp.cu		\
+	$(cdir)/zlaswp_sym.cu		\
 	$(cdir)/zlat2c.cu		\
 	$(cdir)/clat2z.cu		\
 	$(cdir)/dznrm2.cu		\
+	$(cdir)/zsetmatrix_transpose.cpp	\
 	$(cdir)/zswap.cu		\
 	$(cdir)/zswapblk.cu		\
 	$(cdir)/zswapdblk.cu		\
-	$(cdir)/zsymv.cu		\
-	$(cdir)/zsymv_upper.cu		\
 	$(cdir)/zsymmetrize.cu		\
 	$(cdir)/zsymmetrize_tiles.cu	\
+	$(cdir)/zsymv.cu		\
+	$(cdir)/zsymv_upper.cu		\
 	$(cdir)/ztranspose.cu		\
 	$(cdir)/ztranspose_conj.cu		\
-	$(cdir)/ztranspose_inplace.cu	\
 	$(cdir)/ztranspose_conj_inplace.cu	\
-	$(cdir)/zgetmatrix_transpose.cpp	\
-	$(cdir)/zsetmatrix_transpose.cpp	\
+	$(cdir)/ztranspose_inplace.cu	\
 	$(cdir)/ztrsm.cu		\
+	$(cdir)/ztrsv.cu		\
 	$(cdir)/ztrtri_diag.cu		\
 	$(cdir)/ztrtri_lower.cu		\
 	$(cdir)/ztrtri_upper.cu		\
-	$(cdir)/zlarft_kernels.cu		\
-	$(cdir)/ztrsv.cu		\
 	$(cdir)/magmablas_z_v1.cpp	\
 	$(cdir)/magmablas_zc_v1.cpp	\
 
-# Fermi-specific (CUDA arch 2.x) codes
-libmagma_zsrc += \
-	$(cdir)/zgemm_fermi.cu		\
-	$(cdir)/zgemv_fermi.cu		\
-
 # multi-GPU
-libmagma_zsrc += \
+libmagma_src += \
 	$(cdir)/zbcyclic.cpp		\
 	$(cdir)/zgetmatrix_transpose_mgpu.cpp	\
 	$(cdir)/zsetmatrix_transpose_mgpu.cpp	\
@@ -120,45 +117,43 @@ libmagma_zsrc += \
 	$(cdir)/zherk_mgpu.cpp			\
 
 # panels for one-sided factorizations in CUDA
-libmagma_zsrc += \
+libmagma_src += \
 	$(cdir)/zgetf2.cu		\
 	$(cdir)/zgeqr2.cpp		\
 	$(cdir)/zgeqr2x_gpu-v4.cu	\
 	$(cdir)/zpotf2.cu		\
 
 # batched files, alphabetic order by base name (ignoring precision)
-libmagma_zsrc += \
+libmagma_src += \
 	$(cdir)/zgeadd_batched.cu		\
 	$(cdir)/zgemm_batched.cpp		\
-	$(cdir)/zgerbt_func_batched.cu		\
-	$(cdir)/zgetf2_kernels.cu		\
-	$(cdir)/zlaswp_batched.cu		\
-	$(cdir)/zpotf2_kernels_old.cu		\
-	$(cdir)/zpotf2_kernels.cu		\
-	$(cdir)/zset_pointer.cu			\
-	$(cdir)/ztrsm_batched.cpp		\
-	$(cdir)/ztrtri_diag_batched.cu		\
-	$(cdir)/zgeqr2_kernels.cu		\
-	$(cdir)/zgeqr2_batched.cu		\
-	$(cdir)/zherk_batched.cpp		\
-	$(cdir)/zswapdblk_batched.cu	\
-	$(cdir)/ztrsv_batched.cu		\
-
-libmagma_zsrc += \
-	$(cdir)/set_pointer.cu			\
-	$(cdir)/getrf_setup_pivinfo.cu		\
-	$(cdir)/zgemv_batched_core.cu		\
-	$(cdir)/cgemv_batched_core.cu		\
-	$(cdir)/dgemv_batched_core.cu		\
-	$(cdir)/sgemv_batched_core.cu		\
-	$(cdir)/zgemm_batched_core.cu		\
 	$(cdir)/cgemm_batched_core.cu		\
 	$(cdir)/dgemm_batched_core.cu		\
 	$(cdir)/sgemm_batched_core.cu		\
-	$(cdir)/ssyrk_batched_core.cu		\
-	$(cdir)/dsyrk_batched_core.cu		\
+	$(cdir)/zgemm_batched_core.cu		\
+	$(cdir)/cgemv_batched_core.cu		\
+	$(cdir)/dgemv_batched_core.cu		\
+	$(cdir)/sgemv_batched_core.cu		\
+	$(cdir)/zgemv_batched_core.cu		\
+	$(cdir)/zgeqr2_batched.cu		\
+	$(cdir)/zgeqr2_kernels.cu		\
+	$(cdir)/zgerbt_func_batched.cu		\
+	$(cdir)/zgetf2_kernels.cu		\
+	$(cdir)/getrf_setup_pivinfo.cu		\
+	$(cdir)/zherk_batched.cpp		\
 	$(cdir)/cherk_batched_core.cu		\
 	$(cdir)/zherk_batched_core.cu		\
+	$(cdir)/zlaswp_batched.cu		\
+	$(cdir)/zpotf2_kernels.cu		\
+	$(cdir)/zpotf2_kernels_old.cu		\
+	$(cdir)/set_pointer.cu			\
+	$(cdir)/zset_pointer.cu			\
+	$(cdir)/zswapdblk_batched.cu		\
+	$(cdir)/dsyrk_batched_core.cu		\
+	$(cdir)/ssyrk_batched_core.cu		\
+	$(cdir)/ztrsm_batched.cpp		\
+	$(cdir)/ztrsv_batched.cu		\
+	$(cdir)/ztrtri_diag_batched.cu		\
 
 # additional dependencies
 $(cdir)/spotf2_kernels.$(o_ext): $(cdir)/spotf2_devicesfunc.cuh

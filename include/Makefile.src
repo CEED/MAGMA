@@ -14,7 +14,7 @@ cdir      := include
 
 # only headers needing precision generation need to go here.
 # plain headers do not need to be listed.
-zhdr += \
+hdr += \
 	$(cdir)/magma_z.h		\
 	$(cdir)/magma_zc.h		\
 	$(cdir)/magmablas_z_q.h		\
