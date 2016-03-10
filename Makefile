@@ -181,9 +181,9 @@ include $(Makefiles)
 # objects
 
 ifeq ($(FORT),no_fortran)
-lapacktest_all := $(filter %_no_fortran.cpp, $(lapacktest_all))
+liblapacktest_all := $(filter %_no_fortran.cpp, $(liblapacktest_all))
 else
-lapacktest_all := $(filter-out %_no_fortran.cpp, $(lapacktest_all))
+liblapacktest_all := $(filter-out %_no_fortran.cpp, $(liblapacktest_all))
 endif
 
 ifeq ($(FORT),no_fortran)

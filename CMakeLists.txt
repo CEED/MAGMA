@@ -192,7 +192,7 @@ include( ${CMAKE_SOURCE_DIR}/CMake.src )
 # ----------------------------------------
 # common flags
 
-set( LIBS testing lapacktest magma )
+set( LIBS test lapacktest magma )
 
 if ( WIN32 )
 	# On Windows:
@@ -254,18 +254,18 @@ if ( WIN32 )
 	# understand that .F90 files should be pre-processed.
 	
 	# separate Fortran and C/C++/CUDA files
-	foreach( f ${libmagma_allsrc} )
+	foreach( f ${libmagma_all} )
 		if ( ${f} MATCHES "\\.(f)$" )  # |f90|F90
-			list( APPEND libmagma_allsrc_f   ${f} )
+			list( APPEND libmagma_all_f   ${f} )
 		elseif ( ${f} MATCHES "\\.(c|cu|cpp)$" )
-			list( APPEND libmagma_allsrc_cpp ${f} )
+			list( APPEND libmagma_all_cpp ${f} )
 		endif()
 	endforeach()
-	#message( "libmagma_allsrc_cpp ${libmagma_allsrc_cpp}" )
-	#message( "libmagma_allsrc_f   ${libmagma_allsrc_f}"   )
+	#message( "libmagma_all_cpp ${libmagma_all_cpp}" )
+	#message( "libmagma_all_f   ${libmagma_all_f}"   )
 	
 	# on Windows, Fortran files aren't compiled if listed here...
-	cuda_add_library( magma ${libmagma_allsrc_cpp} )
+	cuda_add_library( magma ${libmagma_all_cpp} )
 	target_link_libraries( magma
 		${LAPACK_LIBRARIES}
 		${CUDA_CUDART_LIBRARY}
@@ -273,11 +273,11 @@ if ( WIN32 )
 		${CUDA_cusparse_LIBRARY}
 	)
 	
-	# no Fortran files at the moment (how to test libmagma_allsrc_f is not empty?),
+	# no Fortran files at the moment (how to test libmagma_all_f is not empty?),
 	# but keep this around for future reference.
 	#
 	##  ...so make a separate library out of Fortran files. Ugh.
-	## add_library( magmaf ${libmagma_allsrc_f} )
+	## add_library( magmaf ${libmagma_all_f} )
 	## target_link_libraries( magmaf
 	##     ${LAPACK_LIBRARIES}
 	##     ${CUDA_CUDART_LIBRARY}
@@ -285,10 +285,10 @@ if ( WIN32 )
 	##     ${CUDA_cusparse_LIBRARY}
 	## )
 	
-	set( LIBS testing lapacktest magma )  ##magmaf )
+	set( LIBS test lapacktest magma )  ##magmaf )
 else()
 	# Unix doesn't seem to have a problem with mixing C, CUDA, and Fortran files
-	cuda_add_library( magma ${libmagma_allsrc} )
+	cuda_add_library( magma ${libmagma_all} )
 	target_link_libraries( magma
 		${LAPACK_LIBRARIES}
 		${CUDA_CUDART_LIBRARY}
@@ -299,8 +299,8 @@ endif()
 
 
 # ----------------------------------------
-# compile testing library
-add_library( testing ${libtest_allsrc} )
+# compile test library
+add_library( test ${libtest_all} )
 
 
 # ----------------------------------------
@@ -308,20 +308,20 @@ add_library( testing ${libtest_allsrc} )
 # If use fortran, compile only Fortran files, not magma_[sdcz]_no_fortran.cpp
 # else,           compile only C++     files, not Fortran files
 if ( USE_FORTRAN )
-	foreach( f ${liblapacktest_allsrc} )
+	foreach( f ${liblapacktest_all} )
 		if ( ${f} MATCHES "\\.(f|f90)$" )
-			list( APPEND liblapacktest_allsrc_f ${f} )
+			list( APPEND liblapacktest_all_f ${f} )
 		endif()
 	endforeach()
-	add_library( lapacktest ${liblapacktest_allsrc_f} )
+	add_library( lapacktest ${liblapacktest_all_f} )
 else()
 	# alternatively, use only C/C++/CUDA files, including magma_[sdcz]_no_fortran.cpp
-	foreach( f ${liblapacktest_allsrc} )
+	foreach( f ${liblapacktest_all} )
 		if ( ${f} MATCHES "\\.(c|cu|cpp)$" )
-			list( APPEND liblapacktest_allsrc_cpp ${f} )
+			list( APPEND liblapacktest_all_cpp ${f} )
 		endif()
 	endforeach()
-	add_library( lapacktest ${liblapacktest_allsrc_cpp} )
+	add_library( lapacktest ${liblapacktest_all_cpp} )
 endif()
 
 
@@ -332,7 +332,7 @@ endif()
 include_directories( sparse-iter/include )
 include_directories( sparse-iter/control )
 include_directories( testing )
-cuda_add_library( magma_sparse ${libsparse_allsrc} )
+cuda_add_library( magma_sparse ${libsparse_all} )
 target_link_libraries( magma_sparse
 	magma
 	${LAPACK_LIBRARIES}
@@ -353,12 +353,12 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY testing_lib )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY testing_lib )
 
 # skip Fortran testers, which require an extra file from CUDA
-foreach( f ${testing_allsrc} )
+foreach( f ${testing_all} )
 	if ( ${f} MATCHES "\\.(c|cu|cpp)$" )
-		list( APPEND testing_allsrc_cpp ${f} )
+		list( APPEND testing_all_cpp ${f} )
 	endif()
 endforeach()
-foreach( TEST ${testing_allsrc_cpp} )
+foreach( TEST ${testing_all_cpp} )
 	string( REGEX REPLACE "\\.(cpp|f90|F90)" "" EXE ${TEST} )
 	string( REGEX REPLACE "testing/" "" EXE ${EXE} )
 	#message( "${TEST} --> ${EXE}" )
@@ -370,7 +370,7 @@ endforeach()
 # ----------------------------------------
 # compile each sparse tester
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY sparse-iter/testing )
-foreach( TEST ${sparse_testing_allsrc} )
+foreach( TEST ${sparse_testing_all} )
 	string( REGEX REPLACE "\\.(cpp|f90|F90)"     "" EXE ${TEST} )
 	string( REGEX REPLACE "sparse-iter/testing/" "" EXE ${EXE} )
 	#message( "${TEST} --> ${EXE}" )
