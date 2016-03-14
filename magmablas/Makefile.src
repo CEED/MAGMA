@@ -20,28 +20,6 @@ hdr += \
 	$(cdir)/zlarfg_devicesfunc.cuh		\
 	$(cdir)/ztrsv_template_device.cuh	\
 
-# additional dependencies
-$(cdir)/strtri_diag.$(o_ext): $(cdir)/strtri.cuh
-$(cdir)/dtrtri_diag.$(o_ext): $(cdir)/dtrtri.cuh
-$(cdir)/ctrtri_diag.$(o_ext): $(cdir)/ctrtri.cuh
-$(cdir)/ztrtri_diag.$(o_ext): $(cdir)/ztrtri.cuh
-
-$(cdir)/sgerbt.$(o_ext): $(cdir)/sgerbt.h
-$(cdir)/dgerbt.$(o_ext): $(cdir)/dgerbt.h
-$(cdir)/cgerbt.$(o_ext): $(cdir)/cgerbt.h
-$(cdir)/zgerbt.$(o_ext): $(cdir)/zgerbt.h
-
-$(cdir)/sgerbt_batched.$(o_ext): $(cdir)/sgerbt.h
-$(cdir)/dgerbt_batched.$(o_ext): $(cdir)/dgerbt.h
-$(cdir)/cgerbt_batched.$(o_ext): $(cdir)/cgerbt.h
-$(cdir)/zgerbt_batched.$(o_ext): $(cdir)/zgerbt.h
-
-$(cdir)/strtri_diag_batched.$(o_ext): $(cdir)/strtri.cuh
-$(cdir)/dtrtri_diag_batched.$(o_ext): $(cdir)/dtrtri.cuh
-$(cdir)/ctrtri_diag_batched.$(o_ext): $(cdir)/ctrtri.cuh
-$(cdir)/ztrtri_diag_batched.$(o_ext): $(cdir)/ztrtri.cuh
-
-
 # alphabetic order by base name (ignoring precision)
 libmagma_src += \
 	$(cdir)/zaxpycp.cu		\
@@ -155,17 +133,42 @@ libmagma_src += \
 	$(cdir)/ztrsv_batched.cu		\
 	$(cdir)/ztrtri_diag_batched.cu		\
 
-# additional dependencies
+# kernels with dynamic parallelism (require 2-stage compilation)
+libmagma_dynamic_src += \
+
+
+# ----------------------------------------------------------------------
+# extra include dependencies
+$(cdir)/strtri_diag.$(o_ext): $(cdir)/strtri.cuh
+$(cdir)/dtrtri_diag.$(o_ext): $(cdir)/dtrtri.cuh
+$(cdir)/ctrtri_diag.$(o_ext): $(cdir)/ctrtri.cuh
+$(cdir)/ztrtri_diag.$(o_ext): $(cdir)/ztrtri.cuh
+
+$(cdir)/sgerbt.$(o_ext): $(cdir)/sgerbt.h
+$(cdir)/dgerbt.$(o_ext): $(cdir)/dgerbt.h
+$(cdir)/cgerbt.$(o_ext): $(cdir)/cgerbt.h
+$(cdir)/zgerbt.$(o_ext): $(cdir)/zgerbt.h
+
+$(cdir)/sgerbt_batched.$(o_ext): $(cdir)/sgerbt.h
+$(cdir)/dgerbt_batched.$(o_ext): $(cdir)/dgerbt.h
+$(cdir)/cgerbt_batched.$(o_ext): $(cdir)/cgerbt.h
+$(cdir)/zgerbt_batched.$(o_ext): $(cdir)/zgerbt.h
+
+$(cdir)/strtri_diag_batched.$(o_ext): $(cdir)/strtri.cuh
+$(cdir)/dtrtri_diag_batched.$(o_ext): $(cdir)/dtrtri.cuh
+$(cdir)/ctrtri_diag_batched.$(o_ext): $(cdir)/ctrtri.cuh
+$(cdir)/ztrtri_diag_batched.$(o_ext): $(cdir)/ztrtri.cuh
+
 $(cdir)/spotf2_kernels.$(o_ext): $(cdir)/spotf2_devicesfunc.cuh
 $(cdir)/dpotf2_kernels.$(o_ext): $(cdir)/dpotf2_devicesfunc.cuh
 $(cdir)/cpotf2_kernels.$(o_ext): $(cdir)/cpotf2_devicesfunc.cuh
 $(cdir)/zpotf2_kernels.$(o_ext): $(cdir)/zpotf2_devicesfunc.cuh
+
 $(cdir)/spotf2_kernels_var.$(o_ext): $(cdir)/spotf2_devicesfunc.cuh
 $(cdir)/dpotf2_kernels_var.$(o_ext): $(cdir)/dpotf2_devicesfunc.cuh
 $(cdir)/cpotf2_kernels_var.$(o_ext): $(cdir)/cpotf2_devicesfunc.cuh
 $(cdir)/zpotf2_kernels_var.$(o_ext): $(cdir)/zpotf2_devicesfunc.cuh
 
-# extra include dependencies
 $(cdir)/ztrsv_batched.$(o_ext): $(cdir)/ztrsv_template_device.cuh $(cdir)/gemv_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
 $(cdir)/ctrsv_batched.$(o_ext): $(cdir)/ctrsv_template_device.cuh $(cdir)/gemv_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
 $(cdir)/dtrsv_batched.$(o_ext): $(cdir)/dtrsv_template_device.cuh $(cdir)/gemv_template_device.cuh $(cdir)/gemm_template_device_defs.cuh

@@ -146,11 +146,12 @@ $(PTREXEC): $(PTROBJ)
 
 # variables that multiple sub-directories add to.
 # these MUST be := defined, not = defined, for $(cdir) to work.
-hdr                 :=
-libmagma_src        :=
-libsparse_src       :=
-testing_src         :=
-sparse_testing_src  :=
+hdr                  :=
+libmagma_src         :=
+libmagma_dynamic_src :=
+libsparse_src        :=
+testing_src          :=
+sparse_testing_src   :=
 
 subdirs := \
 	blas_fix        \
@@ -199,8 +200,8 @@ liblapacktest_obj  := $(addsuffix .$(o_ext), $(basename $(liblapacktest_all)))
 testing_obj        := $(addsuffix .$(o_ext), $(basename $(testing_all)))
 sparse_testing_obj := $(addsuffix .$(o_ext), $(basename $(sparse_testing_all)))
 
-libmagma_dynamic_obj  := $(addsuffix .$(o_ext),     $(basename $(libmagma_dynamic_all)))
-libmagma_dlink_obj    := $(addsuffix .link.$(o_ext), $(basename $(libmagma_dynamic_all)))
+libmagma_dynamic_obj := $(addsuffix .$(o_ext),      $(basename $(libmagma_dynamic_all)))
+libmagma_dlink_obj   := $(addsuffix .link.$(o_ext), $(basename $(libmagma_dynamic_all)))
 
 libmagma_obj += $(libmagma_dynamic_obj) $(libmagma_dlink_obj)
 
@@ -538,10 +539,10 @@ sparse-iter/testing/clean:
 %.$(o_ext): %.cu
 	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-$(magma_dynamic_obj): %.$(o_ext): %.cu
+$(libmagma_dynamic_obj): %.$(o_ext): %.cu
 	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -dc -o $@ $<
 
-$(magma_dlink_obj): %.link.$(o_ext): %.$(o_ext)
+$(libmagma_dlink_obj): %.link.$(o_ext): %.$(o_ext)
 	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -dlink -o $@ $<
 
 %.i: %.h
