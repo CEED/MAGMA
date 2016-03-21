@@ -100,8 +100,37 @@ magma_int_t magma_drecommend_cublas_gemm_batched(
             magma_int_t m, magma_int_t n, magma_int_t k)
 {
     magma_int_t use_cublas_gemm_batched = 0;
-    // cublas batched is not used anywhere for DP
+    magma_int_t shape = magma_get_gemm_shape(transa, transb);
+    
+    switch(shape)
+    {
+        case 3: // tn
+        case 6: // cn
+            {
+                use_cublas_gemm_batched = (magma_int_t) (    (  m <  32 && k >  32 )
+                                                          || (  n <  32 && k >  32 )
+                                                          || (  m == 32 && n == 32 && k >= 128 ) );
+            }
+            break;
+        case 0: // nn
+        case 1: // nt
+        case 2: // nc
+        case 4: // tt
+        case 5: // tc
+        case 7: // ct
+        case 8: // cc
+            {
+                use_cublas_gemm_batched = 0;
+            }
+            break;
+        default:;
+    }
+    //printf("decision  ==========================================================================>      m%4d     n%4d    k%4d  for cublas %d\n",m,n,k,use_cublas_gemm_batched);
     return use_cublas_gemm_batched;
+
+
+
+
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 magma_int_t magma_crecommend_cublas_gemm_batched(
