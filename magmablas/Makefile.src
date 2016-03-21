@@ -159,6 +159,11 @@ $(cdir)/dtrtri_diag_batched.$(o_ext): $(cdir)/dtrtri.cuh
 $(cdir)/ctrtri_diag_batched.$(o_ext): $(cdir)/ctrtri.cuh
 $(cdir)/ztrtri_diag_batched.$(o_ext): $(cdir)/ztrtri.cuh
 
+$(cdir)/sgeqr2_batched.$(o_ext): $(cdir)/slarfg_devicesfunc.cuh
+$(cdir)/dgeqr2_batched.$(o_ext): $(cdir)/dlarfg_devicesfunc.cuh
+$(cdir)/cgeqr2_batched.$(o_ext): $(cdir)/clarfg_devicesfunc.cuh
+$(cdir)/zgeqr2_batched.$(o_ext): $(cdir)/zlarfg_devicesfunc.cuh
+
 $(cdir)/spotf2_kernels.$(o_ext): $(cdir)/spotf2_devicesfunc.cuh
 $(cdir)/dpotf2_kernels.$(o_ext): $(cdir)/dpotf2_devicesfunc.cuh
 $(cdir)/cpotf2_kernels.$(o_ext): $(cdir)/cpotf2_devicesfunc.cuh
