@@ -11,7 +11,7 @@
 */
 #include <limits>
 
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define COMPLEX
 
@@ -246,7 +246,15 @@ magma_int_t magma_znan_inf_gpu(
     magma_int_t lda = m;
     magmaDoubleComplex* A;
     magma_zmalloc_cpu( &A, lda*n );
-    magma_zgetmatrix( m, n, dA, ldda, A, lda );
+
+    magma_queue_t queue;
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &queue );
+    
+    magma_zgetmatrix( m, n, dA, ldda, A, lda, queue );
+    
+    magma_queue_destroy( queue );
     
     magma_int_t cnt = magma_znan_inf( uplo, m, n, A, lda, cnt_nan, cnt_inf );
     
