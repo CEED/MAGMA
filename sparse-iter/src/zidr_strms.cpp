@@ -25,7 +25,7 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a complex Hermitian N-by-N positive definite matrix A.
+    where A is a general complex N-by-N matrix A.
     This is a GPU implementation of the Induced Dimension Reduction
     method applying kernel fusion and kernel overlap.
 
