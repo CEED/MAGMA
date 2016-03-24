@@ -144,16 +144,12 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
         for (int i=0; i < POTF2_NB; i++)
         {
             rp[i] = A0[tx + i * lda];
+            rC[i] = MAGMA_Z_ZERO;
         }
     #ifdef ENABLE_COND4
     }
     #endif
 
-    #pragma unroll
-    for (int i=0; i < POTF2_NB; i++)
-    {
-        rC[i] = MAGMA_Z_ZERO;
-    }
     __syncthreads();
 
 
@@ -208,6 +204,7 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
         if (tx < m) 
         {
         #endif
+            #pragma unroll
             for (int i=0; i < POTF2_NB; i++)
             {
                 #pragma unroll
@@ -260,16 +257,12 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
         for (int i=0; i < POTF2_NB; i++)
         {
             rp[i] = A0[min(bound_A, tx + i * lda)];
+            rC[i] = MAGMA_Z_ZERO;
         }
     #ifdef ENABLE_COND5
     }
     #endif
 
-    #pragma unroll
-    for (int i=0; i < POTF2_NB; i++)
-    {
-        rC[i] = MAGMA_Z_ZERO;
-    }
     __syncthreads();
 
 
@@ -324,6 +317,7 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
         if (tx < m) 
         {
         #endif
+            #pragma unroll
             for (int i=0; i < POTF2_NB; i++)
             {
                 #pragma unroll
