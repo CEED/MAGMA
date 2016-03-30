@@ -10,7 +10,6 @@
        
 */
 
-#include "magma.h"
 #include "magma_internal.h"
 
 #ifdef __cplusplus

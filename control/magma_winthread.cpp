@@ -24,7 +24,6 @@
 #include <process.h>
 
 #include <stdio.h>
-#include <magma.h>
 
 CRITICAL_SECTION magma_winthread_static_initializer_check_lock;
 static int magma_winthread_initialized = 0;
