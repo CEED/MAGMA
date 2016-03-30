@@ -13,7 +13,7 @@
 */
 #include <stdio.h>
 
-#include "magma.h"
+#include "magma_v2.h"
 #include "magma_lapack.h"
 
 #ifdef __cplusplus
