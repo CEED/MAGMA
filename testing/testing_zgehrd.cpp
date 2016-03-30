@@ -18,7 +18,7 @@
 
 // includes, project
 #include "flops.h"
-#include "magma.h"
+#include "magma_v2.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
@@ -125,7 +125,7 @@ int main( int argc, char** argv)
                 
                 if ( opts.version == 1 ) {
                     if ( opts.ngpu != 1 ) {
-                        magma_zsetmatrix( nb, N, T, nb, dT, nb );
+                        magma_zsetmatrix( nb, N, T, nb, dT, nb, opts.queue );
                     }
                     magma_zunghr( N, ione, N, h_Q, lda, tau, dT, nb, &info );
                 }

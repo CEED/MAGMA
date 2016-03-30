@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 #include "testings.h"
-#include "magma.h"
+#include "magma_v2.h"
 
 magma_int_t gStatus;
 

@@ -12,8 +12,8 @@
 #include <cuda_runtime.h>
 
 // tests internal routines: magma_{set,get}_lapack_numthreads, magma_get_parallel_numthreads
-// so include common_magma.h instead of magma.h
-#include "common_magma.h"
+// so include magma_internal.h instead of magma_v2.h
+#include "magma_internal.h"
 
 
 ////////////////////////////////////////////////////////////////////////////
