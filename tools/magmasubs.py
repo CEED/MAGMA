@@ -539,6 +539,7 @@ subs = {
     ('magmaFloatComplex', 'magmaDoubleComplex', 'cccccccc', 'zzzzzzzz' ),
     ('MAGMA_C',           'MAGMA_Z',            'cccccccc', 'zzzzzzzz' ),
     ('scnrm2',            'dznrm2',             'cccccccc', 'zzzzzzzz' ),
+    ('magma_c',           'magma_z',            'ccccccc',  'zzzzzzz'  ),
 
     # ----- SPARSE BLAS
     ('cusparseS',      'cusparseD',      'cusparseC',      'cusparseZ'       ),
