@@ -26,7 +26,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, cublas_perf, cublas_time, cpu_perf, cpu_time;
     double          cublas_error, Cnorm, work[1];
@@ -67,12 +68,12 @@ int main( int argc, char** argv)
             
             sizeA = lda*Ak;
             
-            TESTING_MALLOC_CPU( h_A,       magmaDoubleComplex, lda*Ak );
-            TESTING_MALLOC_CPU( h_x,       magmaDoubleComplex, N      );
-            TESTING_MALLOC_CPU( h_xcublas, magmaDoubleComplex, N      );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,       lda*Ak ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_x,       N      ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_xcublas, N      ));
             
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*Ak );
-            TESTING_MALLOC_DEV( d_x, magmaDoubleComplex, N       );
+            TESTING_CHECK( magma_zmalloc( &d_A, ldda*Ak ));
+            TESTING_CHECK( magma_zmalloc( &d_x, N       ));
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
@@ -139,12 +140,12 @@ int main( int argc, char** argv)
                        cublas_perf, 1000.*cublas_time);
             }
             
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_CPU( h_x );
-            TESTING_FREE_CPU( h_xcublas );
+            magma_free_cpu( h_A );
+            magma_free_cpu( h_x );
+            magma_free_cpu( h_xcublas );
             
-            TESTING_FREE_DEV( d_A );
-            TESTING_FREE_DEV( d_x );
+            magma_free( d_A );
+            magma_free( d_x );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -153,6 +154,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

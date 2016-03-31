@@ -28,7 +28,8 @@
 // --------------------
 int main(int argc, char **argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t gflops, cpu_time=0, cpu_perf=0, gpu_time, gpu_perf, mgpu_time, mgpu_perf, cuda_time, cuda_perf;
     double      Ynorm, error=0, error2=0, work[1];
@@ -92,20 +93,20 @@ int main(int argc, char **argv)
             lhwork = N*opts.ngpu;
             ldwork = ldda*(blocks + 1);
 
-            TESTING_MALLOC_CPU( A,       magmaDoubleComplex, matsize );
-            TESTING_MALLOC_CPU( Y,       magmaDoubleComplex, vecsize );
-            TESTING_MALLOC_CPU( Ycublas, magmaDoubleComplex, vecsize );
-            TESTING_MALLOC_CPU( Ymagma,  magmaDoubleComplex, vecsize );
-            TESTING_MALLOC_CPU( Ymagma1, magmaDoubleComplex, vecsize );
-            TESTING_MALLOC_CPU( Ylapack, magmaDoubleComplex, vecsize );
+            TESTING_CHECK( magma_zmalloc_cpu( &A,       matsize ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Y,       vecsize ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Ycublas, vecsize ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Ymagma,  vecsize ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Ymagma1, vecsize ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Ylapack, vecsize ));
 
-            TESTING_MALLOC_PIN( X,       magmaDoubleComplex, vecsize );
-            TESTING_MALLOC_PIN( hwork,   magmaDoubleComplex, lhwork  );
+            TESTING_CHECK( magma_zmalloc_pinned( &X,       vecsize ));
+            TESTING_CHECK( magma_zmalloc_pinned( &hwork,   lhwork  ));
             
             magma_setdevice( opts.device );
-            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, matsize );
-            TESTING_MALLOC_DEV( dX, magmaDoubleComplex, vecsize );
-            TESTING_MALLOC_DEV( dY, magmaDoubleComplex, vecsize );
+            TESTING_CHECK( magma_zmalloc( &dA, matsize ));
+            TESTING_CHECK( magma_zmalloc( &dX, vecsize ));
+            TESTING_CHECK( magma_zmalloc( &dY, vecsize ));
             
             // TODO make magma_zmalloc_bcyclic helper function?
             for( dev=0; dev < opts.ngpu; dev++ ) {
@@ -116,8 +117,8 @@ int main(int argc, char **argv)
                     n_local[dev] += Noffset % nb;
                 
                 magma_setdevice( dev );
-                TESTING_MALLOC_DEV( d_lA[dev],  magmaDoubleComplex, ldda*n_local[dev] );
-                TESTING_MALLOC_DEV( dwork[dev], magmaDoubleComplex, ldwork );
+                TESTING_CHECK( magma_zmalloc( &d_lA[dev],  ldda*n_local[dev] ));
+                TESTING_CHECK( magma_zmalloc( &dwork[dev], ldwork ));
             }
             
             //////////////////////////////////////////////////////////////////////////
@@ -264,25 +265,25 @@ int main(int argc, char **argv)
             }
             
             /* Free Memory */
-            TESTING_FREE_CPU( A );
-            TESTING_FREE_CPU( Y );
-            TESTING_FREE_CPU( Ycublas );
-            TESTING_FREE_CPU( Ymagma  );
-            TESTING_FREE_CPU( Ymagma1 );
-            TESTING_FREE_CPU( Ylapack );
+            magma_free_cpu( A );
+            magma_free_cpu( Y );
+            magma_free_cpu( Ycublas );
+            magma_free_cpu( Ymagma  );
+            magma_free_cpu( Ymagma1 );
+            magma_free_cpu( Ylapack );
 
-            TESTING_FREE_PIN( X );
-            TESTING_FREE_PIN( hwork   );
+            magma_free_pinned( X );
+            magma_free_pinned( hwork   );
             
             magma_setdevice( opts.device );
-            TESTING_FREE_DEV( dA );
-            TESTING_FREE_DEV( dX );
-            TESTING_FREE_DEV( dY );
+            magma_free( dA );
+            magma_free( dX );
+            magma_free( dY );
             
             for( dev=0; dev < opts.ngpu; dev++ ) {
                 magma_setdevice( dev );
-                TESTING_FREE_DEV( d_lA[dev]  );
-                TESTING_FREE_DEV( dwork[dev] );
+                magma_free( d_lA[dev]  );
+                magma_free( dwork[dev] );
             }
             fflush( stdout );
         }
@@ -300,6 +301,6 @@ int main(int argc, char **argv)
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

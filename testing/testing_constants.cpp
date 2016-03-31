@@ -9,8 +9,8 @@
 */
 #include <stdio.h>
 
-#include "testings.h"
 #include "magma_v2.h"
+#include "testings.h"
 
 magma_int_t gStatus;
 

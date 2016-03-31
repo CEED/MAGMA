@@ -1,3 +1,6 @@
+#include <stdio.h>
+
+#include "magma_v2.h"
 #include "testings.h"
 
 int main( int argc, char** argv )

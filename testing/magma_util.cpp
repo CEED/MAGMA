@@ -24,8 +24,8 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include "testings.h"
 #include "magma_v2.h"
+#include "testings.h"
 
 // --------------------
 // global variable

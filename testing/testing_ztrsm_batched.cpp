@@ -40,7 +40,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, magma_perf, magma_time=0, cublas_perf=0, cublas_time=0, cpu_perf=0, cpu_time=0;
     double          magma_error, cublas_error, lapack_error, work[1];
@@ -106,34 +107,34 @@ int main( int argc, char** argv)
             sizeB = ldb*N*batchCount;
             magma_int_t NN = ldb*N;
 
-            TESTING_MALLOC_CPU( h_A,       magmaDoubleComplex, sizeA  );
-            TESTING_MALLOC_CPU( h_B,       magmaDoubleComplex, sizeB   );
-            TESTING_MALLOC_CPU( h_X,       magmaDoubleComplex, sizeB   );
-            TESTING_MALLOC_CPU( h_Blapack, magmaDoubleComplex, sizeB   );
-            TESTING_MALLOC_CPU( h_Bcublas, magmaDoubleComplex, sizeB   );
-            TESTING_MALLOC_CPU( h_Bmagma,  magmaDoubleComplex, sizeB   );
-            TESTING_MALLOC_CPU( ipiv,      magma_int_t,        Ak      );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,       sizeA  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B,       sizeB   ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_X,       sizeB   ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_Blapack, sizeB   ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_Bcublas, sizeB   ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_Bmagma,  sizeB   ));
+            TESTING_CHECK( magma_imalloc_cpu( &ipiv,      Ak      ));
             
-            TESTING_MALLOC_DEV( d_A,       magmaDoubleComplex, ldda*Ak*batchCount );
-            TESTING_MALLOC_DEV( d_B,       magmaDoubleComplex, lddb*N*batchCount  );
+            TESTING_CHECK( magma_zmalloc( &d_A,       ldda*Ak*batchCount ));
+            TESTING_CHECK( magma_zmalloc( &d_B,       lddb*N*batchCount  ));
             
-            TESTING_MALLOC_DEV( d_A_array, magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( d_B_array, magmaDoubleComplex*, batchCount );
-
-            TESTING_MALLOC_DEV( dW1_displ,   magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( dW2_displ,   magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( dW3_displ,   magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( dW4_displ,   magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( dinvA_array, magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( dwork_array, magmaDoubleComplex*, batchCount );
+            TESTING_CHECK( magma_malloc( (void**) &d_A_array,   batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &d_B_array,   batchCount * sizeof(magmaDoubleComplex*) ));
+            
+            TESTING_CHECK( magma_malloc( (void**) &dW1_displ,   batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &dW2_displ,   batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &dW3_displ,   batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &dW4_displ,   batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &dinvA_array, batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &dwork_array, batchCount * sizeof(magmaDoubleComplex*) ));
 
             magmaDoubleComplex* dinvA=NULL;
             magmaDoubleComplex* dwork=NULL; // invA and work are workspace in ztrsm
  
             magma_int_t dinvA_batchSize = magma_roundup( Ak, TRI_NB )*TRI_NB;
             magma_int_t dwork_batchSize = lddb*N;
-            TESTING_MALLOC_DEV( dinvA, magmaDoubleComplex, dinvA_batchSize * batchCount );
-            TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, dwork_batchSize * batchCount );
+            TESTING_CHECK( magma_zmalloc( &dinvA, dinvA_batchSize * batchCount ));
+            TESTING_CHECK( magma_zmalloc( &dwork, dwork_batchSize * batchCount ));
     
             magma_zset_pointer( dwork_array, dwork, lddb, 0, 0, dwork_batchSize, batchCount, opts.queue );
             magma_zset_pointer( dinvA_array, dinvA, magma_roundup( Ak, TRI_NB ), 0, 0, dinvA_batchSize, batchCount, opts.queue );
@@ -347,28 +348,28 @@ int main( int argc, char** argv)
                         (okay ? "ok" : "failed"));
             }
             
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_CPU( h_B );
-            TESTING_FREE_CPU( h_X );
-            TESTING_FREE_CPU( h_Blapack );
-            TESTING_FREE_CPU( h_Bcublas );
-            TESTING_FREE_CPU( h_Bmagma  );
-            TESTING_FREE_CPU( ipiv );
+            magma_free_cpu( h_A );
+            magma_free_cpu( h_B );
+            magma_free_cpu( h_X );
+            magma_free_cpu( h_Blapack );
+            magma_free_cpu( h_Bcublas );
+            magma_free_cpu( h_Bmagma  );
+            magma_free_cpu( ipiv );
             
-            TESTING_FREE_DEV( d_A );
-            TESTING_FREE_DEV( d_B );
-            TESTING_FREE_DEV( d_A_array );
-            TESTING_FREE_DEV( d_B_array );
+            magma_free( d_A );
+            magma_free( d_B );
+            magma_free( d_A_array );
+            magma_free( d_B_array );
 
-            TESTING_FREE_DEV( dW1_displ );
-            TESTING_FREE_DEV( dW2_displ );
-            TESTING_FREE_DEV( dW3_displ );
-            TESTING_FREE_DEV( dW4_displ );
+            magma_free( dW1_displ );
+            magma_free( dW2_displ );
+            magma_free( dW3_displ );
+            magma_free( dW4_displ );
 
-            TESTING_FREE_DEV( dinvA );
-            TESTING_FREE_DEV( dwork );
-            TESTING_FREE_DEV( dwork_array );
-            TESTING_FREE_DEV( dinvA_array );
+            magma_free( dinvA );
+            magma_free( dwork );
+            magma_free( dwork_array );
+            magma_free( dinvA_array );
             
             fflush( stdout );
         }
@@ -378,6 +379,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

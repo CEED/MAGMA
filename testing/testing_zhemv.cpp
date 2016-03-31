@@ -24,7 +24,8 @@
 
 int main(int argc, char **argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     const magma_int_t        ione      = 1;
@@ -61,20 +62,20 @@ int main(int argc, char **argv)
             sizeY  = N*incy;
             gflops = FLOPS_ZHEMV( N ) / 1e9;
             
-            TESTING_MALLOC_CPU( A,        magmaDoubleComplex, sizeA );
-            TESTING_MALLOC_CPU( X,        magmaDoubleComplex, sizeX );
-            TESTING_MALLOC_CPU( Y,        magmaDoubleComplex, sizeY );
-            TESTING_MALLOC_CPU( Yatomics, magmaDoubleComplex, sizeY );
-            TESTING_MALLOC_CPU( Ycublas,  magmaDoubleComplex, sizeY );
-            TESTING_MALLOC_CPU( Ymagma,   magmaDoubleComplex, sizeY );
+            TESTING_CHECK( magma_zmalloc_cpu( &A,        sizeA ));
+            TESTING_CHECK( magma_zmalloc_cpu( &X,        sizeX ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Y,        sizeY ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Yatomics, sizeY ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Ycublas,  sizeY ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Ymagma,   sizeY ));
             
-            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, ldda*N );
-            TESTING_MALLOC_DEV( dX, magmaDoubleComplex, sizeX );
-            TESTING_MALLOC_DEV( dY, magmaDoubleComplex, sizeY );
+            TESTING_CHECK( magma_zmalloc( &dA, ldda*N ));
+            TESTING_CHECK( magma_zmalloc( &dX, sizeX ));
+            TESTING_CHECK( magma_zmalloc( &dY, sizeY ));
             
             blocks = magma_ceildiv( N, nb );
             ldwork = ldda*blocks;
-            TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, ldwork );
+            TESTING_CHECK( magma_zmalloc( &dwork, ldwork ));
             
             magmablas_zlaset( MagmaFull, ldwork, 1, MAGMA_Z_NAN, MAGMA_Z_NAN, dwork, ldwork, opts.queue );
             magmablas_zlaset( MagmaFull, ldda,   N, MAGMA_Z_NAN, MAGMA_Z_NAN, dA,    ldda,   opts.queue );
@@ -185,17 +186,17 @@ int main(int argc, char **argv)
                    magma_error, cublas_error, atomics_error,
                    (okay ? "ok" : "failed"));
             
-            TESTING_FREE_CPU( A );
-            TESTING_FREE_CPU( X );
-            TESTING_FREE_CPU( Y );
-            TESTING_FREE_CPU( Ycublas  );
-            TESTING_FREE_CPU( Yatomics );
-            TESTING_FREE_CPU( Ymagma   );
+            magma_free_cpu( A );
+            magma_free_cpu( X );
+            magma_free_cpu( Y );
+            magma_free_cpu( Ycublas  );
+            magma_free_cpu( Yatomics );
+            magma_free_cpu( Ymagma   );
             
-            TESTING_FREE_DEV( dA );
-            TESTING_FREE_DEV( dX );
-            TESTING_FREE_DEV( dY );
-            TESTING_FREE_DEV( dwork );
+            magma_free( dA );
+            magma_free( dX );
+            magma_free( dY );
+            magma_free( dwork );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -204,6 +205,6 @@ int main(int argc, char **argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

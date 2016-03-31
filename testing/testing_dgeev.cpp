@@ -67,7 +67,8 @@ double magma_dzlapy2(magmaDoubleComplex x)
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gpu_time, cpu_time;
     double *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
@@ -122,18 +123,18 @@ int main( int argc, char** argv)
             // generous workspace - required by dget22
             lwork2 = max( lwork, N*(5 + 2*N) );
             
-            TESTING_MALLOC_CPU( w1copy, magmaDoubleComplex, N );
-            TESTING_MALLOC_CPU( w2copy, magmaDoubleComplex, N );
-            TESTING_MALLOC_CPU( w1,  double, N  );
-            TESTING_MALLOC_CPU( w2,  double, N  );
-            TESTING_MALLOC_CPU( w1i, double, N  );
-            TESTING_MALLOC_CPU( w2i, double, N  );
-            TESTING_MALLOC_CPU( h_A, double, n2 );
+            TESTING_CHECK( magma_zmalloc_cpu( &w1copy, N ));
+            TESTING_CHECK( magma_zmalloc_cpu( &w2copy, N ));
+            TESTING_CHECK( magma_dmalloc_cpu( &w1,  N  ));
+            TESTING_CHECK( magma_dmalloc_cpu( &w2,  N  ));
+            TESTING_CHECK( magma_dmalloc_cpu( &w1i, N  ));
+            TESTING_CHECK( magma_dmalloc_cpu( &w2i, N  ));
+            TESTING_CHECK( magma_dmalloc_cpu( &h_A, n2 ));
             
-            TESTING_MALLOC_PIN( h_R, double, n2 );
-            TESTING_MALLOC_PIN( VL,  double, n2 );
-            TESTING_MALLOC_PIN( VR,  double, n2 );
-            TESTING_MALLOC_PIN( h_work, double, lwork2 );
+            TESTING_CHECK( magma_dmalloc_pinned( &h_R, n2 ));
+            TESTING_CHECK( magma_dmalloc_pinned( &VL,  n2 ));
+            TESTING_CHECK( magma_dmalloc_pinned( &VR,  n2 ));
+            TESTING_CHECK( magma_dmalloc_pinned( &h_work, lwork2 ));
             
             /* Initialize the matrix */
             lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
@@ -301,7 +302,7 @@ int main( int argc, char** argv)
                 // more extensive tests
                 // this is really slow because it calls magma_dgeev multiple times
                 double *LRE, DUM;
-                TESTING_MALLOC_PIN( LRE, double, n2 );
+                TESTING_CHECK( magma_dmalloc_pinned( &LRE, n2 ));
                 
                 lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
                 lapackf77_dlacpy( MagmaFullStr, &N, &N, h_A, &lda, h_R, &lda );
@@ -418,7 +419,7 @@ int main( int argc, char** argv)
                         if ( ! MAGMA_D_EQUAL( VL[j+jj*lda], LRE[j+jj*lda] ))
                             result[8] = 0;
                 
-                TESTING_FREE_PIN( LRE );
+                magma_free_pinned( LRE );
             }
             
             /* =====================================================================
@@ -502,18 +503,18 @@ int main( int argc, char** argv)
                 }
             }
             
-            TESTING_FREE_CPU( w1copy );
-            TESTING_FREE_CPU( w2copy );
-            TESTING_FREE_CPU( w1  );
-            TESTING_FREE_CPU( w2  );
-            TESTING_FREE_CPU( w1i );
-            TESTING_FREE_CPU( w2i );
-            TESTING_FREE_CPU( h_A );
+            magma_free_cpu( w1copy );
+            magma_free_cpu( w2copy );
+            magma_free_cpu( w1  );
+            magma_free_cpu( w2  );
+            magma_free_cpu( w1i );
+            magma_free_cpu( w2i );
+            magma_free_cpu( h_A );
             
-            TESTING_FREE_PIN( h_R );
-            TESTING_FREE_PIN( VL  );
-            TESTING_FREE_PIN( VR  );
-            TESTING_FREE_PIN( h_work );
+            magma_free_pinned( h_R );
+            magma_free_pinned( VL  );
+            magma_free_pinned( VR  );
+            magma_free_pinned( h_work );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -522,6 +523,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

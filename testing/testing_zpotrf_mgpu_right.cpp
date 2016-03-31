@@ -27,7 +27,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     /* Constants */
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -60,8 +61,8 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZPOTRF( N ) / 1e9;
 
             magma_setdevice(0);
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2 );
-            TESTING_MALLOC_PIN( h_R, magmaDoubleComplex, n2 );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A, n2 ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R, n2 ));
 
             nb = magma_get_zpotrf_nb(N);
             if ( ngpu0 > N / nb ) {
@@ -83,7 +84,7 @@ int main( int argc, char** argv)
                 ldn_local = (ldn_local % 256 == 0) ? ldn_local + 32 : ldn_local;
 
                 magma_setdevice(j);
-                TESTING_MALLOC_DEV( d_lA[j], magmaDoubleComplex, ldda * ldn_local );
+                TESTING_CHECK( magma_zmalloc( &d_lA[j], ldda * ldn_local ));
             }
 
             /* Initialize the matrix */
@@ -173,11 +174,11 @@ int main( int argc, char** argv)
 
             for (j = 0; j < ngpu; j++) {
                 magma_setdevice(j);
-                TESTING_FREE_DEV( d_lA[j] );
+                magma_free( d_lA[j] );
             }
             magma_setdevice(0);
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_PIN( h_R );
+            magma_free_cpu( h_A );
+            magma_free_pinned( h_R );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -186,7 +187,7 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
 
     return 0;
 }

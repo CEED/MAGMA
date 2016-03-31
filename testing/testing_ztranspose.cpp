@@ -30,7 +30,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     // OpenCL use:  cl_mem  , offset  (two arguments);
     // else   use:  pointer + offset  (one argument).
@@ -77,12 +78,12 @@ int main( int argc, char** argv)
             // load entire matrix, save entire matrix
             gbytes = sizeof(magmaDoubleComplex) * 2.*M*N / 1e9;
             
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, lda*N  );  // input:  M x N
-            TESTING_MALLOC_CPU( h_B, magmaDoubleComplex, ldb*M  );  // output: N x M
-            TESTING_MALLOC_CPU( h_R, magmaDoubleComplex, ldb*M  );  // output: N x M
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A, lda*N  ));  // input:  M x N
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B, ldb*M  ));  // output: N x M
+            TESTING_CHECK( magma_zmalloc_cpu( &h_R, ldb*M  ));  // output: N x M
             
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N );  // input:  M x N
-            TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*M );  // output: N x M
+            TESTING_CHECK( magma_zmalloc( &d_A, ldda*N ));  // input:  M x N
+            TESTING_CHECK( magma_zmalloc( &d_B, lddb*M ));  // output: N x M
             
             /* Initialize the matrix */
             for( int j = 0; j < N; ++j ) {
@@ -195,12 +196,12 @@ int main( int argc, char** argv)
                 status += ! (error == 0.);
             }
             
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_CPU( h_B );
-            TESTING_FREE_CPU( h_R );
+            magma_free_cpu( h_A );
+            magma_free_cpu( h_B );
+            magma_free_cpu( h_R );
             
-            TESTING_FREE_DEV( d_A );
-            TESTING_FREE_DEV( d_B );
+            magma_free( d_A );
+            magma_free( d_B );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -210,6 +211,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

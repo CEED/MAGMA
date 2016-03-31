@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if ! defined(MAGMA_H) && ! defined(MAGMA_V2_H)
 #include "magma_v2.h"
+#endif
 
 
 /***************************************************************************//**
@@ -55,75 +57,15 @@ void flops_init();
  * Macros to handle error checking.
  */
 
-#define TESTING_INIT()                                                     \
-    magma_init();                                                          \
-    flops_init();                                                          \
-    magma_print_environment();
-
-#define TESTING_FINALIZE()                                                 \
-    magma_finalize();
-
-
-/******************* CPU memory */
-#define TESTING_MALLOC_CPU( ptr, type, size )                              \
-    if ( MAGMA_SUCCESS !=                                                  \
-            magma_malloc_cpu( (void**) &ptr, (size)*sizeof(type) )) {      \
-        fprintf( stderr, "!!!! magma_malloc_cpu failed for: %s\n", #ptr ); \
-        magma_finalize();                                                  \
-        exit(-1);                                                          \
-    }
-
-#define TESTING_FREE_CPU( ptr ) magma_free_cpu( ptr )
-
-
-/******************* Pinned CPU memory */
-#ifdef HAVE_CUBLAS
-    // In CUDA, this allocates pinned memory.
-    #define TESTING_MALLOC_PIN( ptr, type, size )                                 \
-        if ( MAGMA_SUCCESS !=                                                     \
-                magma_malloc_pinned( (void**) &ptr, (size)*sizeof(type) )) {      \
-            fprintf( stderr, "!!!! magma_malloc_pinned failed for: %s\n", #ptr ); \
-            magma_finalize();                                                     \
-            exit(-1);                                                             \
-        }
-    
-    #define TESTING_FREE_PIN( ptr ) magma_free_pinned( ptr )
-#else
-    // For OpenCL, we don't support pinned memory yet.
-    #define TESTING_MALLOC_PIN( ptr, type, size )                              \
-        if ( MAGMA_SUCCESS !=                                                  \
-                magma_malloc_cpu( (void**) &ptr, (size)*sizeof(type) )) {      \
-            fprintf( stderr, "!!!! magma_malloc_cpu failed for: %s\n", #ptr ); \
-            magma_finalize();                                                  \
-            exit(-1);                                                          \
-        }
-    
-    #define TESTING_FREE_PIN( ptr ) magma_free_cpu( ptr )
-#endif
-
-
-/******************* GPU memory */
-#ifdef HAVE_CUBLAS
-    // In CUDA, this has (void**) cast.
-    #define TESTING_MALLOC_DEV( ptr, type, size )                              \
-        if ( MAGMA_SUCCESS !=                                                  \
-                magma_malloc( (void**) &ptr, (size)*sizeof(type) )) {          \
-            fprintf( stderr, "!!!! magma_malloc failed for: %s\n", #ptr );     \
-            magma_finalize();                                                  \
-            exit(-1);                                                          \
-        }
-#else
-    // For OpenCL, ptr is cl_mem* and there is no cast.
-    #define TESTING_MALLOC_DEV( ptr, type, size )                              \
-        if ( MAGMA_SUCCESS !=                                                  \
-                magma_malloc( &ptr, (size)*sizeof(type) )) {                   \
-            fprintf( stderr, "!!!! magma_malloc failed for: %s\n", #ptr );     \
-            magma_finalize();                                                  \
-            exit(-1);                                                          \
-        }
-#endif
-
-#define TESTING_FREE_DEV( ptr ) magma_free( ptr )
+#define TESTING_CHECK( err )                                                 \
+    do {                                                                     \
+        long err_ = (err);                                                   \
+        if ( err_ != 0 ) {                                                   \
+            fprintf( stderr, "Error: %s\nfailed at %s:%d: error %ld: %s\n",  \
+                     #err, __FILE__, __LINE__, err_, magma_strerror(err_) ); \
+            exit(1);                                                         \
+        }                                                                    \
+    } while( 0 )
 
 
 /***************************************************************************//**

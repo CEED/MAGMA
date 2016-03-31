@@ -127,7 +127,8 @@ void test_sqrt( double dtol, double stol )
 
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
     
     gStatus = 0;
     magma_int_t s;
@@ -288,6 +289,6 @@ int main( int argc, char** argv)
     test_sqrt( dtol, stol );
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return gStatus;
 }

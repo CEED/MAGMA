@@ -28,7 +28,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magmaDoubleComplex *h_A, *h_Q, *h_PT, *h_work;
@@ -60,14 +61,14 @@ int main( int argc, char** argv)
             lhwork = (M + N)*nb;
             gflops = FLOPS_ZGEBRD( M, N ) / 1e9;
 
-            TESTING_MALLOC_CPU( h_A,     magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_CPU( tauq,    magmaDoubleComplex, minmn );
-            TESTING_MALLOC_CPU( taup,    magmaDoubleComplex, minmn );
-            TESTING_MALLOC_CPU( diag,    double, minmn   );
-            TESTING_MALLOC_CPU( offdiag, double, minmn-1 );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,     lda*N ));
+            TESTING_CHECK( magma_zmalloc_cpu( &tauq,    minmn ));
+            TESTING_CHECK( magma_zmalloc_cpu( &taup,    minmn ));
+            TESTING_CHECK( magma_dmalloc_cpu( &diag,    minmn   ));
+            TESTING_CHECK( magma_dmalloc_cpu( &offdiag, minmn-1 ));
             
-            TESTING_MALLOC_PIN( h_Q,     magmaDoubleComplex, lda*N  );
-            TESTING_MALLOC_PIN( h_work,  magmaDoubleComplex, lhwork );
+            TESTING_CHECK( magma_zmalloc_pinned( &h_Q,     lda*N  ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_work,  lhwork ));
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -98,14 +99,14 @@ int main( int argc, char** argv)
                 magmaDoubleComplex *h_work_err;
                 lwork_err = max( minmn * nb, M+N );
                 lwork_err = max( lwork_err, minmn*(minmn+1) );
-                TESTING_MALLOC_CPU( h_PT,       magmaDoubleComplex, lda*N     );
-                TESTING_MALLOC_CPU( h_work_err, magmaDoubleComplex, lwork_err );
+                TESTING_CHECK( magma_zmalloc_cpu( &h_PT,       lda*N     ));
+                TESTING_CHECK( magma_zmalloc_cpu( &h_work_err, lwork_err ));
                 
                 // zbdt01 needs M
                 // zunt01 needs minmn
                 #ifdef COMPLEX
                 double *rwork_err;
-                TESTING_MALLOC_CPU( rwork_err, double, M );
+                TESTING_CHECK( magma_dmalloc_cpu( &rwork_err, M ));
                 #endif
 
                 lapackf77_zlacpy( MagmaFullStr, &M, &N, h_Q, &lda, h_PT, &lda );
@@ -149,10 +150,10 @@ int main( int argc, char** argv)
                                   #endif
                                   &result[2]);
                 
-                TESTING_FREE_CPU( h_PT );
-                TESTING_FREE_CPU( h_work_err );
+                magma_free_cpu( h_PT );
+                magma_free_cpu( h_work_err );
                 #ifdef COMPLEX
-                TESTING_FREE_CPU( rwork_err );
+                magma_free_cpu( rwork_err );
                 #endif
             }
             
@@ -193,14 +194,14 @@ int main( int argc, char** argv)
                 printf("     ---            --- \n");
             }
             
-            TESTING_FREE_CPU( h_A     );
-            TESTING_FREE_CPU( tauq    );
-            TESTING_FREE_CPU( taup    );
-            TESTING_FREE_CPU( diag    );
-            TESTING_FREE_CPU( offdiag );
+            magma_free_cpu( h_A     );
+            magma_free_cpu( tauq    );
+            magma_free_cpu( taup    );
+            magma_free_cpu( diag    );
+            magma_free_cpu( offdiag );
             
-            TESTING_FREE_PIN( h_Q    );
-            TESTING_FREE_PIN( h_work );
+            magma_free_pinned( h_Q    );
+            magma_free_pinned( h_work );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -209,6 +210,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

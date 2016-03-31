@@ -27,7 +27,8 @@
 */
 int main( int argc, char** argv )
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
     
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           gpu_error, cpu_error, error, Anorm, work[1];
@@ -73,13 +74,13 @@ int main( int argc, char** argv )
             lhwork = max(lhwork, N*nb);
             lhwork = max(lhwork, 2*nb*nb );
             
-            TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn    );
-            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, lda*N     );
-            TESTING_MALLOC_PIN( h_A2,   magmaDoubleComplex, lda*N     );
-            TESTING_MALLOC_CPU( h_B,    magmaDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC_CPU( h_B2,   magmaDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC_CPU( h_R,    magmaDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC_CPU( h_work, magmaDoubleComplex, lhwork    );
+            TESTING_CHECK( magma_zmalloc_cpu( &tau,    min_mn    ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,    lda*N     ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_A2,   lda*N     ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B,    ldb*nrhs  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B2,   ldb*nrhs  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_R,    ldb*nrhs  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_work, lhwork    ));
             
             /* Initialize the matrices */
             size = lda*N;
@@ -154,13 +155,13 @@ int main( int argc, char** argv )
                 status += ! (error < tol);
             }
 
-            TESTING_FREE_CPU( tau    );
-            TESTING_FREE_CPU( h_A    );
-            TESTING_FREE_PIN( h_A2   );
-            TESTING_FREE_CPU( h_B    );
-            TESTING_FREE_CPU( h_B2   );
-            TESTING_FREE_CPU( h_R    );
-            TESTING_FREE_CPU( h_work );
+            magma_free_cpu( tau    );
+            magma_free_cpu( h_A    );
+            magma_free_pinned( h_A2   );
+            magma_free_cpu( h_B    );
+            magma_free_cpu( h_B2   );
+            magma_free_cpu( h_R    );
+            magma_free_cpu( h_work );
             
             fflush( stdout );
         }
@@ -170,6 +171,6 @@ int main( int argc, char** argv )
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

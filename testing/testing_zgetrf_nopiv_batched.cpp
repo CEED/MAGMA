@@ -34,8 +34,8 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     magmaDoubleComplex *L, *U;
     double work[1], matnorm, residual;
     
-    TESTING_MALLOC_CPU( L, magmaDoubleComplex, M*min_mn);
-    TESTING_MALLOC_CPU( U, magmaDoubleComplex, min_mn*N);
+    TESTING_CHECK( magma_zmalloc_cpu( &L, M*min_mn ));
+    TESTING_CHECK( magma_zmalloc_cpu( &U, min_mn*N ));
     memset( L, 0, M*min_mn*sizeof(magmaDoubleComplex) );
     memset( U, 0, min_mn*N*sizeof(magmaDoubleComplex) );
 
@@ -58,8 +58,8 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     }
     residual = lapackf77_zlange("f", &M, &N, LU, &lda, work);
 
-    TESTING_FREE_CPU(L);
-    TESTING_FREE_CPU(U);
+    magma_free_cpu( L );
+    magma_free_cpu( U );
 
     return residual / (matnorm * N);
 }
@@ -69,7 +69,8 @@ double get_LU_error(magma_int_t M, magma_int_t N,
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf=0., cublas_time=0., cpu_perf=0, cpu_time=0;
     double          error;
@@ -109,17 +110,17 @@ int main( int argc, char** argv)
             ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGETRF( M, N ) / 1e9 * batchCount;
             
-            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount );
-            TESTING_MALLOC_CPU( ipiv, magma_int_t,     min_mn * batchCount );
-            TESTING_MALLOC_CPU( h_A,  magmaDoubleComplex, n2 );
-            TESTING_MALLOC_CPU( h_R,  magmaDoubleComplex, n2 );
+            TESTING_CHECK( magma_imalloc_cpu( &cpu_info, batchCount ));
+            TESTING_CHECK( magma_imalloc_cpu( &ipiv, min_mn * batchCount ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,  n2 ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_R,  n2 ));
             
-            TESTING_MALLOC_DEV( dA_magma,  magmaDoubleComplex, ldda*N * batchCount );
-            TESTING_MALLOC_DEV( dipiv_magma,  magma_int_t, min_mn * batchCount );
-            TESTING_MALLOC_DEV( dinfo_magma,  magma_int_t, batchCount );
+            TESTING_CHECK( magma_zmalloc( &dA_magma,  ldda*N * batchCount ));
+            TESTING_CHECK( magma_imalloc( &dipiv_magma,  min_mn * batchCount ));
+            TESTING_CHECK( magma_imalloc( &dinfo_magma,  batchCount ));
 
-            TESTING_MALLOC_DEV( dA_array,    magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( dipiv_array, magma_int_t*,        batchCount );
+            TESTING_CHECK( magma_malloc( (void**) &dA_array,    batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &dipiv_array, batchCount * sizeof(magma_int_t*) ));
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -214,16 +215,16 @@ int main( int argc, char** argv)
                 printf("     ---  \n");
             }
             
-            TESTING_FREE_CPU( cpu_info );
-            TESTING_FREE_CPU( ipiv );
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_CPU( h_R );
+            magma_free_cpu( cpu_info );
+            magma_free_cpu( ipiv );
+            magma_free_cpu( h_A );
+            magma_free_cpu( h_R );
 
-            TESTING_FREE_DEV( dA_magma );
-            TESTING_FREE_DEV( dinfo_magma );
-            TESTING_FREE_DEV( dipiv_magma );
-            TESTING_FREE_DEV( dipiv_array );
-            TESTING_FREE_DEV( dA_array );
+            magma_free( dA_magma );
+            magma_free( dinfo_magma );
+            magma_free( dipiv_magma );
+            magma_free( dipiv_array );
+            magma_free( dA_array );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -232,6 +233,6 @@ int main( int argc, char** argv)
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

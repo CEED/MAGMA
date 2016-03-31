@@ -74,7 +74,8 @@ double get_residual(
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     magmaDoubleComplex *h_A, *h_B, *h_X, *work, temp;
     real_Double_t   gflops, gpu_perf, gpu_time = 0.0, cpu_perf=0, cpu_time=0;
@@ -100,10 +101,10 @@ int main( int argc, char** argv)
             sizeB  = ldb*opts.nrhs;
             gflops = ( FLOPS_ZPOTRF( N ) + FLOPS_ZPOTRS( N, opts.nrhs ) ) / 1e9;
             
-            TESTING_MALLOC_CPU( ipiv, magma_int_t, N );
-            TESTING_MALLOC_PIN( h_A,  magmaDoubleComplex, n2 );
-            TESTING_MALLOC_PIN( h_B,  magmaDoubleComplex, sizeB );
-            TESTING_MALLOC_PIN( h_X,  magmaDoubleComplex, sizeB );
+            TESTING_CHECK( magma_imalloc_cpu( &ipiv, N ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_A,  n2 ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_B,  sizeB ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_X,  sizeB ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -113,7 +114,7 @@ int main( int argc, char** argv)
                 lapackf77_zhesv(lapack_uplo_const(opts.uplo), &N, &opts.nrhs,
                                 h_A, &lda, ipiv, h_X, &ldb, &temp, &lwork, &info);
                 lwork = (int)MAGMA_Z_REAL(temp);
-                TESTING_MALLOC_CPU( work, magmaDoubleComplex, lwork );
+                TESTING_CHECK( magma_zmalloc_cpu( &work, lwork ));
 
                 init_matrix( N, N, h_A, lda );
                 lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
@@ -130,7 +131,7 @@ int main( int argc, char** argv)
                 }
                 error_lapack = get_residual( opts.uplo, N, opts.nrhs, h_A, lda, ipiv, h_X, ldb, h_B, ldb );
 
-                TESTING_FREE_CPU( work );
+                magma_free_cpu( work );
             }
            
             /* ====================================================================
@@ -172,10 +173,10 @@ int main( int argc, char** argv)
                 status += ! (error < tol);
             }
             
-            TESTING_FREE_CPU( ipiv );
-            TESTING_FREE_PIN( h_X  );
-            TESTING_FREE_PIN( h_B  );
-            TESTING_FREE_PIN( h_A  );
+            magma_free_cpu( ipiv );
+            magma_free_pinned( h_X  );
+            magma_free_pinned( h_B  );
+            magma_free_pinned( h_A  );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -184,6 +185,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

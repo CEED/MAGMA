@@ -36,7 +36,8 @@
 
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magmaDoubleComplex *h_A, *h_R;
@@ -72,13 +73,13 @@ int main( int argc, char** argv)
 
             gflops = batchCount * FLOPS_ZPOTRF( N ) / 1e9;
 
-            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2);
-            TESTING_MALLOC_PIN( h_R, magmaDoubleComplex, n2);
-            TESTING_MALLOC_DEV(  d_A, magmaDoubleComplex, ldda * N * batchCount);
-            TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
+            TESTING_CHECK( magma_imalloc_cpu( &cpu_info, batchCount ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A, n2 ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R, n2 ));
+            TESTING_CHECK( magma_zmalloc( &d_A, ldda * N * batchCount ));
+            TESTING_CHECK( magma_imalloc( &dinfo_magma,  batchCount ));
             
-            TESTING_MALLOC_DEV( d_A_array, magmaDoubleComplex*, batchCount );
+            TESTING_CHECK( magma_malloc( (void**) &d_A_array, batchCount * sizeof(magmaDoubleComplex*) ));
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -190,12 +191,12 @@ int main( int argc, char** argv)
                        (int)batchCount, (int) N, gpu_perf, gpu_time*1000. );
             }
 cleanup:
-            TESTING_FREE_CPU( cpu_info );
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_PIN( h_R );
-            TESTING_FREE_DEV( d_A );
-            TESTING_FREE_DEV( d_A_array );
-            TESTING_FREE_DEV( dinfo_magma );
+            magma_free_cpu( cpu_info );
+            magma_free_cpu( h_A );
+            magma_free_pinned( h_R );
+            magma_free( d_A );
+            magma_free( d_A_array );
+            magma_free( dinfo_magma );
             if (status == -1)
                 break;
             fflush( stdout );
@@ -209,6 +210,6 @@ cleanup:
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

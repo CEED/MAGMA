@@ -24,7 +24,8 @@
 */
 int main( int argc, char** argv )
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
     double           Anorm, error, work[1];
@@ -67,8 +68,8 @@ int main( int argc, char** argv )
             }
             
             // Allocate host memory for the matrix
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2 );
-            TESTING_MALLOC_PIN( h_R, magmaDoubleComplex, n2 );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A, n2 ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R, n2 ));
             
             // Allocate device memory
             // matrix is distributed by block-rows or block-columns
@@ -77,7 +78,7 @@ int main( int argc, char** argv )
             max_size = (1+N/(nb*ngpu))*nb * magma_roundup( N, nb );
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
-                TESTING_MALLOC_DEV( d_lA[dev], magmaDoubleComplex, max_size );
+                TESTING_CHECK( magma_zmalloc( &d_lA[dev], max_size ));
             }
             
             /* Initialize the matrix */
@@ -145,11 +146,11 @@ int main( int argc, char** argv )
                        (int) N, gpu_perf, gpu_time );
             }
             
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_PIN( h_R );
+            magma_free_cpu( h_A );
+            magma_free_pinned( h_R );
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
-                TESTING_FREE_DEV( d_lA[dev] );
+                magma_free( d_lA[dev] );
             }
             fflush( stdout );
         }
@@ -163,6 +164,6 @@ int main( int argc, char** argv )
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

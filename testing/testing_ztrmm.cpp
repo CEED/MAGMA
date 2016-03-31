@@ -27,7 +27,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, cublas_perf, cublas_time, cpu_perf, cpu_time;
     double          cublas_error, Cnorm, work[1];
@@ -80,13 +81,13 @@ int main( int argc, char** argv)
             sizeA = lda*Ak;
             sizeB = ldb*N;
             
-            TESTING_MALLOC_CPU( h_A,       magmaDoubleComplex, lda*Ak );
-            TESTING_MALLOC_CPU( h_B,       magmaDoubleComplex, ldb*N  );
-            TESTING_MALLOC_CPU( h_Bcublas, magmaDoubleComplex, ldb*N  );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,       lda*Ak ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B,       ldb*N  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_Bcublas, ldb*N  ));
             
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*Ak );
-            TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*N  );
-            TESTING_MALLOC_DEV( d_C, magmaDoubleComplex, lddc*N  );
+            TESTING_CHECK( magma_zmalloc( &d_A, ldda*Ak ));
+            TESTING_CHECK( magma_zmalloc( &d_B, lddb*N  ));
+            TESTING_CHECK( magma_zmalloc( &d_C, lddc*N  ));
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
@@ -161,13 +162,13 @@ int main( int argc, char** argv)
                        cublas_perf, 1000.*cublas_time);
             }
             
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_CPU( h_B );
-            TESTING_FREE_CPU( h_Bcublas );
+            magma_free_cpu( h_A );
+            magma_free_cpu( h_B );
+            magma_free_cpu( h_Bcublas );
             
-            TESTING_FREE_DEV( d_A );
-            TESTING_FREE_DEV( d_B );
-            TESTING_FREE_DEV( d_C );
+            magma_free( d_A );
+            magma_free( d_B );
+            magma_free( d_C );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -176,6 +177,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

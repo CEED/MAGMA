@@ -27,7 +27,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t    gbytes, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
@@ -87,10 +88,10 @@ int main( int argc, char** argv)
                 gbytes = sizeof(magmaDoubleComplex) * 1.*M*N / 1e9;
             }
     
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, size   );
-            TESTING_MALLOC_CPU( h_R, magmaDoubleComplex, size   );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A, size   ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_R, size   ));
             
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N );
+            TESTING_CHECK( magma_zmalloc( &d_A, ldda*N ));
             
             /* Initialize the matrix */
             for( int j = 0; j < N; ++j ) {
@@ -142,10 +143,10 @@ int main( int argc, char** argv)
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    (okay ? "ok" : "failed") );
             
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_CPU( h_R );
+            magma_free_cpu( h_A );
+            magma_free_cpu( h_R );
             
-            TESTING_FREE_DEV( d_A );
+            magma_free( d_A );
             fflush( stdout );
           }
         }
@@ -157,6 +158,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

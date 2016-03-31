@@ -115,10 +115,10 @@ float test( magma_int_t m, magma_int_t n )
     const magma_int_t ione = 1;
     magma_int_t lda = max(m,n);
     
-    TESTING_MALLOC_CPU( &sA,    float,  lda*n );
-    TESTING_MALLOC_CPU( &dA,    double, lda*n );
-    TESTING_MALLOC_CPU( &swork, float,  m     );
-    TESTING_MALLOC_CPU( &dwork, double, m     );
+    TESTING_CHECK( magma_smalloc_cpu( &&sA,    lda*n ));
+    TESTING_CHECK( magma_dmalloc_cpu( &&dA,    lda*n ));
+    TESTING_CHECK( magma_smalloc_cpu( &&swork, m     ));
+    TESTING_CHECK( magma_dmalloc_cpu( &&dwork, m     ));
     
     for( magma_int_t j = 0; j < n; ++j ) {
         for( magma_int_t i = 0; i < lda; ++i ) {
@@ -207,10 +207,10 @@ float test( magma_int_t m, magma_int_t n )
     }
     printf( "\n" );
     
-    TESTING_FREE_CPU( sA );
-    TESTING_FREE_CPU( dA );
-    TESTING_FREE_CPU( swork );
-    TESTING_FREE_CPU( dwork );
+    magma_free_cpu( sA );
+    magma_free_cpu( dA );
+    magma_free_cpu( swork );
+    magma_free_cpu( dwork );
     
     return 1.125;
 }

@@ -25,7 +25,8 @@
 */
 int main( int argc, char** argv )
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
     
     real_Double_t   gbytes, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double error, work[1];
@@ -56,13 +57,13 @@ int main( int argc, char** argv )
             gbytes = (real_Double_t) m*n * (sizeof(magmaDoubleComplex) + sizeof(magmaFloatComplex)) / 1e9;
             size = ldda*n;  // ldda >= lda
             
-            TESTING_MALLOC_CPU(  SA, magmaFloatComplex,  size );
-            TESTING_MALLOC_CPU(   A, magmaDoubleComplex, size );
-            TESTING_MALLOC_CPU(  SR, magmaFloatComplex,  size );
-            TESTING_MALLOC_CPU(   R, magmaDoubleComplex, size );
+            TESTING_CHECK( magma_cmalloc_cpu( &SA, size ));
+            TESTING_CHECK( magma_zmalloc_cpu( &A, size ));
+            TESTING_CHECK( magma_cmalloc_cpu( &SR, size ));
+            TESTING_CHECK( magma_zmalloc_cpu( &R, size ));
             
-            TESTING_MALLOC_DEV( dSA, magmaFloatComplex,  size );
-            TESTING_MALLOC_DEV(  dA, magmaDoubleComplex, size );
+            TESTING_CHECK( magma_cmalloc( &dSA, size ));
+            TESTING_CHECK( magma_zmalloc( &dA, size ));
             
             lapackf77_zlarnv( &ione, ISEED, &size,  A );
             lapackf77_clarnv( &ione, ISEED, &size, SA );
@@ -159,13 +160,13 @@ int main( int argc, char** argv )
                     error, (error == 0 ? "ok" : "failed") );
             status += ! (error == 0);
             
-            TESTING_FREE_CPU(  SA );
-            TESTING_FREE_CPU(   A );
-            TESTING_FREE_CPU(  SR );
-            TESTING_FREE_CPU(   R );
+            magma_free_cpu( SA );
+            magma_free_cpu( A );
+            magma_free_cpu( SR );
+            magma_free_cpu( R );
             
-            TESTING_FREE_DEV( dSA );
-            TESTING_FREE_DEV(  dA );
+            magma_free( dSA );
+            magma_free( dA );
             printf( "\n" );
             fflush( stdout );
         }
@@ -175,6 +176,6 @@ int main( int argc, char** argv )
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

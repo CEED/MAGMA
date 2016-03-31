@@ -33,7 +33,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     /* Constants */
     const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
@@ -113,17 +114,17 @@ int main( int argc, char** argv)
                                      #endif
                                      &liwork);
             /* Allocate host memory for the matrix */
-            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2 );
-            TESTING_MALLOC_CPU( h_B,    magmaDoubleComplex, n2 );
-            TESTING_MALLOC_CPU( w1,     double, N );
-            TESTING_MALLOC_CPU( w2,     double, N );
-            TESTING_MALLOC_CPU( iwork,  magma_int_t, liwork );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,    n2 ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B,    n2 ));
+            TESTING_CHECK( magma_dmalloc_cpu( &w1,     N ));
+            TESTING_CHECK( magma_dmalloc_cpu( &w2,     N ));
+            TESTING_CHECK( magma_imalloc_cpu( &iwork,  liwork ));
             
-            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2 );
-            TESTING_MALLOC_PIN( h_S,    magmaDoubleComplex, n2 );
-            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, max( lwork, N*N ));  // check needs N*N
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R,    n2 ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_S,    n2 ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_work, max( lwork, N*N ) ));  // check needs N*N
             #ifdef COMPLEX
-            TESTING_MALLOC_PIN( rwork,  double, lrwork);
+            TESTING_CHECK( magma_dmalloc_pinned( &rwork,  lrwork ));
             #endif
 
             /* Initialize the matrix */
@@ -253,17 +254,17 @@ int main( int argc, char** argv)
                 printf("     ---\n");
             }
             
-            TESTING_FREE_CPU( h_A   );
-            TESTING_FREE_CPU( h_B   );
-            TESTING_FREE_CPU( w1    );
-            TESTING_FREE_CPU( w2    );
-            TESTING_FREE_CPU( iwork );
+            magma_free_cpu( h_A   );
+            magma_free_cpu( h_B   );
+            magma_free_cpu( w1    );
+            magma_free_cpu( w2    );
+            magma_free_cpu( iwork );
             
-            TESTING_FREE_PIN( h_R );
-            TESTING_FREE_PIN( h_S );
-            TESTING_FREE_PIN( h_work );
+            magma_free_pinned( h_R );
+            magma_free_pinned( h_S );
+            magma_free_pinned( h_work );
             #ifdef COMPLEX
-            TESTING_FREE_PIN( rwork );
+            magma_free_pinned( rwork );
             #endif
             fflush( stdout );
         }
@@ -273,6 +274,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

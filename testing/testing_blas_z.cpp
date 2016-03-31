@@ -36,7 +36,8 @@
 
 int main( int argc, char** argv )
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
     
     real_Double_t   gflops, t1, t2;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -75,18 +76,18 @@ int main( int argc, char** argv )
         maxn = max( max( m, n ), k );
         ld = max( 1, maxn );
         size = ld*maxn;
-        TESTING_MALLOC_CPU( piv, magma_int_t, maxn );
+        TESTING_CHECK( magma_imalloc_cpu( &piv, maxn ));
         
-        TESTING_MALLOC_PIN( A,   magmaDoubleComplex, size );
-        TESTING_MALLOC_PIN( B,   magmaDoubleComplex, size );
-        TESTING_MALLOC_PIN( C,   magmaDoubleComplex, size );
-        TESTING_MALLOC_PIN( C2,  magmaDoubleComplex, size );
-        TESTING_MALLOC_PIN( LU,  magmaDoubleComplex, size );
+        TESTING_CHECK( magma_zmalloc_pinned( &A,   size ));
+        TESTING_CHECK( magma_zmalloc_pinned( &B,   size ));
+        TESTING_CHECK( magma_zmalloc_pinned( &C,   size ));
+        TESTING_CHECK( magma_zmalloc_pinned( &C2,  size ));
+        TESTING_CHECK( magma_zmalloc_pinned( &LU,  size ));
         
-        TESTING_MALLOC_DEV( dA,  magmaDoubleComplex, size );
-        TESTING_MALLOC_DEV( dB,  magmaDoubleComplex, size );
-        TESTING_MALLOC_DEV( dC1, magmaDoubleComplex, size );
-        TESTING_MALLOC_DEV( dC2, magmaDoubleComplex, size );
+        TESTING_CHECK( magma_zmalloc( &dA,  size ));
+        TESTING_CHECK( magma_zmalloc( &dB,  size ));
+        TESTING_CHECK( magma_zmalloc( &dC1, size ));
+        TESTING_CHECK( magma_zmalloc( &dC2, size ));
         
         // initialize matrices
         size = maxn*maxn;
@@ -438,16 +439,16 @@ int main( int argc, char** argv )
         printf( "\n" );
         
         // cleanup
-        TESTING_FREE_CPU( piv );
-        TESTING_FREE_PIN( A   );
-        TESTING_FREE_PIN( B   );
-        TESTING_FREE_PIN( C   );
-        TESTING_FREE_PIN( C2  );
-        TESTING_FREE_PIN( LU  );
-        TESTING_FREE_DEV( dA  );
-        TESTING_FREE_DEV( dB  );
-        TESTING_FREE_DEV( dC1 );
-        TESTING_FREE_DEV( dC2 );
+        magma_free_cpu( piv );
+        magma_free_pinned( A   );
+        magma_free_pinned( B   );
+        magma_free_pinned( C   );
+        magma_free_pinned( C2  );
+        magma_free_pinned( LU  );
+        magma_free( dA  );
+        magma_free( dB  );
+        magma_free( dC1 );
+        magma_free( dC2 );
         fflush( stdout );
     }
     
@@ -460,7 +461,7 @@ int main( int argc, char** argv )
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     
     magma_int_t status = (total_error != 0.);
     return status;

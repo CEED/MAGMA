@@ -33,7 +33,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf, cpu_time;
     double          magma_error, cublas_error, Cnorm, work[1];
@@ -104,19 +105,19 @@ int main( int argc, char** argv)
             sizeB = ldb*Bn*batchCount;
             sizeC = ldc*N*batchCount;
             
-            TESTING_MALLOC_CPU( h_A,  magmaDoubleComplex, sizeA );
-            TESTING_MALLOC_CPU( h_B,  magmaDoubleComplex, sizeB );
-            TESTING_MALLOC_CPU( h_C,  magmaDoubleComplex, sizeC  );
-            TESTING_MALLOC_CPU( h_Cmagma,  magmaDoubleComplex, sizeC  );
-            TESTING_MALLOC_CPU( h_Ccublas, magmaDoubleComplex, sizeC  );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,  sizeA ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B,  sizeB ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_C,  sizeC  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_Cmagma,  sizeC  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_Ccublas, sizeC  ));
 
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*An*batchCount );
-            TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*Bn*batchCount );
-            TESTING_MALLOC_DEV( d_C, magmaDoubleComplex, lddc*N*batchCount  );
+            TESTING_CHECK( magma_zmalloc( &d_A, ldda*An*batchCount ));
+            TESTING_CHECK( magma_zmalloc( &d_B, lddb*Bn*batchCount ));
+            TESTING_CHECK( magma_zmalloc( &d_C, lddc*N*batchCount  ));
 
-            TESTING_MALLOC_DEV( A_array, magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( B_array, magmaDoubleComplex*, batchCount );
-            TESTING_MALLOC_DEV( C_array, magmaDoubleComplex*, batchCount );
+            TESTING_CHECK( magma_malloc( (void**) &A_array, batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &B_array, batchCount * sizeof(magmaDoubleComplex*) ));
+            TESTING_CHECK( magma_malloc( (void**) &C_array, batchCount * sizeof(magmaDoubleComplex*) ));
 
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
@@ -247,18 +248,18 @@ int main( int argc, char** argv)
                    magma_error, (okay ? "ok" : "failed") );
             }
             
-            TESTING_FREE_CPU( h_A  );
-            TESTING_FREE_CPU( h_B  );
-            TESTING_FREE_CPU( h_C  );
-            TESTING_FREE_CPU( h_Cmagma  );
-            TESTING_FREE_CPU( h_Ccublas );
+            magma_free_cpu( h_A  );
+            magma_free_cpu( h_B  );
+            magma_free_cpu( h_C  );
+            magma_free_cpu( h_Cmagma  );
+            magma_free_cpu( h_Ccublas );
 
-            TESTING_FREE_DEV( d_A );
-            TESTING_FREE_DEV( d_B );
-            TESTING_FREE_DEV( d_C );
-            TESTING_FREE_DEV( A_array );
-            TESTING_FREE_DEV( B_array );
-            TESTING_FREE_DEV( C_array );
+            magma_free( d_A );
+            magma_free( d_B );
+            magma_free( d_C );
+            magma_free( A_array );
+            magma_free( B_array );
+            magma_free( C_array );
 
             fflush( stdout);
         }
@@ -268,6 +269,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

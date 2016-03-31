@@ -22,7 +22,8 @@
 
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magmaDoubleComplex *h_x, *h_x2, *h_tau, *h_tau2;
@@ -50,13 +51,13 @@ int main( int argc, char** argv)
             ldda = magma_roundup( N, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZLARFG( N ) / 1e9 * nb;
     
-            TESTING_MALLOC_CPU( h_x,    magmaDoubleComplex, N*nb );
-            TESTING_MALLOC_CPU( h_x2,   magmaDoubleComplex, N*nb );
-            TESTING_MALLOC_CPU( h_tau,  magmaDoubleComplex, nb   );
-            TESTING_MALLOC_CPU( h_tau2, magmaDoubleComplex, nb   );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_x,    N*nb ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_x2,   N*nb ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_tau,  nb   ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_tau2, nb   ));
         
-            TESTING_MALLOC_DEV( d_x,   magmaDoubleComplex, ldda*nb );
-            TESTING_MALLOC_DEV( d_tau, magmaDoubleComplex, nb      );
+            TESTING_CHECK( magma_zmalloc( &d_x,   ldda*nb ));
+            TESTING_CHECK( magma_zmalloc( &d_tau, nb      ));
             
             /* Initialize the vectors */
             size = N*nb;
@@ -107,13 +108,13 @@ int main( int argc, char** argv)
                    (error < tol && error2 < tol ? "ok" : "failed") );
             status += ! (error < tol && error2 < tol);
             
-            TESTING_FREE_CPU( h_x    );
-            TESTING_FREE_CPU( h_x2   );
-            TESTING_FREE_CPU( h_tau  );
-            TESTING_FREE_CPU( h_tau2 );
+            magma_free_cpu( h_x    );
+            magma_free_cpu( h_x2   );
+            magma_free_cpu( h_tau  );
+            magma_free_cpu( h_tau2 );
         
-            TESTING_FREE_DEV( d_x   );
-            TESTING_FREE_DEV( d_tau );
+            magma_free( d_x   );
+            magma_free( d_tau );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -122,6 +123,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

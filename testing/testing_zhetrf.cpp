@@ -67,8 +67,8 @@ double get_residual(
     magmaDoubleComplex *x, *b;
     
     // initialize RHS
-    TESTING_MALLOC_CPU( x, magmaDoubleComplex, n );
-    TESTING_MALLOC_CPU( b, magmaDoubleComplex, n );
+    TESTING_CHECK( magma_zmalloc_cpu( &x, n ));
+    TESTING_CHECK( magma_zmalloc_cpu( &b, n ));
     lapackf77_zlarnv( &ione, ISEED, &n, b );
     blasf77_zcopy( &n, b, &ione, x, &ione );
     
@@ -121,8 +121,8 @@ double get_residual(
     
     //printf( "r=\n" ); magma_zprint( 1, n, b, 1 );
     
-    TESTING_FREE_CPU( x );
-    TESTING_FREE_CPU( b );
+    magma_free_cpu( x );
+    magma_free_cpu( b );
     
     //printf( "r=%.2e, A=%.2e, x=%.2e, n=%d\n", norm_r, norm_A, norm_x, n );
     return norm_r / (n * norm_A * norm_x);
@@ -141,8 +141,8 @@ double get_residual_aasen(
     #define  A(i,j) ( A[(i) + (j)*lda])
     #define  L(i,j) ( L[(i) + (j)*n])
     #define  T(i,j) ( T[(i) + (j)*n])
-    TESTING_MALLOC_CPU( L, magmaDoubleComplex, n*n );
-    TESTING_MALLOC_CPU( T, magmaDoubleComplex, n*n );
+    TESTING_CHECK( magma_zmalloc_cpu( &L, n*n ));
+    TESTING_CHECK( magma_zmalloc_cpu( &T, n*n ));
     memset( L, 0, n*n*sizeof(magmaDoubleComplex) );
     memset( T, 0, n*n*sizeof(magmaDoubleComplex) );
 
@@ -178,8 +178,8 @@ double get_residual_aasen(
     magmaDoubleComplex *x, *b;
     
     // initialize RHS
-    TESTING_MALLOC_CPU( x, magmaDoubleComplex, n );
-    TESTING_MALLOC_CPU( b, magmaDoubleComplex, n );
+    TESTING_CHECK( magma_zmalloc_cpu( &x, n ));
+    TESTING_CHECK( magma_zmalloc_cpu( &b, n ));
     lapackf77_zlarnv( &ione, ISEED, &n, b );
     blasf77_zcopy( &n, b, &ione, x, &ione );
     // pivot..
@@ -194,11 +194,11 @@ double get_residual_aasen(
     // banded solver
     magma_int_t nrhs = 1, *p = NULL;
     
-    TESTING_MALLOC_CPU( p, magma_int_t, n );
+    TESTING_CHECK( magma_imalloc_cpu( &p, n ));
     
     lapackf77_zgesv( &n, &nrhs, &T(0, 0), &n, p, x, &n, &info );
     
-    TESTING_FREE_CPU( p );
+    magma_free_cpu( p );
     
     // backward solve
     blasf77_ztrsv( MagmaLowerStr, MagmaConjTransStr, MagmaUnitStr, &n, &L(0,0), &n, x, &ione );
@@ -223,11 +223,11 @@ double get_residual_aasen(
     norm_x = lapackf77_zlange( MagmaFullStr, &n, &ione, x, &n, work );
     
     //printf( "r=\n" ); magma_zprint( 1, n, b, 1 );
-    TESTING_FREE_CPU( L );
-    TESTING_FREE_CPU( T );
+    magma_free_cpu( L );
+    magma_free_cpu( T );
     
-    TESTING_FREE_CPU( x );
-    TESTING_FREE_CPU( b );
+    magma_free_cpu( x );
+    magma_free_cpu( b );
     
     #undef T
     #undef L
@@ -258,9 +258,9 @@ double get_LDLt_error(
     #define  L(i,j) ( L[(i) + (j)*N])
     #define  D(i,j) ( D[(i) + (j)*N])
 
-    TESTING_MALLOC_CPU( A, magmaDoubleComplex, N*N );
-    TESTING_MALLOC_CPU( L, magmaDoubleComplex, N*N );
-    TESTING_MALLOC_CPU( D, magmaDoubleComplex, N*N );
+    TESTING_CHECK( magma_zmalloc_cpu( &A, N*N ));
+    TESTING_CHECK( magma_zmalloc_cpu( &L, N*N ));
+    TESTING_CHECK( magma_zmalloc_cpu( &D, N*N ));
     memset( L, 0, N*N*sizeof(magmaDoubleComplex) );
     memset( D, 0, N*N*sizeof(magmaDoubleComplex) );
 
@@ -440,9 +440,9 @@ double get_LDLt_error(
     }
     residual = lapackf77_zlange(MagmaFullStr, &N, &N, D, &N, work);
 
-    TESTING_FREE_CPU( A );
-    TESTING_FREE_CPU( L );
-    TESTING_FREE_CPU( D );
+    magma_free_cpu( A );
+    magma_free_cpu( L );
+    magma_free_cpu( D );
 
     return residual / (matnorm * N);
 }
@@ -461,9 +461,9 @@ double get_LTLt_error(
     #define LT(i,j) (LT[(i) + (j)*lda])
     #define  T(i,j) ( T[(i) + (j)*N])
     
-    TESTING_MALLOC_CPU( A, magmaDoubleComplex, N*N );
-    TESTING_MALLOC_CPU( L, magmaDoubleComplex, N*N );
-    TESTING_MALLOC_CPU( T, magmaDoubleComplex, N*N );
+    TESTING_CHECK( magma_zmalloc_cpu( &A, N*N ));
+    TESTING_CHECK( magma_zmalloc_cpu( &L, N*N ));
+    TESTING_CHECK( magma_zmalloc_cpu( &T, N*N ));
     memset( L, 0, N*N*sizeof(magmaDoubleComplex) );
     memset( T, 0, N*N*sizeof(magmaDoubleComplex) );
 
@@ -473,7 +473,7 @@ double get_LTLt_error(
     // for debuging
     /*
     magma_int_t *p;
-    TESTING_MALLOC_CPU( p, magma_int_t, n );
+    TESTING_CHECK( magma_imalloc_cpu( &p, n ));
     for (i=0; i < N; i++) {
         p[i] = i;
     }
@@ -488,7 +488,7 @@ double get_LTLt_error(
         printf("%d ", p[i] );
     }
     printf( "];\n" );
-    TESTING_FREE_CPU( p );
+    magma_free_cpu( p );
     */
     
     // extract T
@@ -558,9 +558,9 @@ double get_LTLt_error(
     }
     residual = lapackf77_zlange(MagmaFullStr, &N, &N, T, &N, work);
 
-    TESTING_FREE_CPU( A );
-    TESTING_FREE_CPU( L );
-    TESTING_FREE_CPU( T );
+    magma_free_cpu( A );
+    magma_free_cpu( L );
+    magma_free_cpu( T );
 
     return residual / (matnorm * N);
 }
@@ -570,7 +570,8 @@ double get_LTLt_error(
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     magmaDoubleComplex *h_A, *work, temp;
     real_Double_t   gflops, gpu_perf, gpu_time = 0.0, cpu_perf=0, cpu_time=0;
@@ -639,8 +640,8 @@ int main( int argc, char** argv)
             n2     = lda*N;
             gflops = FLOPS_ZPOTRF( N ) / 1e9;
             
-            TESTING_MALLOC_PIN( ipiv, magma_int_t, N );
-            TESTING_MALLOC_PIN( h_A,  magmaDoubleComplex, n2 );
+            TESTING_CHECK( magma_imalloc_pinned( &ipiv, N ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_A,  n2 ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -649,7 +650,7 @@ int main( int argc, char** argv)
                 lwork = -1;
                 lapackf77_zhetrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, ipiv, &temp, &lwork, &info );
                 lwork = (magma_int_t)MAGMA_Z_REAL( temp );
-                TESTING_MALLOC_CPU( work, magmaDoubleComplex, lwork );
+                TESTING_CHECK( magma_zmalloc_cpu( &work, lwork ));
 
                 init_matrix( nopiv, N, h_A, lda );
                 cpu_time = magma_wtime();
@@ -662,7 +663,7 @@ int main( int argc, char** argv)
                 }
                 error_lapack = get_residual( nopiv, opts.uplo, N, h_A, lda, ipiv );
 
-                TESTING_FREE_CPU( work );
+                magma_free_cpu( work );
             }
            
             /* ====================================================================
@@ -686,13 +687,13 @@ int main( int argc, char** argv)
                 // GPU-interface to non-piv LDLt
                 magma_int_t ldda = magma_roundup( N, opts.align );
                 magmaDoubleComplex_ptr d_A;
-                TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, N*ldda );
+                TESTING_CHECK( magma_zmalloc( &d_A, N*ldda ));
                 magma_zsetmatrix(N, N, h_A, lda, d_A, ldda, opts.queue );
                 gpu_time = magma_wtime();
                 magma_zhetrf_nopiv_gpu( opts.uplo, N, d_A, ldda, &info);
                 gpu_time = magma_wtime() - gpu_time;
                 magma_zgetmatrix(N, N, d_A, ldda, h_A, lda, opts.queue );
-                TESTING_FREE_DEV( d_A );
+                magma_free( d_A );
             } else if (aasen) {
                 // CPU-interface to Aasen's LTLt
                 gpu_time = magma_wtime();
@@ -745,8 +746,8 @@ int main( int argc, char** argv)
                 printf("     ---   \n");
             }
  
-            TESTING_FREE_PIN( ipiv );
-            TESTING_FREE_PIN( h_A  );
+            magma_free_pinned( ipiv );
+            magma_free_pinned( h_A  );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -755,6 +756,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

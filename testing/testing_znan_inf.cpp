@@ -26,7 +26,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     #define hA(i,j) (hA + (i) + (j)*lda)
     
@@ -141,8 +142,8 @@ int main( int argc, char** argv)
             size  = lda*N;
 
             /* Allocate memory for the matrix */
-            TESTING_MALLOC_CPU( hA, magmaDoubleComplex, lda *N );
-            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, ldda*N );
+            TESTING_CHECK( magma_zmalloc_cpu( &hA, lda *N ));
+            TESTING_CHECK( magma_zmalloc( &dA, ldda*N ));
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &size, hA );
@@ -157,8 +158,8 @@ int main( int argc, char** argv)
             assert( total <= M*N );
             
             // fill in indices
-            TESTING_MALLOC_CPU( ii, magma_int_t, size );
-            TESTING_MALLOC_CPU( jj, magma_int_t, size );
+            TESTING_CHECK( magma_imalloc_cpu( &ii, size ));
+            TESTING_CHECK( magma_imalloc_cpu( &jj, size ));
             for( cnt=0; cnt < size; ++cnt ) {
                 ii[cnt] = cnt % M;
                 jj[cnt] = cnt / M;
@@ -232,17 +233,17 @@ int main( int argc, char** argv)
                     (okay ? "ok" : "failed"));
             status += ! okay;
             
-            TESTING_FREE_CPU( hA );
-            TESTING_FREE_DEV( dA );
+            magma_free_cpu( hA );
+            magma_free( dA );
             
-            TESTING_FREE_CPU( ii );
-            TESTING_FREE_CPU( jj );
+            magma_free_cpu( ii );
+            magma_free_cpu( jj );
         }
       }
       printf( "\n" );
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

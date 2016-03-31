@@ -30,7 +30,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
     
     // Constants
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -61,13 +62,13 @@ int main( int argc, char** argv)
             ldda   = magma_roundup( lda, opts.align );
             n2     = N*lda;
             
-            TESTING_MALLOC_CPU( h_A,     magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_CPU( h_B,     magmaDoubleComplex, lda*N );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,     lda*N ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_B,     lda*N ));
             
-            TESTING_MALLOC_PIN( h_R,     magmaDoubleComplex, lda*N );
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R,     lda*N ));
             
-            TESTING_MALLOC_DEV( d_A,     magmaDoubleComplex, ldda*N );
-            TESTING_MALLOC_DEV( d_B,     magmaDoubleComplex, ldda*N );
+            TESTING_CHECK( magma_zmalloc( &d_A,     ldda*N ));
+            TESTING_CHECK( magma_zmalloc( &d_B,     ldda*N ));
             
             /* ====================================================================
                Initialize the matrix
@@ -127,13 +128,13 @@ int main( int argc, char** argv)
                        (int) opts.itype, (int) N, gpu_time );
             }
             
-            TESTING_FREE_CPU( h_A );
-            TESTING_FREE_CPU( h_B );
+            magma_free_cpu( h_A );
+            magma_free_cpu( h_B );
             
-            TESTING_FREE_PIN( h_R );
+            magma_free_pinned( h_R );
             
-            TESTING_FREE_DEV( d_A );
-            TESTING_FREE_DEV( d_B );
+            magma_free( d_A );
+            magma_free( d_B );
             
             fflush( stdout );
         }
@@ -143,6 +144,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

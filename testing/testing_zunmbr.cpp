@@ -27,7 +27,8 @@
 */
 int main( int argc, char** argv )
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
     
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double Cnorm, error, dwork[1];
@@ -111,14 +112,14 @@ int main( int argc, char** argv )
             // this rounds it up slightly if needed to agree with lwork query below
             lwork_max = int( real( magma_zmake_lwork( lwork_max )));
             
-            TESTING_MALLOC_CPU( C,    magmaDoubleComplex, ldc*n );
-            TESTING_MALLOC_CPU( R,    magmaDoubleComplex, ldc*n );
-            TESTING_MALLOC_CPU( A,    magmaDoubleComplex, lda*nn );
-            TESTING_MALLOC_CPU( work, magmaDoubleComplex, lwork_max );
-            TESTING_MALLOC_CPU( d,    double,             min(mm,nn) );
-            TESTING_MALLOC_CPU( e,    double,             min(mm,nn) );
-            TESTING_MALLOC_CPU( tauq, magmaDoubleComplex, min(mm,nn) );
-            TESTING_MALLOC_CPU( taup, magmaDoubleComplex, min(mm,nn) );
+            TESTING_CHECK( magma_zmalloc_cpu( &C,    ldc*n ));
+            TESTING_CHECK( magma_zmalloc_cpu( &R,    ldc*n ));
+            TESTING_CHECK( magma_zmalloc_cpu( &A,    lda*nn ));
+            TESTING_CHECK( magma_zmalloc_cpu( &work, lwork_max ));
+            TESTING_CHECK( magma_dmalloc_cpu( &d,    min(mm,nn) ));
+            TESTING_CHECK( magma_dmalloc_cpu( &e,    min(mm,nn) ));
+            TESTING_CHECK( magma_zmalloc_cpu( &tauq, min(mm,nn) ));
+            TESTING_CHECK( magma_zmalloc_cpu( &taup, min(mm,nn) ));
             
             // C is full, m x n
             size = ldc*n;
@@ -204,14 +205,14 @@ int main( int argc, char** argv )
                     error, (error < tol ? "ok" : "failed") );
             status += ! (error < tol);
             
-            TESTING_FREE_CPU( C );
-            TESTING_FREE_CPU( R );
-            TESTING_FREE_CPU( A );
-            TESTING_FREE_CPU( work );
-            TESTING_FREE_CPU( d );
-            TESTING_FREE_CPU( e );
-            TESTING_FREE_CPU( taup );
-            TESTING_FREE_CPU( tauq );
+            magma_free_cpu( C );
+            magma_free_cpu( R );
+            magma_free_cpu( A );
+            magma_free_cpu( work );
+            magma_free_cpu( d );
+            magma_free_cpu( e );
+            magma_free_cpu( taup );
+            magma_free_cpu( tauq );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -222,6 +223,6 @@ int main( int argc, char** argv )
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

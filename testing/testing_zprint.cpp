@@ -25,7 +25,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     magmaDoubleComplex *hA;
     magmaDoubleComplex_ptr dA;
@@ -46,8 +47,8 @@ int main( int argc, char** argv)
             //size  = lda*N;
 
             /* Allocate host memory for the matrix */
-            TESTING_MALLOC_CPU( hA, magmaDoubleComplex, lda *N );
-            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, ldda*N );
+            TESTING_CHECK( magma_zmalloc_cpu( &hA, lda *N ));
+            TESTING_CHECK( magma_zmalloc( &dA, ldda*N ));
         
             //lapackf77_zlarnv( &ione, ISEED, &size, hA );
             for( int j = 0; j < N; ++j ) {
@@ -63,12 +64,12 @@ int main( int argc, char** argv)
             printf( "dA=" );
             magma_zprint_gpu( M, N, dA, ldda );
             
-            TESTING_FREE_CPU( hA );
-            TESTING_FREE_DEV( dA );
+            magma_free_cpu( hA );
+            magma_free( dA );
         }
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

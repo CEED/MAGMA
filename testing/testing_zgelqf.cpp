@@ -28,7 +28,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     const double             d_neg_one = MAGMA_D_NEG_ONE;
     const double             d_one     = MAGMA_D_ONE;
@@ -67,11 +68,11 @@ int main( int argc, char** argv)
             lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
             lwork = max( lwork, M*nb );
 
-            TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn );
-            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2     );
+            TESTING_CHECK( magma_zmalloc_cpu( &tau,    min_mn ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,    n2     ));
             
-            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
-            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R,    n2     ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_work, lwork  ));
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -98,9 +99,9 @@ int main( int argc, char** argv)
                 magma_int_t ldl = M;
                 magmaDoubleComplex *Q, *L;
                 double *work;
-                TESTING_MALLOC_CPU( Q,    magmaDoubleComplex, ldq*N );       // K by N
-                TESTING_MALLOC_CPU( L,    magmaDoubleComplex, ldl*min_mn );  // M by K
-                TESTING_MALLOC_CPU( work, double,             min_mn );
+                TESTING_CHECK( magma_zmalloc_cpu( &Q,    ldq*N ));       // K by N
+                TESTING_CHECK( magma_zmalloc_cpu( &L,    ldl*min_mn ));  // M by K
+                TESTING_CHECK( magma_dmalloc_cpu( &work, min_mn ));
                 
                 // generate K by N matrix Q, where K = min(M,N)
                 lapackf77_zlacpy( "Upper", &min_mn, &N, h_R, &lda, Q, &ldq );
@@ -127,9 +128,9 @@ int main( int argc, char** argv)
                 if ( N > 0 )
                     error2 /= N;
                 
-                TESTING_FREE_CPU( Q    );  Q    = NULL;
-                TESTING_FREE_CPU( L    );  L    = NULL;
-                TESTING_FREE_CPU( work );  work = NULL;
+                magma_free_cpu( Q    );  Q    = NULL;
+                magma_free_cpu( L    );  L    = NULL;
+                magma_free_cpu( work );  work = NULL;
             }
             
             /* =====================================================================
@@ -166,11 +167,11 @@ int main( int argc, char** argv)
                 printf( "    ---\n" );
             }
             
-            TESTING_FREE_CPU( tau );
-            TESTING_FREE_CPU( h_A );
+            magma_free_cpu( tau );
+            magma_free_cpu( h_A );
             
-            TESTING_FREE_PIN( h_R    );
-            TESTING_FREE_PIN( h_work );
+            magma_free_pinned( h_R    );
+            magma_free_pinned( h_work );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -179,6 +180,6 @@ int main( int argc, char** argv)
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

@@ -34,7 +34,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gbytes, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magmaDoubleComplex *h_A;
@@ -109,11 +110,11 @@ int main( int argc, char** argv)
             // read upper or lower triangle
             gbytes = 0.5*(N+1)*N*sizeof(magmaDoubleComplex) / 1e9;
             
-            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2 );
-            TESTING_MALLOC_CPU( h_work, double, N );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,    n2 ));
+            TESTING_CHECK( magma_dmalloc_cpu( &h_work, N ));
             
-            TESTING_MALLOC_DEV( d_A,    magmaDoubleComplex, ldda*N );
-            TESTING_MALLOC_DEV( d_work, double, N );
+            TESTING_CHECK( magma_zmalloc( &d_A,    ldda*N ));
+            TESTING_CHECK( magma_dmalloc( &d_work, N ));
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &idist, ISEED, &n2, h_A );
@@ -237,11 +238,11 @@ int main( int argc, char** argv)
                    (inf_okay ? "ok" : "failed"), (la_inf_okay ? " " : "*"));
             
         cleanup:
-            TESTING_FREE_CPU( h_A    );
-            TESTING_FREE_CPU( h_work );
+            magma_free_cpu( h_A    );
+            magma_free_cpu( h_work );
             
-            TESTING_FREE_DEV( d_A    );
-            TESTING_FREE_DEV( d_work );
+            magma_free( d_A    );
+            magma_free( d_work );
             fflush( stdout );
         } // end iter
         if ( opts.niter > 1 ) {
@@ -265,6 +266,6 @@ int main( int argc, char** argv)
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

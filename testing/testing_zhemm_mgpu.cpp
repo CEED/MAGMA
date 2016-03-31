@@ -33,7 +33,8 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex alpha     = MAGMA_Z_MAKE( 3.456, 5.678 );
@@ -112,24 +113,24 @@ int main( int argc, char** argv)
             
             magma_int_t dworksiz = lddc*N + (M*N)*opts.ngpu;
             
-            TESTING_MALLOC_CPU( hA, magmaDoubleComplex, lda*M );
-            TESTING_MALLOC_CPU( hB, magmaDoubleComplex, ldb*N );
-            TESTING_MALLOC_CPU( hC, magmaDoubleComplex, ldc*N );
+            TESTING_CHECK( magma_zmalloc_cpu( &hA, lda*M ));
+            TESTING_CHECK( magma_zmalloc_cpu( &hB, ldb*N ));
+            TESTING_CHECK( magma_zmalloc_cpu( &hC, ldc*N ));
             
-            TESTING_MALLOC_PIN( hR, magmaDoubleComplex, ldc*N );
+            TESTING_CHECK( magma_zmalloc_pinned( &hR, ldc*N ));
 
             for( dev = 0; dev < opts.ngpu; ++dev ) {
                 magma_int_t mlocal = ((M / nb) / opts.ngpu + 1) * nb;
                 magma_setdevice( dev );
-                TESTING_MALLOC_DEV( dA[dev],    magmaDoubleComplex, ldda*mlocal );
-                TESTING_MALLOC_DEV( dB[dev],    magmaDoubleComplex, lddb*N      );
-                TESTING_MALLOC_DEV( dC[dev],    magmaDoubleComplex, lddc*N      );
-                TESTING_MALLOC_DEV( dwork[dev], magmaDoubleComplex, dworksiz    );
+                TESTING_CHECK( magma_zmalloc( &dA[dev],    ldda*mlocal ));
+                TESTING_CHECK( magma_zmalloc( &dB[dev],    lddb*N      ));
+                TESTING_CHECK( magma_zmalloc( &dC[dev],    lddc*N      ));
+                TESTING_CHECK( magma_zmalloc( &dwork[dev], dworksiz    ));
             }
             
             if ( opts.check ) {
                 magma_setdevice( 0 );
-                TESTING_MALLOC_DEV( dA2, magmaDoubleComplex, ldda*M );
+                TESTING_CHECK( magma_zmalloc( &dA2, ldda*M ));
             }
 
             size = lda*M;
@@ -245,23 +246,23 @@ int main( int argc, char** argv)
                         gpu_perf, gpu_time );
             }
             
-            TESTING_FREE_CPU( hA );
-            TESTING_FREE_CPU( hB );
-            TESTING_FREE_CPU( hC );
+            magma_free_cpu( hA );
+            magma_free_cpu( hB );
+            magma_free_cpu( hC );
             
-            TESTING_FREE_PIN( hR );
+            magma_free_pinned( hR );
             
             for( dev = 0; dev < opts.ngpu; ++dev ) {
                 magma_setdevice( dev );
-                TESTING_FREE_DEV( dA[dev]    );
-                TESTING_FREE_DEV( dB[dev]    );
-                TESTING_FREE_DEV( dC[dev]    );
-                TESTING_FREE_DEV( dwork[dev] );
+                magma_free( dA[dev]    );
+                magma_free( dB[dev]    );
+                magma_free( dC[dev]    );
+                magma_free( dwork[dev] );
             }
             
             if ( opts.check ) {
                 magma_setdevice( 0 );
-                TESTING_FREE_DEV( dA2 );
+                magma_free( dA2 );
             }
             fflush( stdout );
         }
@@ -283,6 +284,6 @@ int main( int argc, char** argv)
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

@@ -49,7 +49,8 @@ void zgeadd(
 */
 int main( int argc, char** argv )
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     real_Double_t   gflops, magma_perf, magma_time=0;  //, cpu_perf=0, cpu_time=0;
     double          magma_error, norm_invA, work[1];
@@ -86,13 +87,13 @@ int main( int argc, char** argv )
             nblock = magma_ceildiv( N, nb );
             gflops = nblock * FLOPS_ZTRTRI( nb ) / 1e9;
             
-            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_CPU( ipiv,   magma_int_t,        N     );
+            TESTING_CHECK( magma_zmalloc_cpu( &h_A,    lda*N ));
+            TESTING_CHECK( magma_imalloc_cpu( &ipiv,   N     ));
             
             size_inv = nblock*nb*nb;
-            TESTING_MALLOC_DEV( d_A,    magmaDoubleComplex, ldda*N );
-            TESTING_MALLOC_DEV( d_dinvA, magmaDoubleComplex, size_inv );
-            TESTING_MALLOC_CPU( h_dinvA, magmaDoubleComplex, size_inv );
+            TESTING_CHECK( magma_zmalloc( &d_A,    ldda*N ));
+            TESTING_CHECK( magma_zmalloc( &d_dinvA, size_inv ));
+            TESTING_CHECK( magma_zmalloc_cpu( &h_dinvA, size_inv ));
             
             /* Initialize the matrices */
             /* Factor A into LU to get well-conditioned triangular matrix.
@@ -169,12 +170,12 @@ int main( int argc, char** argv )
                         magma_perf,  1000.*magma_time );
             }
             
-            TESTING_FREE_CPU( h_A     );
-            TESTING_FREE_CPU( ipiv    );
+            magma_free_cpu( h_A     );
+            magma_free_cpu( ipiv    );
             
-            TESTING_FREE_DEV( d_A     );
-            TESTING_FREE_DEV( d_dinvA );
-            TESTING_FREE_CPU( h_dinvA );
+            magma_free( d_A     );
+            magma_free( d_dinvA );
+            magma_free_cpu( h_dinvA );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -183,6 +184,6 @@ int main( int argc, char** argv )
     }
 
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }

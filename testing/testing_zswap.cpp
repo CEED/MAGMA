@@ -55,7 +55,8 @@ static void init_matrix(
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
     
     // OpenCL use:  cl_mem  , offset  (two arguments);
     // else   use:  pointer + offset  (one argument).
@@ -115,17 +116,17 @@ int main( int argc, char** argv)
             // each swap does 2N loads and 2N stores, for nb swaps
             gbytes = sizeof(magmaDoubleComplex) * 4.*N*nb / 1e9;
             
-            TESTING_MALLOC_PIN( h_A1, magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_PIN( h_A2, magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_PIN( h_R1, magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_PIN( h_R2, magmaDoubleComplex, lda*N );
+            TESTING_CHECK( magma_zmalloc_pinned( &h_A1, lda*N ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_A2, lda*N ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R1, lda*N ));
+            TESTING_CHECK( magma_zmalloc_pinned( &h_R2, lda*N ));
             
-            TESTING_MALLOC_CPU( ipiv,  magma_int_t, nb );
-            TESTING_MALLOC_CPU( ipiv2, magma_int_t, nb );
+            TESTING_CHECK( magma_imalloc_cpu( &ipiv,  nb ));
+            TESTING_CHECK( magma_imalloc_cpu( &ipiv2, nb ));
             
-            TESTING_MALLOC_DEV( d_ipiv, magma_int_t, nb );
-            TESTING_MALLOC_DEV( d_A1, magmaDoubleComplex, ldda*N );
-            TESTING_MALLOC_DEV( d_A2, magmaDoubleComplex, ldda*N );
+            TESTING_CHECK( magma_imalloc( &d_ipiv, nb ));
+            TESTING_CHECK( magma_zmalloc( &d_A1, ldda*N ));
+            TESTING_CHECK( magma_zmalloc( &d_A2, ldda*N ));
             
             // getrf always makes ipiv[j] >= j+1, where ipiv is one based and j is zero based
             // some implementations (e.g., MacOS dlaswp) assume this
@@ -425,17 +426,17 @@ int main( int argc, char** argv)
                    (check == 0 ? "ok" : "* failed") );
             status += ! (check == 0);
             
-            TESTING_FREE_PIN( h_A1 );
-            TESTING_FREE_PIN( h_A2 );
-            TESTING_FREE_PIN( h_R1 );
-            TESTING_FREE_PIN( h_R2 );
+            magma_free_pinned( h_A1 );
+            magma_free_pinned( h_A2 );
+            magma_free_pinned( h_R1 );
+            magma_free_pinned( h_R2 );
             
-            TESTING_FREE_CPU( ipiv  );
-            TESTING_FREE_CPU( ipiv2 );
+            magma_free_cpu( ipiv  );
+            magma_free_cpu( ipiv2 );
             
-            TESTING_FREE_DEV( d_ipiv );
-            TESTING_FREE_DEV( d_A1 );
-            TESTING_FREE_DEV( d_A2 );
+            magma_free( d_ipiv );
+            magma_free( d_A1 );
+            magma_free( d_A2 );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
@@ -444,6 +445,6 @@ int main( int argc, char** argv)
     }
     
     opts.cleanup();
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return status;
 }
