@@ -123,8 +123,8 @@ int main( int argc, char** argv)
             TESTING_CHECK( magma_zmalloc( &dA,  ldda*N * batchCount ));
             TESTING_CHECK( magma_imalloc( &dipiv_magma,  min_mn * batchCount ));
             TESTING_CHECK( magma_imalloc( &dinfo_magma,  batchCount ));
-            TESTING_CHECK( magma_imalloc( &dipiv_cublas, min_mn * batchCount ));
-            TESTING_CHECK( magma_imalloc( &dinfo_cublas, batchCount ));
+            TESTING_CHECK( magma_malloc( (void**) &dipiv_cublas, min_mn * batchCount * sizeof(int) ));  // not magma_int_t
+            TESTING_CHECK( magma_malloc( (void**) &dinfo_cublas, batchCount          * sizeof(int) ));
 
             TESTING_CHECK( magma_malloc( (void**) &dA_array,    batchCount * sizeof(magmaDoubleComplex*) ));
             TESTING_CHECK( magma_malloc( (void**) &dipiv_array, batchCount * sizeof(magma_int_t*) ));
