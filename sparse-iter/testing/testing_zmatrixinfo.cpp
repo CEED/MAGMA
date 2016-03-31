@@ -16,12 +16,9 @@
 #include <math.h>
 
 // includes, project
-#include "flops.h"
 #include "magma_v2.h"
-#include "magma_lapack.h"
+#include "magmasparse.h"
 #include "testings.h"
-#include "magmasparse_internal.h"
-
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -30,7 +27,8 @@
 int main(  int argc, char** argv )
 {
     magma_int_t info = 0;
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     magma_zopts zopts;
     magma_queue_t queue=NULL;
@@ -39,7 +37,7 @@ int main(  int argc, char** argv )
     magma_z_matrix Z={Magma_CSR};
     
     int i=1;
-    CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
+    TESTING_CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
     printf("matrixinfo = [ \n");
     printf("%%   size (n)   ||   nonzeros (nnz)   ||   nnz/n \n");
     printf("%%=============================================================%%\n");
@@ -47,9 +45,9 @@ int main(  int argc, char** argv )
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;
             magma_int_t laplace_size = atoi( argv[i] );
-            CHECK( magma_zm_5stencil(  laplace_size, &Z, queue ));
+            TESTING_CHECK( magma_zm_5stencil(  laplace_size, &Z, queue ));
         } else {                        // file-matrix test
-            CHECK( magma_z_csr_mtx( &Z,  argv[i], queue ));
+            TESTING_CHECK( magma_z_csr_mtx( &Z,  argv[i], queue ));
         }
 
         printf("   %10d          %10d          %10d\n",
@@ -61,10 +59,8 @@ int main(  int argc, char** argv )
     }
     printf("%%=============================================================%%\n");
     printf("];\n");
-        
-cleanup:
-    magma_zmfree(&Z, queue );
+    
     magma_queue_destroy( queue );
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return info;
 }

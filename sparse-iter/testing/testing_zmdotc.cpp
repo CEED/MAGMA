@@ -16,11 +16,10 @@
 #include <math.h>
 
 // includes, project
-#include "flops.h"
 #include "magma_v2.h"
-#include "magma_lapack.h"
+#include "magmasparse.h"
+#include "magma_operators.h"
 #include "testings.h"
-#include "magmasparse_internal.h"
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -36,7 +35,8 @@ int main(  int argc, char** argv )
     const magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magmaDoubleComplex alpha;
 
-    TESTING_INIT();
+    TESTING_CHECK( magma_init() );
+    magma_print_environment();
 
     magma_z_matrix a={Magma_CSR}, b={Magma_CSR}, x={Magma_CSR}, y={Magma_CSR}, skp={Magma_CSR};
 
@@ -58,22 +58,22 @@ int main(  int argc, char** argv )
             real_Double_t mdot_time, cudot_time;
             #endif
 
-            CHECK( magma_zvinit( &a, Magma_DEV, n, num_vecs, one, queue ));
-            CHECK( magma_zvinit( &b, Magma_DEV, num_vecs, 1, one, queue ));
+            TESTING_CHECK( magma_zvinit( &a, Magma_DEV, n, num_vecs, one, queue ));
+            TESTING_CHECK( magma_zvinit( &b, Magma_DEV, num_vecs, 1, one, queue ));
             int min_ten = min(num_vecs, 15);
-            CHECK( magma_zvinit( &x, Magma_DEV, min_ten, n, one, queue ));
-            CHECK( magma_zvinit( &y, Magma_DEV, min_ten, n, one, queue ));
-            CHECK( magma_zvinit( &skp, Magma_DEV, num_vecs, 1, zero, queue ));
+            TESTING_CHECK( magma_zvinit( &x, Magma_DEV, min_ten, n, one, queue ));
+            TESTING_CHECK( magma_zvinit( &y, Magma_DEV, min_ten, n, one, queue ));
+            TESTING_CHECK( magma_zvinit( &skp, Magma_DEV, num_vecs, 1, zero, queue ));
 
             // warm up
-            CHECK( magma_zgemvmdot( n, num_vecs, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
+            TESTING_CHECK( magma_zgemvmdot( n, num_vecs, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
 
             // CUDOT
             #ifdef ENABLE_TIMER
             cudot1 = magma_sync_wtime( queue );
             #endif
-            for( int h=0; h<iters; h++) {
-                for( int l=0; l<num_vecs/2; l++) {
+            for( int h=0; h < iters; h++) {
+                for( int l=0; l < num_vecs/2; l++) {
                     alpha = magma_zdotc( n, a.dval, 1, b.dval, 1, queue );
                 }
             }
@@ -86,7 +86,7 @@ int main(  int argc, char** argv )
             #ifdef ENABLE_TIMER
             mdot1 = magma_sync_wtime( queue );
             #endif
-            for( int h=0; h<iters; h++) {
+            for( int h=0; h < iters; h++) {
                 if( num_vecs == 2 ){
                     magma_zmdotc1( n, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
                 }
@@ -136,13 +136,7 @@ int main(  int argc, char** argv )
         info = -1;
     }
 
-cleanup:
-    magma_zmfree(&a, queue );
-    magma_zmfree(&b, queue );
-    magma_zmfree(&x, queue );
-    magma_zmfree(&y, queue );
-    magma_zmfree(&skp, queue );
     magma_queue_destroy( queue );
-    TESTING_FINALIZE();
+    TESTING_CHECK( magma_finalize() );
     return info;
 }
