@@ -17,10 +17,10 @@
 
 // includes, project
 #include "flops.h"
-#include "magma.h"
+#include "magma_v2.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 
@@ -34,7 +34,7 @@ int main(  int argc, char** argv )
 
     magma_zopts zopts;
     magma_queue_t queue=NULL;
-    magma_queue_create( &queue );
+    magma_queue_create( 0, &queue );
 
     real_Double_t res;
     magma_z_matrix A={Magma_CSR}, AT={Magma_CSR}, A2={Magma_CSR}, 
