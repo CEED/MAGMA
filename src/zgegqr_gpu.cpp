@@ -210,16 +210,16 @@ magma_zgegqr_gpu(
         magma_int_t nb = n;
 
         magmaDoubleComplex_ptr dtau = dwork + 2*n*n;
-        magmaDoubleComplex_ptr d_T  = dwork;
+        magmaDoubleComplex_ptr dT   = dwork;
         magmaDoubleComplex_ptr ddA  = dwork + n*n;
         magmaDoubleComplex *tau  = work+n*n;
 
-        magmablas_zlaset( MagmaFull, n, n, c_zero, c_zero, d_T, n, queue );
-        magma_zgeqr2x3_gpu( m, n, dA, ldda, dtau, d_T, ddA,
-                            (double*)(dwork+min_mn+2*n*n), info );
+        magmablas_zlaset( MagmaFull, n, n, c_zero, c_zero, dT, n, queue );
+        magma_zgeqr2x3_gpu( m, n, dA, ldda, dtau, dT, ddA,
+                            (double*)(dwork + min_mn + 2*n*n), info );
         magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn, queue );
         magma_zgetmatrix( n, n, ddA, n, work, n, queue );
-        magma_zungqr_gpu( m, n, n, dA, ldda, tau, d_T, nb, info );
+        magma_zungqr_gpu( m, n, n, dA, ldda, tau, dT, nb, info );
         // ================== end of ikind == 2 ===================================================
     }
     else if (ikind == 3) {
