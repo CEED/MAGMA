@@ -79,9 +79,9 @@
     @param[in]
     lwork   INTEGER
             The length of the array WORK.
-            If N <= 1,                      LWORK >= 1.
-            If JOBZ = MagmaNoVec and N > 1, LWORK >= 2*N + N*NB.
-            If JOBZ = MagmaVec   and N > 1, LWORK >= max( 2*N + N*NB, 1 + 6*N + 2*N**2 ).
+     -      If N <= 1,                      LWORK >= 1.
+     -      If JOBZ = MagmaNoVec and N > 1, LWORK >= 2*N + N*NB.
+     -      If JOBZ = MagmaVec   and N > 1, LWORK >= max( 2*N + N*NB, 1 + 6*N + 2*N**2 ).
             NB can be obtained through magma_get_dsytrd_nb(N).
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
@@ -97,9 +97,9 @@
     @param[in]
     liwork  INTEGER
             The dimension of the array IWORK.
-            If N <= 1,                      LIWORK >= 1.
-            If JOBZ = MagmaNoVec and N > 1, LIWORK >= 1.
-            If JOBZ = MagmaVec   and N > 1, LIWORK >= 3 + 5*N.
+     -      If N <= 1,                      LIWORK >= 1.
+     -      If JOBZ = MagmaNoVec and N > 1, LIWORK >= 1.
+     -      If JOBZ = MagmaVec   and N > 1, LIWORK >= 3 + 5*N.
     \n
             If LIWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
