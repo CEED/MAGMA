@@ -715,6 +715,37 @@ subs = {
   ], # end normal
 
   # ------------------------------------------------------------
+  # replacements applied to Fortran files.
+  'fortran' : [
+    # ----- header                                                             
+    ('s',              'd',              'c',              'z'               ),
+
+    # ----- Text
+    ('symmetric',      'symmetric',      'hermitian',      'hermitian'       ),
+    ('symmetric',      'symmetric',      'Hermitian',      'Hermitian'       ),
+    ('orthogonal',     'orthogonal',     'unitary',        'unitary'         ),
+    
+    # ----- data types    
+    ('REAL',           'DOUBLE PRECISION', 'REAL',         'DOUBLE PRECISION'),
+    ('REAL',           'DOUBLE PRECISION', 'COMPLEX',      'COMPLEX\*16'     ),
+    ('real',           'double',           'complex',      'complex16'       ),
+    
+    # ----- constants                        
+    ('\.0E',           '\.0D',             '\.0E',         '\.0D'            ),
+    
+    # ----- BLAS & LAPACK
+    ]
+    + lower( blas )    # e.g., dgemm
+    + upper( blas )    # e.g., DGEMM
+    + lower( lapack )  # e.g., dgetrf
+    + upper( lapack )  # e.g., DGETRF
+    + [
+    
+    ('SLASCL',         'DLASCL',           'SLASCL',       'DLASCL'          ),
+    
+  ], # end fortran
+  
+  # ------------------------------------------------------------
   # replacements applied for profiling with tau
   'tracing' :[
     # ----- Special line indicating column types
