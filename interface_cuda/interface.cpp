@@ -66,7 +66,7 @@ enum {
 // ------------------------------------------------------------
 // globals
 #if __cplusplus >= 201103  // C++11 standard
-    std::mutex g_mutex;
+    static std::mutex g_mutex;
 #else
     // without C++11, wrap pthread mutex
     class PthreadMutex {
@@ -76,6 +76,14 @@ enum {
             int err = pthread_mutex_init( &mutex, NULL );
             if ( err ) {
                 fprintf( stderr, "pthread_mutex_init failed: %d\n", err );
+            }
+        }
+        
+        ~PthreadMutex()
+        {
+            int err = pthread_mutex_destroy( &mutex );
+            if ( err ) {
+                fprintf( stderr, "pthread_mutex_destroy failed: %d\n", err );
             }
         }
         
@@ -99,18 +107,18 @@ enum {
         pthread_mutex_t mutex;
     };
     
-    PthreadMutex g_mutex;
+    static PthreadMutex g_mutex;
 #endif
 
 // count of (init - finalize) calls
-int g_init = 0;
+static int g_init = 0;
 
-magma_queue_t* g_null_queues = NULL;
+static magma_queue_t* g_null_queues = NULL;
 
 #ifdef HAVE_PTHREAD_KEY
-    pthread_key_t g_magma_queue_key;
+    static pthread_key_t g_magma_queue_key;
 #else
-    magma_queue_t g_magma_queue = NULL;
+    static magma_queue_t g_magma_queue = NULL;
 #endif
 
 
@@ -122,13 +130,67 @@ struct magma_device_info
     magma_int_t cuda_arch;
 };
 
-int g_magma_devices_cnt = 0;
-struct magma_device_info* g_magma_devices = NULL;
+static int g_magma_devices_cnt = 0;
+static struct magma_device_info* g_magma_devices = NULL;
 
 
 // ========================================
 // initialization
 // --------------------
+// Queries devices for properties and caches that information.
+// Succeeds even if no devices are found.
+// Called by magma_init and magma_init_v2.
+magma_int_t magma_init_internal_props()
+{
+    magma_int_t info = 0;
+    size_t size;
+    cudaError_t err;
+    
+    g_magma_devices_cnt = 0;
+    err = cudaGetDeviceCount( &g_magma_devices_cnt );
+    if ( err != 0 && err != cudaErrorNoDevice ) {
+        info = MAGMA_ERR_UNKNOWN;
+        return info;
+    }
+    
+    // allocate list of devices
+    size = max( 1, g_magma_devices_cnt ) * sizeof(struct magma_device_info);
+    magma_malloc_cpu( (void**) &g_magma_devices, size );
+    if ( g_magma_devices == NULL ) {
+        info = MAGMA_ERR_HOST_ALLOC;
+        return info;
+    }
+    memset( g_magma_devices, 0, size );
+    
+    // query each device
+    for( int dev=0; dev < g_magma_devices_cnt; ++dev ) {
+        cudaDeviceProp prop;
+        err = cudaGetDeviceProperties( &prop, dev );
+        if ( err != 0 ) {
+            info = MAGMA_ERR_UNKNOWN;
+        }
+        else {
+            g_magma_devices[dev].memory    = prop.totalGlobalMem;
+            g_magma_devices[dev].cuda_arch = prop.major*100 + prop.minor*10;
+        }
+    }
+    
+    // create thread-specific key
+    // currently, this is only need for MAGMA v1 compatability
+    // (see magma_init, magmablas(Set|Get)KernelStream, magmaGetQueue),
+    // but always initialize it here so magma_finalize doesn't error when deleting it.
+    #ifdef HAVE_PTHREAD_KEY
+        info = pthread_key_create( &g_magma_queue_key, NULL );
+        if ( info != 0 ) {
+            info = MAGMA_ERR_UNKNOWN;
+            return info;
+        }
+    #endif
+    
+    return info;
+}
+
+
 /**
     Initializes the MAGMA library.
     Caches information about available CUDA devices.
@@ -152,60 +214,43 @@ extern "C"
 magma_int_t magma_init()
 {
     magma_int_t info = 0;
+    size_t size;
     
     g_mutex.lock();
     {
         if ( g_init == 0 ) {
-            // query devices
-            cudaError_t err;
-            err = cudaGetDeviceCount( &g_magma_devices_cnt );
-            if ( err != 0 ) {
-                info = MAGMA_ERR_UNKNOWN;
-                g_magma_devices_cnt = 0;
-            }
-            magma_malloc_cpu( (void**) &g_magma_devices, g_magma_devices_cnt * sizeof(struct magma_device_info) );
-            if ( g_magma_devices == NULL ) {
-                info = MAGMA_ERR_HOST_ALLOC;
+            info = magma_init_internal_props();
+            if ( info != 0 ) {
                 goto cleanup;
             }
-            for( int dev=0; dev < g_magma_devices_cnt; ++dev ) {
-                cudaDeviceProp prop;
-                err = cudaGetDeviceProperties( &prop, dev );
-                if ( err != 0 ) {
-                    info = MAGMA_ERR_UNKNOWN;
-                }
-                check_error( err );
-                g_magma_devices[dev].memory    = prop.totalGlobalMem;
-                g_magma_devices[dev].cuda_arch = prop.major*100 + prop.minor*10;
-            }
             
-            // build NULL queues (for backwards compatability with MAGMA 1.x) on each device
-            magma_device_t cdev;
-            magma_getdevice( &cdev );
-            
-            magma_malloc_cpu( (void**) &g_null_queues, g_magma_devices_cnt * sizeof(magma_queue_t) );
+            // ----- queues with NULL streams (for backwards compatability with MAGMA 1.x)
+            // allocate array of queues with NULL stream
+            size = max( 1, g_magma_devices_cnt ) * sizeof(magma_queue_t);
+            magma_malloc_cpu( (void**) &g_null_queues, size );
             if ( g_null_queues == NULL ) {
                 info = MAGMA_ERR_HOST_ALLOC;
                 goto cleanup;
             }
-            for( int dev=0; dev < g_magma_devices_cnt; ++dev ) {
-                magma_queue_create_from_cuda( dev, NULL, NULL, NULL, &g_null_queues[dev] );
-            }
+            memset( g_null_queues, 0, size );
             
-            // set default queue on current device (for backwards compatability with MAGMA 1.x)
-            #ifdef HAVE_PTHREAD_KEY
-                info = pthread_key_create( &g_magma_queue_key, NULL );
-                if ( info != 0 ) {
-                    info = MAGMA_ERR_UNKNOWN;
+            // create queue with NULL stream on each device
+            if ( g_magma_devices_cnt > 0 ) {
+                magma_device_t cdev;
+                magma_getdevice( &cdev );
+                
+                for( int dev=0; dev < g_magma_devices_cnt; ++dev ) {
+                    magma_queue_create_from_cuda( dev, NULL, NULL, NULL, &g_null_queues[dev] );
                 }
-            #endif
-            
-            magma_setdevice( cdev );
-            magmablasSetKernelStream( g_null_queues[cdev] );
+                
+                // set default queue on current device
+                magma_setdevice( cdev );
+                magmablasSetKernelStream( g_null_queues[cdev] );
+            }
         }
+cleanup:
         g_init += 1;  // increment (init - finalize) count
     }
-cleanup:
     g_mutex.unlock();
     
     return info;
@@ -239,41 +284,10 @@ magma_int_t magma_init_v2()
     g_mutex.lock();
     {
         if ( g_init == 0 ) {
-            // query devices
-            cudaError_t err;
-            err = cudaGetDeviceCount( &g_magma_devices_cnt );
-            if ( err != 0 ) {
-                info = MAGMA_ERR_UNKNOWN;
-                g_magma_devices_cnt = 0;
-            }
-            magma_malloc_cpu( (void**) &g_magma_devices, g_magma_devices_cnt * sizeof(struct magma_device_info) );
-            if ( g_magma_devices == NULL ) {
-                info = MAGMA_ERR_HOST_ALLOC;
-                goto cleanup;
-            }
-            for( int dev=0; dev < g_magma_devices_cnt; ++dev ) {
-                cudaDeviceProp prop;
-                err = cudaGetDeviceProperties( &prop, dev );
-                if ( err != 0 ) {
-                    info = MAGMA_ERR_UNKNOWN;
-                }
-                check_error( err );
-                g_magma_devices[dev].memory    = prop.totalGlobalMem;
-                g_magma_devices[dev].cuda_arch = prop.major*100 + prop.minor*10;
-            }
-            
-            // skip creating NULL queues
-            
-            #ifdef HAVE_PTHREAD_KEY
-                info = pthread_key_create( &g_magma_queue_key, NULL );
-                if ( info != 0 ) {
-                    info = MAGMA_ERR_UNKNOWN;
-                }
-            #endif
+            info = magma_init_internal_props();
         }
         g_init += 1;  // increment (init - finalize) count
     }
-cleanup:
     g_mutex.unlock();
     
     return info;
@@ -504,8 +518,6 @@ void magma_device_sync()
 
 // ========================================
 // queue support
-// At the moment, MAGMA queue == CUDA stream.
-// In the future, MAGMA queue may be CUBLAS handle.
 extern "C"
 magma_int_t
 magma_queue_get_device( magma_queue_t queue )
@@ -539,18 +551,6 @@ extern "C"
 magma_int_t magmablasSetKernelStream( magma_queue_t queue )
 {
     magma_int_t info = 0;
-    if ( queue == NULL ) {
-        magma_device_t dev;
-        magma_getdevice( &dev );
-        assert( 0 <= dev && dev < g_magma_devices_cnt );
-        if ( g_null_queues == NULL || g_null_queues[dev] == NULL ) {
-            info = MAGMA_ERR_NOT_INITIALIZED;
-            fprintf( stderr, "%s( NULL ) requires magma_init() to be called first for MAGMA v1 compatability.\n",
-                     __func__ );
-            return info;
-        }
-        queue = g_null_queues[dev];
-    }
     #ifdef HAVE_PTHREAD_KEY
     info = pthread_setspecific( g_magma_queue_key, queue );
     #else
@@ -579,10 +579,20 @@ magma_queue_t magmablasGetQueue()
 {
     magma_queue_t queue;
     #ifdef HAVE_PTHREAD_KEY
-        queue = (magma_queue_t) pthread_getspecific( g_magma_queue_key );
+    queue = (magma_queue_t) pthread_getspecific( g_magma_queue_key );
     #else
-        queue = g_magma_queue;
+    queue = g_magma_queue;
     #endif
+    if ( queue == NULL ) {
+        magma_device_t dev;
+        magma_getdevice( &dev );
+        if ( dev >= g_magma_devices_cnt || g_null_queues == NULL || g_null_queues[dev] == NULL ) {
+            fprintf( stderr, "Error: %s requires magma_init() to be called first for MAGMA v1 compatability.\n",
+                     __func__ );
+            return NULL;
+        }
+        queue = g_null_queues[dev];
+    }
     assert( queue != NULL );
     return queue;
 }

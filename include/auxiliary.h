@@ -20,7 +20,6 @@ extern "C" {
 // initialization
 
 magma_int_t magma_init( void );
-magma_int_t magma_init_v2( void );
 magma_int_t magma_finalize( void );
 
 
