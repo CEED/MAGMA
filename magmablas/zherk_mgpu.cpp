@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 2.0.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -40,19 +40,18 @@ magma_zherk_mgpu(
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
     magma_trans_t transa, transb;
-    if(trans == MagmaNoTrans){
+    if (trans == MagmaNoTrans) {
         transa = MagmaNoTrans;
         transb = MagmaConjTrans;
-    }else{
+    }
+    else {
         transa = MagmaConjTrans;
         transb = MagmaNoTrans;
     }
 
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
-   
-
-
+    
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
         id = ((i+c_offset)/nb)%ngpu;
@@ -138,10 +137,11 @@ magma_zherk_mgpu2(
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
     magma_trans_t transa, transb;
-    if(trans == MagmaNoTrans){
+    if (trans == MagmaNoTrans) {
         transa = MagmaNoTrans;
         transb = MagmaConjTrans;
-    }else{
+    }
+    else {
         transa = MagmaConjTrans;
         transb = MagmaNoTrans;
     }
