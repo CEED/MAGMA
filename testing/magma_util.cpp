@@ -303,6 +303,10 @@ void magma_opts::parse_opts( int argc, char** argv )
     
     int ndevices;  // not magma_int_t
     cudaGetDeviceCount( &ndevices );
+    if ( ndevices == 0 ) {
+        fprintf( stderr, "No CUDA devices available\n" );
+        exit(1);
+    }
     
     this->ntest = 0;
     for( int i = 1; i < argc; ++i ) {
