@@ -199,7 +199,7 @@ my $output_wrapper = <<EOT;
 
 #include <stdint.h>  // for uintptr_t
 
-#include "magma.h"
+#include "magma_v2.h"
 #include "magma_mangling.h"
 
 /*
