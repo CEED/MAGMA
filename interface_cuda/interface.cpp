@@ -509,12 +509,13 @@ magma_queue_get_cusparse_handle( magma_queue_t queue )
 extern "C"
 magma_int_t magmablasSetKernelStream( magma_queue_t queue )
 {
+    magma_int_t info = 0;
     #ifdef HAVE_PTHREAD_KEY
     info = pthread_setspecific( g_magma_queue_key, queue );
     #else
     g_magma_queue = queue;
     #endif
-    return 0;
+    return info;
 }
 
 
