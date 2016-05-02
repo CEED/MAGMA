@@ -241,9 +241,6 @@ cleanup:
     }
     g_mutex.unlock();
     
-    if ( info ) {
-        printf( "%s info %d\n", __func__, info );
-    }
     return info;
 }
 
