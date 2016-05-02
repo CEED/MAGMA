@@ -8,6 +8,8 @@
        @author Mark Gates
        @precisions normal z -> s d c
 */
+#ifndef MAGMA_NO_V1
+
 #include "common_magma.h"
 #include "error.h"
 
@@ -1454,3 +1456,5 @@ magma_ztrsm(
 #endif // HAVE_CUBLAS
 
 #undef COMPLEX
+
+#endif // MAGMA_NO_V1

@@ -12,6 +12,7 @@
        Implements all the wrappers for v1 backwards compatability.
        Separating the wrappers allows the new functions to use magma_internal.h
 */
+#ifndef MAGMA_NO_V1
 
 #include "common_magma.h"
 
@@ -107,3 +108,5 @@ magmablas_zclaswp(
 {
     magmablas_zclaswp_q( n, A, lda, SA, lda, m, ipiv, incx, magmablasGetQueue() );
 }
+
+#endif // MAGMA_NO_V1

@@ -11,6 +11,8 @@
        @precisions normal z -> s d c
 
 */
+#ifndef MAGMA_NO_V1
+
 #include "common_magma.h"
 #include "trace.h"
 
@@ -507,3 +509,5 @@ magma_zpotrf_mgpu_right(
 #undef tmppanel
 #undef tmpprevpanel
 #undef STREAM_ID
+
+#endif // MAGMA_NO_V1

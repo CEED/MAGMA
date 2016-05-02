@@ -9,6 +9,10 @@
 #ifndef MAGMABLAS_V1_H
 #define MAGMABLAS_V1_H
 
+#ifdef MAGMA_NO_V1
+#error "Since MAGMA_NO_V1 is defined, magma.h is invalid; use magma_v2.h"
+#endif
+
 #include "magmablas_z_v1.h"
 #include "magmablas_c_v1.h"
 #include "magmablas_d_v1.h"

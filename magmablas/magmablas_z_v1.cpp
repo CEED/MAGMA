@@ -12,6 +12,7 @@
        Implements all the wrappers for v1 backwards compatability.
        Separating the wrappers allows the new functions to use magma_internal.h
 */
+#ifndef MAGMA_NO_V1
 
 #include "common_magma.h"
 
@@ -991,3 +992,5 @@ magma_zlarfb_gpu_gemm(
                                     dwork, ldwork, dworkvt, ldworkvt,
                                     magmablasGetQueue() );
 }
+
+#endif // MAGMA_NO_V1

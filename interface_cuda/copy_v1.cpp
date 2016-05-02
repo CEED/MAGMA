@@ -7,6 +7,8 @@
  
        @author Mark Gates
 */
+#ifndef MAGMA_NO_V1
+
 #include "common_magma.h"
 #include "error.h"
 
@@ -115,3 +117,5 @@ magma_copymatrix_internal(
 }
 
 #endif // HAVE_CUBLAS
+
+#endif // MAGMA_NO_V1
