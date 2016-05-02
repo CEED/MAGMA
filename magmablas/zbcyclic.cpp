@@ -67,6 +67,11 @@ magma_zsetmatrix_1D_col_bcyclic_q(
                                 queues[dev] );
     }
     
+    for( dev=0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
+    }
+    
     magma_setdevice( cdevice );
 }
 
@@ -115,6 +120,11 @@ magma_zgetmatrix_1D_col_bcyclic_q(
                                 dA( dev, 0, j/(nb*ngpu)*nb ), ldda,
                                 hA(0,j), lda,
                                 queues[dev] );
+    }
+    
+    for( dev=0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
     }
     
     magma_setdevice( cdevice );
@@ -167,6 +177,11 @@ magma_zsetmatrix_1D_row_bcyclic_q(
                                 queues[dev] );
     }
     
+    for( dev=0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
+    }
+    
     magma_setdevice( cdevice );
 }
 
@@ -215,6 +230,11 @@ magma_zgetmatrix_1D_row_bcyclic_q(
                                 dA( dev, i/(nb*ngpu)*nb, 0 ), ldda,
                                 hA(i,0), lda,
                                 queues[dev] );
+    }
+    
+    for( dev=0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
     }
     
     magma_setdevice( cdevice );
