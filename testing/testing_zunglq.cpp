@@ -69,7 +69,7 @@ int main( int argc, char** argv )
             n2 = lda*n;
             min_mn = min(m, n);
             nb = magma_get_zgelqf_nb( m, n );
-            lwork  = max( m*nb + nb*nb, nb*nb );
+            lwork  = m*nb;
             gflops = FLOPS_ZUNGLQ( m, n, k ) / 1e9;
             
             TESTING_CHECK( magma_zmalloc_pinned( &h_work, lwork  ));

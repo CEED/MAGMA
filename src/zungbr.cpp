@@ -116,6 +116,7 @@ magma_zungbr(
     // Constants
     const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     const magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    const magma_int_t ineg_one = -1;
     
     // Local variables
     bool lquery, wantq;
@@ -146,11 +147,12 @@ magma_zungbr(
                 // magma_zungqr takes dT instead of work
                 // magma_zungqr2 doesn't take work
                 //magma_zungqr2( m, n, k, A, lda, tau, work, -1, &iinfo );
-                work[0] = c_one;
+                lapackf77_zungqr( &m, &n, &k, A, &lda, tau, work, &ineg_one, &iinfo );
             }
             else if (m > 1) {
                 //magma_zungqr2( m-1, m-1, m-1, A(1,1), lda, tau, work, -1, &iinfo );
-                work[0] = c_one;
+                magma_int_t m1 = m-1;
+                lapackf77_zungqr( &m1, &m1, &m1, A(1,1), &lda, tau, work, &ineg_one, &iinfo );
             }
         }
         else {

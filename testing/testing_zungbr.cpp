@@ -77,7 +77,7 @@ int main( int argc, char** argv )
             min_mn = min(m, n);
             nb = max( magma_get_zgelqf_nb( m, n ),
                       magma_get_zgebrd_nb( m, n ));
-            lwork  = max( nb*nb, (m + n)*nb );
+            lwork  = (m + n)*nb;
             
             if (vect == MagmaQ) {
                 if (m >= k) {

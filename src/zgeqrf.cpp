@@ -61,7 +61,7 @@
 
     @param[in]
     lwork   INTEGER
-            The dimension of the array WORK.  LWORK >= max( N*NB, 2*NB*NB ),
+            The dimension of the array WORK.  LWORK >= N*NB,
             where NB can be obtained through magma_get_zgeqrf_nb( M, N ).
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
@@ -115,6 +115,7 @@ magma_zgeqrf(
     const magmaDoubleComplex c_one = MAGMA_Z_ONE;
     
     /* Local variables */
+    magmaDoubleComplex* work_local = NULL;
     magmaDoubleComplex_ptr dA, dT, dwork;
     magma_int_t i, ib, min_mn, ldda, lddwork, old_i, old_ib;
     
@@ -122,8 +123,7 @@ magma_zgeqrf(
     *info = 0;
     magma_int_t nb = magma_get_zgeqrf_nb( m, n );
     
-    // need 2*nb*nb to store T and upper triangle of V simultaneously
-    magma_int_t lwkopt = max( n*nb, 2*nb*nb );
+    magma_int_t lwkopt = n*nb;
     work[0] = magma_zmake_lwork( lwkopt );
     bool lquery = (lwork == -1);
     if (m < 0) {
@@ -162,6 +162,18 @@ magma_zgeqrf(
     if (MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda + nb*lddwork + nb*nb )) {
         /* alloc failed so call non-GPU-resident version */
         return magma_zgeqrf_ooc( m, n, A, lda, tau, work, lwork, info );
+    }
+    
+    // Need at least 2*nb*nb to store T and upper triangle of V simultaneously.
+    // For better LAPACK compatability, which needs N*NB,
+    // allow lwork < 2*NB*NB and allocate here if needed.
+    if (lwork < 2*nb*nb) {
+        if (MAGMA_SUCCESS != magma_zmalloc_cpu( &work_local, 2*nb*nb )) {
+            magma_free( dA );
+            *info = MAGMA_ERR_HOST_ALLOC;
+            return *info;
+        }
+        work = work_local;
     }
     
     dwork = dA + n*ldda;
@@ -258,10 +270,15 @@ magma_zgeqrf(
         lapackf77_zgeqrf( &rows, &ib, A(i,i), &lda, tau+i, work, &lwork, info );
     }
     
+    magma_queue_sync( queues[0] );
+    magma_queue_sync( queues[1] );
     magma_queue_destroy( queues[0] );
     magma_queue_destroy( queues[1] );
     
+    work[0] = magma_zmake_lwork( lwkopt );  // before free( work_local )
+    
     magma_free( dA );
+    magma_free_cpu( work_local );  // if allocated
     
     return *info;
 } /* magma_zgeqrf */

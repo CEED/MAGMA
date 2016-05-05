@@ -63,7 +63,7 @@ int main( int argc, char** argv)
             lwork = -1;
             lapackf77_zgeqrf(&M, &N, NULL, &M, NULL, tmp, &lwork, &info);
             lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
-            lwork = max( lwork, max( N*nb, 2*nb*nb ));
+            lwork = max( lwork, N*nb );
             
             TESTING_CHECK( magma_zmalloc_cpu( &tau,    min_mn ));
             TESTING_CHECK( magma_zmalloc_cpu( &h_A,    n2     ));
