@@ -262,10 +262,6 @@ libmagma_src += \
 	$(cdir)/ztrevc3_mt.cpp		\
 	$(cdir)/zunghr.cpp		\
 
-# use ztrevc3 and ztrevc3_mt instead
-	#$(cdir)/lapack_dtrevc3.f	\
-	#$(cdir)/lapack_ztrevc3.f	\
-
 # non-symmetric eigenvalues, multi-GPU
 libmagma_src += \
 	$(cdir)/dgeev_m.cpp		\
