@@ -12,6 +12,10 @@ cdir      := testing
 # ----------------------------------------------------------------------
 
 
+hdr += \
+	$(cdir)/testing_z.h		\
+
+
 # ----------
 # BLAS and auxiliary
 testing_src += \
@@ -226,6 +230,7 @@ $(cdir)/fortran_thunking.$(o_ext) : $(CUDADIR)/src/fortran_thunking.c
 libtest_src := \
 	$(cdir)/magma_util.cpp		\
 	$(cdir)/magma_zutil.cpp		\
+	$(cdir)/magma_zgesvd_check.cpp	\
 
 
 # ----------------------------------------------------------------------

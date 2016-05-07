@@ -150,7 +150,6 @@ const char *usage =
 "                   Also set with $MAGMA_RUN_LAPACK.\n"
 "      --[no]warmup Whether to warmup. Not yet implemented in most cases.\n"
 "                   Also set with $MAGMA_WARMUP.\n"
-"      --[not]all   Whether to test all combinations of flags, e.g., jobu.\n"
 "  --dev x          GPU device to use, default 0.\n"
 "  --align n        Round up LDDA on GPU to multiple of align, default 32.\n"
 "  --verbose        Verbose output.\n"
@@ -170,7 +169,19 @@ const char *usage =
 "                    to control the number of CPU threads.)\n"
 "  --offset x       Offset from beginning of matrix, default 0.\n"
 "  --itype [123]    Generalized Hermitian-definite eigenproblem type, default 1.\n"
-"  --svd_work [0123] SVD workspace size, from min (1) to optimal (3), or query (0), default 0.\n"
+"  --svd-work x     SVD workspace size, one of:\n"
+"         query*    queries LAPACK and MAGMA\n"
+"         doc       is what LAPACK and MAGMA document as required\n"
+"         doc_old   is what LAPACK <= 3.6 documents\n"
+"         min       is minimum required, which may be smaller than doc\n"
+"         min_old   is minimum required by LAPACK <= 3.6\n"
+"         min_fast  is minimum to take fast path in gesvd\n"
+"         min-1     is (minimum - 1), to test error return\n"
+"         opt       is optimal\n"
+"         opt_old   is optimal as computed by LAPACK <= 3.6\n"
+"         opt_slow  is optimal for slow path in gesvd\n"
+"         max       is maximum that will be used\n"
+"\n"
 "  --version x      version of routine, e.g., during development, default 1.\n"
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "                   If fraction == 0, computes eigenvalues il=0.1*N to iu=0.3*N.\n"
@@ -182,11 +193,12 @@ const char *usage =
 "  -[TC]            transA = Trans or ConjTrans. Default is NoTrans. Doesn't change transB.\n"
 "  -S[LR]           side   = Left*, Right.\n"
 "  -D[NU]           diag   = NonUnit*, Unit.\n"
-"  -U[NASO]         jobu   = No*, All, Some, or Overwrite; compute left  singular vectors. gesdd uses this for jobz.\n"
-"  -V[NASO]         jobvt  = No*, All, Some, or Overwrite; compute right singular vectors.\n"
+"  --jobu [nsoa]    No*, Some, Overwrite, or All left singular vectors (U). gesdd uses this for jobz.\n"
+"  --jobv [nsoa]    No*, Some, Overwrite, or All right singular vectors (V).\n"
 "  -J[NV]           jobz   = No* or Vectors; compute eigenvectors (symmetric).\n"
 "  -L[NV]           jobvl  = No* or Vectors; compute left  eigenvectors (non-symmetric).\n"
 "  -R[NV]           jobvr  = No* or Vectors; compute right eigenvectors (non-symmetric).\n"
+"\n"
 "                   * default values\n";
 
 
@@ -206,23 +218,20 @@ magma_opts::magma_opts( magma_opts_t flag )
     this->nthread  = 1;
     this->offset   = 0;
     this->itype    = 1;
-    this->svd_work = 0;
     this->version  = 1;
+    this->verbose  = 0;
     this->fraction = 1.;
     this->tolerance = 30.;
     this->check     = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
+    this->magma     = true;
     this->lapack    = (getenv("MAGMA_RUN_LAPACK")     != NULL);
     this->warmup    = (getenv("MAGMA_WARMUP")         != NULL);
-    this->all       = (getenv("MAGMA_RUN_ALL")        != NULL);
-    this->verbose   = false;
     
     this->uplo      = MagmaLower;      // potrf, etc.
     this->transA    = MagmaNoTrans;    // gemm, etc.
     this->transB    = MagmaNoTrans;    // gemm
     this->side      = MagmaLeft;       // trsm, etc.
     this->diag      = MagmaNonUnit;    // trsm, etc.
-    this->jobu      = MagmaNoVec;  // gesvd: no left  singular vectors
-    this->jobvt     = MagmaNoVec;  // gesvd: no right singular vectors
     this->jobz      = MagmaNoVec;  // heev:  no eigen vectors
     this->jobvr     = MagmaNoVec;  // geev:  no right eigen vectors
     this->jobvl     = MagmaNoVec;  // geev:  no left  eigen vectors
@@ -442,11 +451,6 @@ void magma_opts::parse_opts( int argc, char** argv )
             magma_assert( this->itype >= 1 && this->itype <= 3,
                           "error: --itype %s is invalid; ensure itype in [1,2,3].\n", argv[i] );
         }
-        else if ( strcmp("--svd_work", argv[i]) == 0 && i+1 < argc ) {
-            this->svd_work = atoi( argv[++i] );
-            magma_assert( this->svd_work >= 0 && this->svd_work <= 3,
-                          "error: --svd_work %s is invalid; ensure svd_work in [0,1,2,3].\n", argv[i] );
-        }
         else if ( strcmp("--version", argv[i]) == 0 && i+1 < argc ) {
             this->version = atoi( argv[++i] );
             magma_assert( this->version >= 1,
@@ -475,16 +479,24 @@ void magma_opts::parse_opts( int argc, char** argv )
         else if ( strcmp("-c2",        argv[i]) == 0 ||
                   strcmp("--check2",   argv[i]) == 0 ) { this->check  = 2; }
         else if ( strcmp("--nocheck",  argv[i]) == 0 ) { this->check  = 0; }
+        
         else if ( strcmp("-l",         argv[i]) == 0 ||
                   strcmp("--lapack",   argv[i]) == 0 ) { this->lapack = true;  }
         else if ( strcmp("--nolapack", argv[i]) == 0 ) { this->lapack = false; }
+        
+        else if ( strcmp("--magma",    argv[i]) == 0 ) { this->magma  = true;  }
+        else if ( strcmp("--nomagma",  argv[i]) == 0 ) { this->magma  = false; }
+        
         else if ( strcmp("--warmup",   argv[i]) == 0 ) { this->warmup = true;  }
         else if ( strcmp("--nowarmup", argv[i]) == 0 ) { this->warmup = false; }
-        else if ( strcmp("--all",      argv[i]) == 0 ) { this->all    = true;  }
-        else if ( strcmp("--notall",   argv[i]) == 0 ) { this->all    = false; }
-        else if ( strcmp("--verbose",  argv[i]) == 0 ) { this->verbose= true;  }
         
-        // ----- lapack flag arguments
+        //else if ( strcmp("--all",      argv[i]) == 0 ) { this->all    = true;  }
+        //else if ( strcmp("--notall",   argv[i]) == 0 ) { this->all    = false; }
+        
+        else if ( strcmp("-v",         argv[i]) == 0 ||
+                  strcmp("--verbose",  argv[i]) == 0 ) { this->verbose += 1;  }
+        
+        // ----- lapack options
         else if ( strcmp("-L",  argv[i]) == 0 ) { this->uplo = MagmaLower; }
         else if ( strcmp("-U",  argv[i]) == 0 ) { this->uplo = MagmaUpper; }
         else if ( strcmp("-F",  argv[i]) == 0 ) { this->uplo = MagmaFull; }
@@ -507,16 +519,6 @@ void magma_opts::parse_opts( int argc, char** argv )
         else if ( strcmp("-DN", argv[i]) == 0 ) { this->diag  = MagmaNonUnit; }
         else if ( strcmp("-DU", argv[i]) == 0 ) { this->diag  = MagmaUnit;    }
         
-        else if ( strcmp("-UA", argv[i]) == 0 ) { this->jobu  = MagmaAllVec;       }
-        else if ( strcmp("-US", argv[i]) == 0 ) { this->jobu  = MagmaSomeVec;      }
-        else if ( strcmp("-UO", argv[i]) == 0 ) { this->jobu  = MagmaOverwriteVec; }
-        else if ( strcmp("-UN", argv[i]) == 0 ) { this->jobu  = MagmaNoVec;        }
-        
-        else if ( strcmp("-VA", argv[i]) == 0 ) { this->jobvt = MagmaAllVec;       }
-        else if ( strcmp("-VS", argv[i]) == 0 ) { this->jobvt = MagmaSomeVec;      }
-        else if ( strcmp("-VO", argv[i]) == 0 ) { this->jobvt = MagmaOverwriteVec; }
-        else if ( strcmp("-VN", argv[i]) == 0 ) { this->jobvt = MagmaNoVec;        }
-        
         else if ( strcmp("-JN", argv[i]) == 0 ) { this->jobz  = MagmaNoVec; }
         else if ( strcmp("-JV", argv[i]) == 0 ) { this->jobz  = MagmaVec;   }
         
@@ -525,6 +527,56 @@ void magma_opts::parse_opts( int argc, char** argv )
         
         else if ( strcmp("-RN", argv[i]) == 0 ) { this->jobvr = MagmaNoVec; }
         else if ( strcmp("-RV", argv[i]) == 0 ) { this->jobvr = MagmaVec;   }
+        
+        // ----- vectors of options
+        else if ( strcmp("--svd-work", argv[i]) == 0 && i+1 < argc ) {
+            i += 1;
+            char *token;
+            char *arg = strdup( argv[i] );
+            while( (token = strsep( &arg, ", " )) != NULL ) {
+                if ( *token == '\0' ) { /* ignore empty tokens */ }
+                else if ( strcmp( token, "all"       ) == 0 ) { this->svd_work.push_back( MagmaSVD_all        ); }
+                else if ( strcmp( token, "query"     ) == 0 ) { this->svd_work.push_back( MagmaSVD_query      ); }
+                else if ( strcmp( token, "doc"       ) == 0 ) { this->svd_work.push_back( MagmaSVD_doc        ); }
+                else if ( strcmp( token, "doc_old"   ) == 0 ) { this->svd_work.push_back( MagmaSVD_doc_old    ); }
+                else if ( strcmp( token, "min"       ) == 0 ) { this->svd_work.push_back( MagmaSVD_min        ); }
+                else if ( strcmp( token, "min-1"     ) == 0 ) { this->svd_work.push_back( MagmaSVD_min_1      ); }
+                else if ( strcmp( token, "min_old"   ) == 0 ) { this->svd_work.push_back( MagmaSVD_min_old    ); }
+                else if ( strcmp( token, "min_old-1" ) == 0 ) { this->svd_work.push_back( MagmaSVD_min_old_1  ); }
+                else if ( strcmp( token, "min_fast"  ) == 0 ) { this->svd_work.push_back( MagmaSVD_min_fast   ); }
+                else if ( strcmp( token, "min_fast-1") == 0 ) { this->svd_work.push_back( MagmaSVD_min_fast_1 ); }
+                else if ( strcmp( token, "opt"       ) == 0 ) { this->svd_work.push_back( MagmaSVD_opt        ); }
+                else if ( strcmp( token, "opt_old"   ) == 0 ) { this->svd_work.push_back( MagmaSVD_opt_old    ); }
+                else if ( strcmp( token, "opt_slow"  ) == 0 ) { this->svd_work.push_back( MagmaSVD_opt_slow   ); }
+                else if ( strcmp( token, "max"       ) == 0 ) { this->svd_work.push_back( MagmaSVD_max        ); }
+                else {
+                    magma_assert( false, "error: --svd-work '%s' is invalid\n", argv[i] );
+                }
+            }
+            free( arg );
+        }
+        
+        else if ( strcmp("--jobu", argv[i]) == 0 && i+1 < argc ) {
+            i += 1;
+            const char* arg = argv[i];
+            while( *arg != '\0' ) {
+                this->jobu.push_back( magma_vec_const( *arg ));
+                ++arg;
+                if ( *arg == ',' )
+                    ++arg;
+            }
+        }
+        else if ( (strcmp("--jobv",  argv[i]) == 0 ||
+                   strcmp("--jobvt", argv[i]) == 0) && i+1 < argc ) {
+            i += 1;
+            const char* arg = argv[i];
+            while( *arg != '\0' ) {
+                this->jobv.push_back( magma_vec_const( *arg ));
+                ++arg;
+                if ( *arg == ',' )
+                    ++arg;
+            }
+        }
         
         // ----- misc
         else if ( strcmp("-x",          argv[i]) == 0 ||
@@ -548,6 +600,17 @@ void magma_opts::parse_opts( int argc, char** argv )
         }
     }
     
+    // default values
+    if ( this->svd_work.size() == 0 ) {
+        this->svd_work.push_back( MagmaSVD_query );
+    }
+    if ( this->jobu.size() == 0 ) {
+        this->jobu.push_back( MagmaNoVec );
+    }
+    if ( this->jobv.size() == 0 ) {
+        this->jobv.push_back( MagmaNoVec );
+    }
+    
     // if -N or --range not given, use default range
     if ( this->ntest == 0 ) {
         magma_int_t n2 = this->default_nstart;  //1024 + 64;
@@ -560,12 +623,6 @@ void magma_opts::parse_opts( int argc, char** argv )
         }
     }
     assert( this->ntest <= MAX_NTEST );
-    
-    // disallow jobu=O, jobvt=O
-    if ( this->jobu == MagmaOverwriteVec && this->jobvt == MagmaOverwriteVec ) {
-        printf( "jobu and jobvt cannot both be Overwrite.\n" );
-        exit(1);
-    }
     
     // lock file
     #ifdef USE_FLOCK

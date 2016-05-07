@@ -95,6 +95,7 @@ void magma_zmake_spd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 // MKL 11.2 corrects it for inf, one, max norm.
 // MKL 11.2 still segfaults for Frobenius norm.
 // See testing_zlanhe.cpp
+extern "C"
 double safe_lapackf77_zlanhe(
     const char *norm, const char *uplo,
     const magma_int_t *n,

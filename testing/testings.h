@@ -8,6 +8,14 @@
 #include "magma_v2.h"
 #endif
 
+#include <vector>
+
+#include "magma_lapack.h"
+#include "testing_s.h"
+#include "testing_d.h"
+#include "testing_c.h"
+#include "testing_z.h"
+
 
 /***************************************************************************//**
  *  For portability to Windows
@@ -71,48 +79,10 @@ void flops_init();
 /***************************************************************************//**
  * Functions and data structures used for testing.
  */
-void magma_zmake_symmetric( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
-void magma_cmake_symmetric( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
-void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
-void magma_cmake_hermitian( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
-void magma_dmake_symmetric( magma_int_t N, double*             A, magma_int_t lda );
-void magma_smake_symmetric( magma_int_t N, float*              A, magma_int_t lda );
-
-void magma_zmake_spd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
-void magma_cmake_spd( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
-void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
-void magma_cmake_hpd( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
-void magma_dmake_hpd( magma_int_t N, double*             A, magma_int_t lda );
-void magma_smake_hpd( magma_int_t N, float*              A, magma_int_t lda );
 
 void magma_assert( bool condition, const char* msg, ... );
 
 void magma_assert_warn( bool condition, const char* msg, ... );
-
-// work around MKL bug in multi-threaded lanhe/lansy
-double safe_lapackf77_zlanhe(
-    const char *norm, const char *uplo,
-    const magma_int_t *n,
-    const magmaDoubleComplex *A, const magma_int_t *lda,
-    double *work );
-
-float  safe_lapackf77_clanhe(
-    const char *norm, const char *uplo,
-    const magma_int_t *n,
-    const magmaFloatComplex *A, const magma_int_t *lda,
-    float *work );
-
-double safe_lapackf77_dlansy(
-    const char *norm, const char *uplo,
-    const magma_int_t *n,
-    const double *A, const magma_int_t *lda,
-    double *work );
-
-float safe_lapackf77_slansy(
-    const char *norm, const char *uplo,
-    const magma_int_t *n,
-    const float *A, const magma_int_t *lda,
-    float *work );
 
 #define MAX_NTEST 1050
 
@@ -120,6 +90,23 @@ typedef enum {
     MagmaOptsDefault = 0,
     MagmaOptsBatched = 1000
 } magma_opts_t;
+
+typedef enum {
+    MagmaSVD_all,
+    MagmaSVD_query,
+    MagmaSVD_doc,
+    MagmaSVD_doc_old,
+    MagmaSVD_min,
+    MagmaSVD_min_1,
+    MagmaSVD_min_old,
+    MagmaSVD_min_old_1,
+    MagmaSVD_min_fast,
+    MagmaSVD_min_fast_1,
+    MagmaSVD_opt,
+    MagmaSVD_opt_old,
+    MagmaSVD_opt_slow,
+    MagmaSVD_max
+} magma_svd_work_t;
 
 class magma_opts
 {
@@ -156,29 +143,31 @@ public:
     magma_int_t nthread;
     magma_int_t offset;
     magma_int_t itype;     // hegvd: problem type
-    magma_int_t svd_work;  // gesvd
     magma_int_t version;   // hemm_mgpu, hetrd
     magma_int_t check;
+    magma_int_t verbose;
     double      fraction;  // hegvdx
     double      tolerance;
     
     // boolean arguments
+    bool magma;
     bool lapack;
     bool warmup;
-    bool all;
-    bool verbose;
     
-    // lapack flags
+    // lapack options
     magma_uplo_t    uplo;
     magma_trans_t   transA;
     magma_trans_t   transB;
     magma_side_t    side;
     magma_diag_t    diag;
-    magma_vec_t     jobu;    // gesvd:  no left  singular vectors
-    magma_vec_t     jobvt;   // gesvd:  no right singular vectors
     magma_vec_t     jobz;    // heev:   no eigen vectors
     magma_vec_t     jobvr;   // geev:   no right eigen vectors
     magma_vec_t     jobvl;   // geev:   no left  eigen vectors
+    
+    // vectors of options
+    std::vector< magma_svd_work_t > svd_work;
+    std::vector< magma_vec_t > jobu;
+    std::vector< magma_vec_t > jobv;
     
     // queue for default device
     magma_queue_t   queue;
