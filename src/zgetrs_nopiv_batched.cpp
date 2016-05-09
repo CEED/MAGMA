@@ -11,7 +11,7 @@
 */
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
-#include "cublas_v2.h"
+
 /**
     Purpose
     -------
