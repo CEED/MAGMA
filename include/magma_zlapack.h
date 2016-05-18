@@ -786,8 +786,8 @@ void   lapackf77_zlartg( magmaDoubleComplex *F,
 
 void   lapackf77_zlascl( const char *type,
                          const magma_int_t *kl, const magma_int_t *ku,
-                         double *cfrom,
-                         double *cto,
+                         const double *cfrom,
+                         const double *cto,
                          const magma_int_t *m, const magma_int_t *n,
                          magmaDoubleComplex *A, const magma_int_t *lda,
                          magma_int_t *info );
