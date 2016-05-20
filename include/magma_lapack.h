@@ -86,22 +86,22 @@ void   lapackf77_ssterf( const magma_int_t *n,
                          magma_int_t *info );
 
 // precision conversion, general matrix
-void   lapackf77_zlag2c( magma_int_t *m, const magma_int_t *n,
+void   lapackf77_zlag2c( const magma_int_t *m, const magma_int_t *n,
                          const magmaDoubleComplex *A,  const magma_int_t *lda,
                                magmaFloatComplex  *SA, const magma_int_t *ldsa,
                          magma_int_t *info );
 
-void   lapackf77_clag2z( magma_int_t *m, const magma_int_t *n,
+void   lapackf77_clag2z( const magma_int_t *m, const magma_int_t *n,
                          const magmaFloatComplex  *SA, const magma_int_t *ldsa,
                                magmaDoubleComplex *A,  const magma_int_t *lda,
                          magma_int_t *info );
 
-void   lapackf77_dlag2s( magma_int_t *m, const magma_int_t *n,
+void   lapackf77_dlag2s( const magma_int_t *m, const magma_int_t *n,
                          const double *A,  const magma_int_t *lda,
                                float  *SA, const magma_int_t *ldsa,
                          magma_int_t *info );
 
-void   lapackf77_slag2d( magma_int_t *m, const magma_int_t *n,
+void   lapackf77_slag2d( const magma_int_t *m, const magma_int_t *n,
                          const float  *SA, const magma_int_t *ldsa,
                                double *A,  const magma_int_t *lda,
                          magma_int_t *info );
