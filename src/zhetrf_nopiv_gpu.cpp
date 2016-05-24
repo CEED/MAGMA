@@ -99,7 +99,7 @@ magma_zhetrf_nopiv_gpu(
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return */
