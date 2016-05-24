@@ -106,7 +106,7 @@ magma_zhetrf_nopiv(
 
     /* Quick return */
     if ( n == 0 )
-      return MAGMA_SUCCESS;
+      return *info;
 
     ldda = magma_roundup( n, 32 );
     nb = magma_get_zhetrf_nopiv_nb(n);
@@ -293,5 +293,5 @@ magma_zhetrf_nopiv(
     magma_free(dW);
     magma_free(dA);
     
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zhetrf_nopiv */

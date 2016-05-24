@@ -96,17 +96,18 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
 
     magma_int_t maxnb = max_shared_bsiz;
 
-    if ( lwork < k*ldt) 
-    {
-        magma_xerbla( __func__, -(10) );
-        return -10;
+    magma_int_t info = 0;
+    if (stair_T > 0 && stair_T > maxnb) {
+        info = -3;
+    }
+    else if (lwork < k*ldt) {
+        info = -10;
+    }
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return info;
     }
 
-    if ( stair_T > 0 && stair_T > maxnb)
-    { 
-        magma_xerbla( __func__, -(3) );
-        return -3;
-    }
     magma_int_t DEBUG=0;
     magma_int_t nb = stair_T == 0 ? min(k,maxnb) : stair_T;
 
