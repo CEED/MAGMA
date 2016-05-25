@@ -1,10 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#ifdef HAVE_CUBLAS
-#include <cublas_v2.h>
-#endif
-
 #include "magma_types.h"
 
 // ----------------------------------------

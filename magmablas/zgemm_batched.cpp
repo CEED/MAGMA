@@ -22,7 +22,6 @@
        
        The batched version uses gemm_kernel_batched.cuh instead of gemm_kernel.cuh.
 */
-#include "cublas_v2.h"
 #include "magma_internal.h"
 #include "commonblas_z.h"
 
