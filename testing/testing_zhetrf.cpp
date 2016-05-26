@@ -140,25 +140,11 @@ double get_residual_aasen(
     magmaDoubleComplex *L, *T;
     #define  A(i,j) ( A[(i) + (j)*lda])
     #define  L(i,j) ( L[(i) + (j)*n])
-    #define  T(i,j) ( T[(i) + (j)*n])
     TESTING_CHECK( magma_zmalloc_cpu( &L, n*n ));
-    TESTING_CHECK( magma_zmalloc_cpu( &T, n*n ));
     memset( L, 0, n*n*sizeof(magmaDoubleComplex) );
-    memset( T, 0, n*n*sizeof(magmaDoubleComplex) );
 
-    magma_int_t i, j, istart, piv;
+    magma_int_t i, j, piv;
     magma_int_t nb = magma_get_zhetrf_aasen_nb(n);
-    // extract T
-    for (i=0; i < n; i++)
-    {
-        istart = max(0, i-nb);
-        for (j=istart; j <= i; j++) {
-            T(i,j) = A(i,j);
-        }
-        for (j=istart; j < i; j++) {
-            T(j,i) = MAGMA_Z_CONJ(A(i,j));
-        }
-    }
     // extract L
     for (i=0; i < min(n,nb); i++) 
     {
@@ -193,13 +179,43 @@ double get_residual_aasen(
     blasf77_ztrsv( MagmaLowerStr, MagmaNoTransStr, MagmaUnitStr, &n, &L(0,0), &n, x, &ione );
     // banded solver
     magma_int_t nrhs = 1, *p = NULL;
-    
     TESTING_CHECK( magma_imalloc_cpu( &p, n ));
-    
-    lapackf77_zgesv( &n, &nrhs, &T(0, 0), &n, p, x, &n, &info );
-    
+    //#define ZHESV_USE_ZGESV
+    #ifdef ZHESV_USE_ZGESV
+      // using ZGESV on banded matrix
+      #define  T(i,j) ( T[(i) + (j)*n])
+      // extract T
+      TESTING_CHECK( magma_zmalloc_cpu( &T, n*n ));
+      memset( T, 0, n*n*sizeof(magmaDoubleComplex) );
+      for (i=0; i < n; i++)
+      {
+          magma_int_t istart = max(0, i-nb);
+          for (j=istart; j <= i; j++) {
+              T(i,j) = A(i,j);
+          }
+          for (j=istart; j < i; j++) {
+              T(j,i) = MAGMA_Z_CONJ(A(i,j));
+          }
+      }
+      // solve with T
+      lapackf77_zgesv( &n, &nrhs, &T(0, 0), &n, p, x, &n, &info );
+    #else
+      // using ZGBSV on banded matrix
+      magma_int_t ldtb = 3*nb+1;
+      // extract T
+      TESTING_CHECK( magma_zmalloc_cpu( &T, ldtb * n ));
+      memset( T, 0, ldtb*n*sizeof(magmaDoubleComplex) );
+      for (j=0; j<n; j++) {
+          magma_int_t i0 = max(0, j-nb);
+          magma_int_t i1 = min(n-1, j+nb);
+          for (i=i0; i<j; i++) T[nb + i-(j-nb) + j*ldtb] = MAGMA_Z_CONJ(A(j,i));
+          for (i=j; i<=i1; i++) T[nb + i-(j-nb) + j*ldtb] = A(i,j);
+      }
+      // solve with T
+      lapackf77_zgbsv(&n,&nb,&nb, &nrhs, T,&ldtb, p,x,&n, &info);
+    #endif
     magma_free_cpu( p );
-    
+
     // backward solve
     blasf77_ztrsv( MagmaLowerStr, MagmaConjTransStr, MagmaUnitStr, &n, &L(0,0), &n, x, &ione );
     // pivot..
@@ -721,7 +737,7 @@ int main( int argc, char** argv)
                 printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)",
                        (int) N, (int) N, gpu_perf, gpu_time );
             }
-            if ( opts.check == 2 ) {
+            if ( opts.check == 2 && info == 0) {
                 if (aasen) {
                     error = get_residual_aasen( (nopiv | nopiv_gpu), opts.uplo, N, h_A, lda, ipiv );
                 } else {
@@ -733,7 +749,7 @@ int main( int argc, char** argv)
                 printf("\n");
                 status += ! (error < tol);
             }
-            else if ( opts.check ) {
+            else if ( opts.check && info == 0 ) {
                 if (aasen) {
                     error = get_LTLt_error( (nopiv | nopiv_gpu), opts.uplo, N, h_A, lda, ipiv );
                 } else {
