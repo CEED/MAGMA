@@ -533,7 +533,7 @@ magma_int_t magma_get_zhetrf_nopiv_nb( magma_int_t n )
 
 magma_int_t magma_get_chetrf_nopiv_nb( magma_int_t n )
 {
-    return 96;
+    return 320;
 }
 
 magma_int_t magma_get_dsytrf_nopiv_nb( magma_int_t n )

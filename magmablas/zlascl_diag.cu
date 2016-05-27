@@ -9,7 +9,8 @@
 */
 #include "magma_internal.h"
 
-#define NB 64
+#define MB 64
+#define NB 160
 
 
 // each thread block does one NB x n block row of A.
@@ -20,11 +21,12 @@ zlascl_diag_lower(
     const magmaDoubleComplex* D, int ldd,
     magmaDoubleComplex*       A, int lda)
 {
-    int ind = blockIdx.x * NB + threadIdx.x;
+    int ind_x = blockIdx.x * MB + threadIdx.x;
+    int ind_y = blockIdx.y * NB;
 
-    A += ind;
-    if (ind < m) {
-        for (int j=0; j < n; j++ ) {
+    A += ind_x;
+    if (ind_x < m) {
+        for (int j=ind_y; j < min(ind_y+NB, n); j++ ) {
             A[j*lda] = MAGMA_Z_DIV( A[j*lda], D[j + j*ldd] );
         }
     }
@@ -39,12 +41,13 @@ zlascl_diag_upper(
     const magmaDoubleComplex* D, int ldd,
     magmaDoubleComplex*       A, int lda)
 {
-    int ind = blockIdx.x * NB + threadIdx.x;
+    int ind_x = blockIdx.x * MB + threadIdx.x;
+    int ind_y = blockIdx.y * NB;
 
-    A += ind;
-    if (ind < m) {
-        for (int j=0; j < n; j++ ) {
-            A[j*lda] = MAGMA_Z_DIV( A[j*lda], D[ind + ind*ldd] );
+    A += ind_x;
+    if (ind_x < m) {
+        for (int j=ind_y; j < min(ind_y+NB, n); j++ ) {
+            A[j*lda] = MAGMA_Z_DIV( A[j*lda], D[ind_x + ind_x*ldd] );
         }
     }
 }
@@ -126,8 +129,8 @@ magmablas_zlascl_diag_q(
         return;  //info;
     }
     
-    dim3 threads( NB );
-    dim3 grid( magma_ceildiv( m, NB ) );
+    dim3 threads( MB );
+    dim3 grid( magma_ceildiv( m, MB ), magma_ceildiv( n, NB ) );
     
     if (type == MagmaLower) {
         zlascl_diag_lower
