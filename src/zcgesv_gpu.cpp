@@ -13,22 +13,22 @@
 /**
     Purpose
     -------
-    ZCHESV computes the solution to a complex system of linear equations
+    ZCGESV computes the solution to a complex system of linear equations
        A * X = B,  A**T * X = B,  or  A**H * X = B,
-    where A is an N-by-N Hermitian matrix and X and B are N-by-NRHS matrices.
+    where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
 
-    ZCHESV first attempts to factorize the matrix in complex SINGLE PRECISION
-    (without pivoting) and use this factorization within an iterative refinement 
-    procedure to produce a solution with complex DOUBLE PRECISION norm-wise backward 
-    error quality (see below). If the approach fails the method switches to a
+    ZCGESV first attempts to factorize the matrix in complex SINGLE PRECISION
+    and use this factorization within an iterative refinement procedure 
+    to produce a solution with complex DOUBLE PRECISION norm-wise backward error 
+    quality (see below). If the approach fails the method switches to a
     complex DOUBLE PRECISION factorization and solve.
 
     The iterative refinement is not going to be a winning strategy if
     the ratio complex SINGLE PRECISION performance over complex DOUBLE PRECISION
-    performance is too small or if there are many right-hand sides. A reasonable 
-    strategy should take the number of right-hand sides and the size of the matrix 
-    into account. This might be done with a call to ILAENV in the future. Up to now, 
-    we always try iterative refinement.
+    performance is too small. A reasonable strategy should take the 
+    number of right-hand sides and the size of the matrix into account. 
+    This might be done with a call to ILAENV in the future. Up to now, we 
+    always try iterative refinement.
     
     The iterative refinement process is stopped if
         ITER > ITERMAX
