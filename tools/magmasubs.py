@@ -105,6 +105,8 @@ blas_mixed = [
     ('dsymm',          'zhemm'           ),
     ('dsymv',          'zhemv'           ),
     ('dsyrk',          'zherk'           ),
+    ('dsytrf',         'zhetrf'          ),
+    ('dsytrs',         'zhetrs'          ),
     ('dtrmm',          'ztrmm'           ),
     ('dtrsm',          'ztrsm'           ),
     ('dtrsv',          'ztrsv'           ),
@@ -113,6 +115,10 @@ blas_mixed = [
     ('slansy',         'clanhe'          ),
     ('slat2d',         'clat2z'          ),
     ('spotrf',         'cpotrf'          ),
+    ('ssysv',          'chesv'           ),
+    ('ssysv',          'csysv'           ),
+    ('ssytrf',         'chetrf'          ),
+    ('ssytrs',         'chetrs'          ),
     ('strmm',          'ctrmm'           ),
     ('strsm',          'ctrsm'           ),
     ('strsv',          'ctrsv'           ),
@@ -281,7 +287,6 @@ lapack = [
     ('ssygs2',         'dsygs2',         'chegs2',         'zhegs2'          ),
     ('ssygst',         'dsygst',         'chegst',         'zhegst'          ),
     ('ssygv',          'dsygv',          'chegv',          'zhegv'           ),
-    ('ssysv',          'dsysv',          'chesv',          'zhesv'           ),
     ('ssysv',          'dsysv',          'csysv',          'zsysv'           ),
     ('ssyt21',         'dsyt21',         'chet21',         'zhet21'          ),
     ('ssytd2',         'dsytd2',         'chetd2',         'zhetd2'          ),
@@ -289,6 +294,8 @@ lapack = [
     ('ssytf2',         'dsytf2',         'csytf2',         'zsytf2'          ),
     ('ssytrd',         'dsytrd',         'chetrd',         'zhetrd'          ),
     ('ssytrf',         'dsytrf',         'chetrf',         'zhetrf'          ),
+    ('ssysv',          'dsysv',          'chesv',          'zhesv'           ),
+    ('ssysv',          'dsysv',          'csysv',          'zsysv'           ),
     ('ssytrf',         'dsytrf',         'csytrf',         'zsytrf'          ),
     ('ssytrs',         'dsytrs',         'chetrs',         'zhetrs'          ),
     ('ssytrs',         'dsytrs',         'csytrs',         'zsytrs'          ),
@@ -312,6 +319,7 @@ subs = {
 
     # ----- special cases
     ('dcopy',                     'zcopy'                   ),  # before zc
+    ('dssysv',                    'zchesv'                   ),  # before zc
 
     # ----- Mixed precision prefix
     # TODO drop these two -- they are way too general

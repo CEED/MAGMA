@@ -138,6 +138,8 @@ libmagma_src += \
 # ----------
 # symmetric indefinite factorization, CPU interface
 libmagma_src += \
+	$(cdir)/zchesv_gpu.cpp		\
+        \
 	$(cdir)/zhesv.cpp		\
 	$(cdir)/zhetrf.cpp		\
 	$(cdir)/zhetrf_aasen.cpp	\
