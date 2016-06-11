@@ -162,28 +162,28 @@ magma_z_precondsetup(
     else if ( precond->solver == Magma_ICC ) {
         info = magma_zcumiccsetup( A, precond, queue );
     }
-    else if ( precond->solver == Magma_AICC ) {
+    else if ( precond->solver == Magma_PARIC ) {
         info = magma_zitericsetup( A, b, precond, queue );
     }
-    else if ( precond->solver == Magma_AICT ) {
+    else if ( precond->solver == Magma_PARICT ) {
         #ifdef _OPENMP
             info = magma_ziterictsetup( A, b, precond, queue );
-            precond->solver = Magma_AICC; // handle as AICC
+            precond->solver = Magma_PARIC; // handle as PARIC
         #else
             printf( "error: preconditioner requires OpenMP.\n" );
             info = MAGMA_ERR_NOT_SUPPORTED;
         #endif
     }
-    else if ( precond->solver == Magma_AILU ) {
+    else if ( precond->solver == Magma_PARILU ) {
         info = magma_ziterilusetup( A, b, precond, queue );
     }
     else if ( precond->solver == Magma_CUSTOMIC ) {
         info = magma_zcustomicsetup( A, b, precond, queue );
-        precond->solver = Magma_AICC; // handle as AICC
+        precond->solver = Magma_PARIC; // handle as PARIC
     }
     else if ( precond->solver == Magma_CUSTOMILU ) {
         info = magma_zcustomilusetup( A, b, precond, queue );
-        precond->solver = Magma_AILU; // handle as AILU
+        precond->solver = Magma_PARILU; // handle as PARILU
     }
     else if ( precond->solver == Magma_NONE ) {
         info = MAGMA_SUCCESS;
@@ -197,9 +197,9 @@ magma_z_precondsetup(
           solver->solver == Magma_PBICG ||
           solver->solver == Magma_LSQR ) &&
         ( precond->solver == Magma_ILU      || 
-            precond->solver == Magma_AILU   || 
+            precond->solver == Magma_PARILU   || 
             precond->solver == Magma_ICC    || 
-            precond->solver == Magma_AICC ) ) {  // also prepare the transpose
+            precond->solver == Magma_PARIC ) ) {  // also prepare the transpose
         info = magma_zcumilusetup_transpose( A, precond, queue );
     }
     
@@ -334,11 +334,11 @@ magma_z_applyprecond_left(
             CHECK( magma_zjacobi_diagscal( b.num_rows, precond->d, b, x, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter >= 50 ) {
             CHECK( magma_zapplycumilu_l( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter < 50 ) {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
@@ -346,11 +346,11 @@ magma_z_applyprecond_left(
             // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
         }
         else if ( ( precond->solver == Magma_ICC ||
-                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 )  {
+                    precond->solver == Magma_PARIC ) && precond->maxiter >= 50 )  {
             CHECK( magma_zapplycumicc_l( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ICC ||
-                    precond->solver == Magma_AICC ) && precond->maxiter < 50 )  {
+                    precond->solver == Magma_PARIC ) && precond->maxiter < 50 )  {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
@@ -372,11 +372,11 @@ magma_z_applyprecond_left(
             CHECK( magma_zjacobi_diagscal( b.num_rows, precond->d, b, x, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter >= 50 ) {
             CHECK( magma_zapplycumilu_l_transpose( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter < 50 ) {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
@@ -384,11 +384,11 @@ magma_z_applyprecond_left(
             // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
         }
         else if ( ( precond->solver == Magma_ICC ||
-                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 )  {
+                    precond->solver == Magma_PARIC ) && precond->maxiter >= 50 )  {
             CHECK( magma_zapplycumicc_l( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ICC ||
-                    precond->solver == Magma_AICC ) && precond->maxiter < 50 )  {
+                    precond->solver == Magma_PARIC ) && precond->maxiter < 50 )  {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
@@ -466,11 +466,11 @@ magma_z_applyprecond_right(
             magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );    // x = b
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter >= 50 ) {
             CHECK( magma_zapplycumilu_r( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter < 50 ) {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
@@ -479,11 +479,11 @@ magma_z_applyprecond_right(
         }
     
         else if ( ( precond->solver == Magma_ICC ||
-                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 ) {
+                    precond->solver == Magma_PARIC ) && precond->maxiter >= 50 ) {
             CHECK( magma_zapplycumicc_r( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ICC ||
-                   precond->solver == Magma_AICC ) && precond->maxiter < 50 ) {
+                   precond->solver == Magma_PARIC ) && precond->maxiter < 50 ) {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
@@ -505,11 +505,11 @@ magma_z_applyprecond_right(
             magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );    // x = b
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter >= 50 ) {
             CHECK( magma_zapplycumilu_r_transpose( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
-                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+                    precond->solver == Magma_PARILU ) && precond->maxiter < 50 ) {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
@@ -518,11 +518,11 @@ magma_z_applyprecond_right(
         }
     
         else if ( ( precond->solver == Magma_ICC ||
-                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 ) {
+                    precond->solver == Magma_PARIC ) && precond->maxiter >= 50 ) {
             CHECK( magma_zapplycumicc_r( b, x, precond, queue ));
         }
         else if ( ( precond->solver == Magma_ICC ||
-                   precond->solver == Magma_AICC ) && precond->maxiter < 50 ) {
+                   precond->solver == Magma_PARIC ) && precond->maxiter < 50 ) {
             magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
             magma_z_solver_par solver_par;
             solver_par.maxiter = precond->maxiter;
