@@ -492,8 +492,8 @@ typedef enum {
     Magma_PASTIX       = 444,
     Magma_ILU          = 445,
     Magma_ICC          = 446,
-    Magma_AILU         = 447,
-    Magma_AICC         = 448,
+    Magma_PARILU       = 447,
+    Magma_PARIC        = 448,
     Magma_BAITER       = 449,
     Magma_LOBPCG       = 450,
     Magma_NONE         = 451,
@@ -518,7 +518,7 @@ typedef enum {
     Magma_BAITERO      = 493,
     Magma_IDRMERGE     = 494,
   Magma_PBICGSTABMERGE = 495,
-    Magma_AICT         = 496,
+    Magma_PARICT       = 496,
     Magma_CUSTOMIC     = 497,
     Magma_CUSTOMILU    = 498,
     Magma_PIDRMERGE    = 499,
@@ -526,8 +526,9 @@ typedef enum {
     Magma_BICGMERGE    = 501,
     Magma_PBICG        = 502,
     Magma_PBICGMERGE   = 503,
-    Magma_LSQR         = 504
-    
+    Magma_LSQR         = 504,
+    Magma_PARILUT      = 505,
+    Magma_ISAI         = 506
 } magma_solver_type;
 
 typedef enum {
