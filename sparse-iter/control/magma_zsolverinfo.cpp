@@ -178,11 +178,11 @@ magma_zsolverinfo(
                     printf("%%   Preconditioner used: Block-asynchronous iteration.\n"); break;
             case  Magma_ILU:
                     printf("%%   Preconditioner used: ILU(%d).\n", int(precond_par->levels)); break;
-            case  Magma_AILU:
+            case  Magma_PARILU:
                     printf("%%   Preconditioner used: iterative ILU(%d).\n", int(precond_par->levels)); break;
             case  Magma_ICC:
                     printf("%%   Preconditioner used: IC(%d).\n", int(precond_par->levels)); break;
-            case  Magma_AICC:
+            case  Magma_PARIC:
                     printf("%%   Preconditioner used: iterative IC(%d).\n", int(precond_par->levels)); break;
             default:
                   break;

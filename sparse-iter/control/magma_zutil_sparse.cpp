@@ -40,7 +40,7 @@ static const char *usage_sparse =
 " --precond x   Possibility to choose a preconditioner:\n"
 "               CG, BICGSTAB, GMRES, LOBPCG, JACOBI,\n"
 "               BAITER, IDR, CGS, TFQMR, QMR, BICG\n"
-"               BOMBARDMENT, ITERREF, ILU, AILU, NONE.\n"
+"               BOMBARDMENT, ITERREF, ILU, PARILU, NONE.\n"
 "                   --patol atol  Absolute residual stopping criterion for preconditioner.\n"
 "                   --prtol rtol  Relative residual stopping criterion for preconditioner.\n"
 "                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"
@@ -302,11 +302,11 @@ magma_zparse_opts(
             else if ( strcmp("ILU", argv[i]) == 0 || strcmp("IC", argv[i]) == 0 )  {
                 opts->precond_par.solver = Magma_ILU;
             }
-            else if ( strcmp("AILU", argv[i]) == 0 || strcmp("AIC", argv[i]) == 0 ) {
-                opts->precond_par.solver = Magma_AILU;
+            else if ( strcmp("PARILU", argv[i]) == 0 || strcmp("AIC", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PARILU;
             }
-            else if ( strcmp("AICT", argv[i]) == 0 ) {
-                opts->precond_par.solver = Magma_AICT;
+            else if ( strcmp("PARICT", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PARICT;
             }
             else if ( strcmp("CUSTOMIC", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_CUSTOMIC;
@@ -431,8 +431,8 @@ magma_zparse_opts(
         && opts->precond_par.solver == Magma_ILU )
             opts->precond_par.solver = Magma_ICC;
     if ( ( opts->solver_par.solver == Magma_PCG || opts->solver_par.solver == Magma_PCGMERGE )
-        && opts->precond_par.solver == Magma_AILU )
-            opts->precond_par.solver = Magma_AICC;
+        && opts->precond_par.solver == Magma_PARILU )
+            opts->precond_par.solver = Magma_PARIC;
             
             
     return info;
