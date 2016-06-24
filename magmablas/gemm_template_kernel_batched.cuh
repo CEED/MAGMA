@@ -28,24 +28,18 @@ void gemm_template_batched_nn_kernel(
     T const * const * Aarray, int LDA,
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
-    T alpha, T beta,
-    int offsetA, int offsetB )
+    T alpha, T beta, 
+    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
 {
-    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
-    int batchid = blockIdx.z;
-    
-    /*
-    #ifdef TEXTURE_1D
-    int matrixA_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    int matrixB_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    offsetA += batchid*matrixA_size;
-    offsetB += batchid*matrixB_size;
-    #endif
-    */
+    const int batchid = blockIdx.z;
     
     gemm_template_device_nn
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-        ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+        ( M, N, K, 
+          Aarray[batchid] + LDA *  coffA + roffA, LDA, 
+          Barray[batchid] + LDB *  coffB + roffB, LDB, 
+          Carray[batchid] + LDC *  coffC + roffC, LDC, 
+          alpha, beta );
 }
 
 
@@ -59,24 +53,18 @@ void gemm_template_batched_nt_kernel(
     T const * const * Aarray, int LDA,
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
-    T alpha, T beta,
-    int offsetA, int offsetB )
+    T alpha, T beta, 
+    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
 {
-    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
-    int batchid = blockIdx.z;
-    
-    /*
-    #ifdef TEXTURE_1D
-    int matrixA_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    int matrixB_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    offsetA += batchid*matrixA_size;
-    offsetB += batchid*matrixB_size;
-    #endif
-    */
+    const int batchid = blockIdx.z;
     
     gemm_template_device_nt
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-        ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+        ( M, N, K, 
+          Aarray[batchid] + LDA *  coffA + roffA, LDA, 
+          Barray[batchid] + LDB *  coffB + roffB, LDB, 
+          Carray[batchid] + LDC *  coffC + roffC, LDC, 
+          alpha, beta );
 }
 
 
@@ -90,24 +78,18 @@ void gemm_template_batched_tn_kernel(
     T const * const * Aarray, int LDA,
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
-    T alpha, T beta,
-    int offsetA, int offsetB )
+    T alpha, T beta, 
+    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
 {
-    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
-    int batchid = blockIdx.z;
-    
-    /*
-    #ifdef TEXTURE_1D
-    int matrixA_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    int matrixB_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    offsetA += batchid*matrixA_size;
-    offsetB += batchid*matrixB_size;
-    #endif
-    */
+    const int batchid = blockIdx.z;
     
     gemm_template_device_tn
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-        ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+        ( M, N, K, 
+          Aarray[batchid] + LDA *  coffA + roffA, LDA, 
+          Barray[batchid] + LDB *  coffB + roffB, LDB, 
+          Carray[batchid] + LDC *  coffC + roffC, LDC, 
+          alpha, beta );
 }
 
 
@@ -121,27 +103,19 @@ void gemm_template_batched_tt_kernel(
     T const * const * Aarray, int LDA,
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
-    T alpha, T beta,
-    int offsetA, int offsetB )
+    T alpha, T beta, 
+    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
 {
-    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
-    int batchid = blockIdx.z;
-    
-    /*
-    #ifdef TEXTURE_1D
-    int matrixA_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    int matrixB_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    offsetA += batchid*matrixA_size;
-    offsetB += batchid*matrixB_size;
-    #endif
-    */
+    const int batchid = blockIdx.z;
     
     gemm_template_device_tt
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-        ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+        ( M, N, K, 
+          Aarray[batchid] + LDA *  coffA + roffA, LDA, 
+          Barray[batchid] + LDB *  coffB + roffB, LDB, 
+          Carray[batchid] + LDC *  coffC + roffC, LDC, 
+          alpha, beta );
 }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // kernel wrappers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,8 +129,8 @@ void gemm_template_batched_nn(
     T const * const * dA_array, magma_int_t ldda,
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
-    T alpha, T beta,
-    magma_int_t offsetA, magma_int_t offsetB, 
+    T alpha, T beta, 
+    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -164,7 +138,7 @@ void gemm_template_batched_nn(
     gemm_template_batched_nn_kernel
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
         <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
-        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
+        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC);
 }
 
 
@@ -180,7 +154,7 @@ void gemm_template_batched_nt(
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta,
-    magma_int_t offsetA, magma_int_t offsetB, 
+    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -188,7 +162,7 @@ void gemm_template_batched_nt(
     gemm_template_batched_nt_kernel
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
         <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
-        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
+        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC);
 }
 
 
@@ -203,8 +177,8 @@ void gemm_template_batched_tn(
     T const * const * dA_array, magma_int_t ldda,
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
-    T alpha, T beta,
-    magma_int_t offsetA, magma_int_t offsetB, 
+    T alpha, T beta, 
+    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -212,7 +186,7 @@ void gemm_template_batched_tn(
     gemm_template_batched_tn_kernel
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
         <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
-        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
+        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC);
 }
 
 
@@ -228,7 +202,7 @@ void gemm_template_batched_tt(
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta,
-    magma_int_t offsetA, magma_int_t offsetB, 
+    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -236,7 +210,7 @@ void gemm_template_batched_tt(
     gemm_template_batched_tt_kernel
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
         <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
-        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
+        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC);
 }
 
 #endif //GEMM_TEMPLATE_KERNEL_BATCHED_CUH

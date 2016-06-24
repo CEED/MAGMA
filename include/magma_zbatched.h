@@ -73,6 +73,18 @@ magmablas_zswapdblk_batched(
    *  BLAS batched routines
    */
 void
+magmablas_zgemm_batched_core(
+    magma_trans_t transA, magma_trans_t transB, 
+    magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+    magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex **dC_array, magma_int_t lddc, 
+    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t batchCount, magma_queue_t queue );
+
+void
 magma_zgemm_batched(
     magma_trans_t transA, magma_trans_t transB, 
     magma_int_t m, magma_int_t n, magma_int_t k,
@@ -81,18 +93,6 @@ magma_zgemm_batched(
     magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
     magmaDoubleComplex beta,
     magmaDoubleComplex **dC_array, magma_int_t lddc, 
-    magma_int_t batchCount, magma_queue_t queue );
-
-void
-magmablas_zgemm_vbatched(
-    magma_trans_t transA, magma_trans_t transB, 
-    magma_int_t* m, magma_int_t* n, magma_int_t* k,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex const * const * dA_array, magma_int_t* ldda,
-    magmaDoubleComplex const * const * dB_array, magma_int_t* lddb,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex **dC_array, magma_int_t* lddc, 
-    magma_int_t max_m, magma_int_t max_n, magma_int_t max_k, 
     magma_int_t batchCount, magma_queue_t queue );
 
 void

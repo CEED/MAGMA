@@ -25,9 +25,10 @@ template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const i
 static __global__
 void herk_template_batched_nt_kernel(
     magma_uplo_t uplo, int N, int K, 
-    T alpha, T const * const * Aarray, int LDA,
-    T beta, T**       Carray, int LDC,
-    int offsetA, int offsetB)
+    T alpha, 
+    T const * const * Aarray, int LDA,
+    T const * const * Barray, int LDB,
+    T beta, T**       Carray, int LDC)
 {
     // for lower: each thread-block checks its bottom left corner of its corresponding C block
     if ( ( uplo == MagmaLower ) && ( blockIdx.y*BLK_N > (blockIdx.x+1)*BLK_M ) )
@@ -39,18 +40,9 @@ void herk_template_batched_nt_kernel(
 
     int batchid = blockIdx.z;
     
-    /*
-    #ifdef TEXTURE_1D
-    int matrixA_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    int matrixB_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    offsetA += batchid*matrixA_size;
-    offsetB += batchid*matrixB_size;
-    #endif
-    */
-    
     gemm_template_device_nt
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-        ( N, N, K, Aarray[batchid], LDA, Aarray[batchid], LDA, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+        ( N, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta );
 }
 
 
@@ -61,9 +53,10 @@ template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const i
 static __global__
 void herk_template_batched_tn_kernel(
     magma_uplo_t uplo, int N, int K, 
-    T alpha, T const * const * Aarray, int LDA,
-    T beta, T**       Carray, int LDC,
-    int offsetA, int offsetB )
+    T alpha, 
+    T const * const * Aarray, int LDA,
+    T const * const * Barray, int LDB,
+    T beta, T**       Carray, int LDC )
 {
     // for lower: each thread-block checks its bottom left corner of its corresponding C block
     if ( ( uplo == MagmaLower ) && ( blockIdx.y*BLK_N > (blockIdx.x+1)*BLK_M ) )
@@ -75,18 +68,9 @@ void herk_template_batched_tn_kernel(
 
     int batchid = blockIdx.z;
     
-    /*
-    #ifdef TEXTURE_1D
-    int matrixA_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    int matrixB_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;
-    offsetA += batchid*matrixA_size;
-    offsetB += batchid*matrixB_size;
-    #endif
-    */
-    
     gemm_template_device_tn
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-        ( N, N, K, Aarray[batchid], LDA, Aarray[batchid], LDA, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+        ( N, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta );
 }
 
 
@@ -101,9 +85,9 @@ template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const i
 void herk_template_batched_nt(
     magma_uplo_t uplo, magma_int_t n, magma_int_t k,
     T const * const * dA_array, magma_int_t ldda,
+    T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta,
-    magma_int_t offsetA, magma_int_t offsetB, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -111,7 +95,7 @@ void herk_template_batched_nt(
     herk_template_batched_nt_kernel
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
         <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
-        (uplo, n, k, alpha, dA_array, ldda, beta, dC_array, lddc, offsetA, offsetB);
+        (uplo, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc);
 }
 
 
@@ -124,9 +108,9 @@ template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const i
 void herk_template_batched_tn(
     magma_uplo_t uplo, magma_int_t n, magma_int_t k,
     T const * const * dA_array, magma_int_t ldda,
+    T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta,
-    magma_int_t offsetA, magma_int_t offsetB, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -134,7 +118,7 @@ void herk_template_batched_tn(
     herk_template_batched_tn_kernel
         <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
         <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
-        (uplo, n, k, alpha, dA_array, ldda, beta, dC_array, lddc, offsetA, offsetB);
+        (uplo, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc);
 }
 
 #endif //HERK_TEMPLATE_KERNEL_BATCHED_CUH

@@ -28,6 +28,8 @@ hdr += \
 	$(cdir)/magma_zbulgeinc.h	\
 	$(cdir)/magma_zgehrd_m.h	\
 	$(cdir)/magma_zbatched.h	\
+	$(cdir)/magma_zvbatched.h	\
+
 
 
 # ----------------------------------------------------------------------

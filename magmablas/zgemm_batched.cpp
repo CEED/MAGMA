@@ -22,6 +22,7 @@
        
        The batched version uses gemm_kernel_batched.cuh instead of gemm_kernel.cuh.
 */
+#include "cublas_v2.h"
 #include "magma_internal.h"
 #include "commonblas_z.h"
 
@@ -143,8 +144,32 @@
     queue   magma_queue_t
             Queue to execute in.
     
+    @param[in]
+    myhandle    cublasHandle_t
+              Handlde to use cuBLAS routines
+
     @ingroup magma_zblas3
     ********************************************************************/
+///////////////////////////////////////////////////////////////////////////////////////////////////
+extern "C" void
+magmablas_zgemm_batched( magma_trans_t transA, magma_trans_t transB, 
+                     magma_int_t m, magma_int_t n, magma_int_t k,
+                     magmaDoubleComplex alpha,
+                     magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+                     magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
+                     magmaDoubleComplex beta,
+                     magmaDoubleComplex **dC_array, magma_int_t lddc, 
+                     magma_int_t batchCount, magma_queue_t queue )
+{
+    magmablas_zgemm_batched_core(
+                transA, transB, m, n, k,
+                alpha, dA_array, ldda,
+                dB_array, lddb,
+                beta, dC_array, lddc, 
+                0, 0, 0, 0, 0, 0, 
+                batchCount, queue );
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C" void
 magma_zgemm_batched( magma_trans_t transA, magma_trans_t transB, 
                      magma_int_t m, magma_int_t n, magma_int_t k,

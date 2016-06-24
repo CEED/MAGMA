@@ -15,6 +15,7 @@
 #include "magmablas_v2.h"
 #include "magmablas_q.h"
 #include "magma_batched.h"
+#include "magma_vbatched.h"
 #include "magma_bulge.h"
 
 /* ------------------------------------------------------------
