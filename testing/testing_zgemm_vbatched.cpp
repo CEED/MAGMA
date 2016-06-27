@@ -51,6 +51,7 @@ int main( int argc, char** argv)
 
     magmaDoubleComplex *h_A, *h_B, *h_C, *h_Cmagma;
     magmaDoubleComplex *d_A, *d_B, *d_C;
+    magmaDoubleComplex *h_A_tmp, *h_B_tmp, *h_C_tmp;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.48,  0.38 );
@@ -60,10 +61,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex **d_A_array = NULL;
     magmaDoubleComplex **d_B_array = NULL;
     magmaDoubleComplex **d_C_array = NULL;
-    
-    magmaDoubleComplex *h_A_tmp, *h_B_tmp, *h_C_tmp;
-    magmaDoubleComplex *d_A_tmp, *d_B_tmp, *d_C_tmp;
-    
+        
     magma_int_t *h_M, *h_N, *h_K; // hold the sizes on cpu
     magma_int_t *d_M, *d_N, *d_K; // hold the sizes on gpu
      
