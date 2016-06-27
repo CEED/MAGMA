@@ -106,6 +106,38 @@ magmablas_zgemm_batched(
     magmaDoubleComplex **dC_array, magma_int_t lddc, 
     magma_int_t batchCount, magma_queue_t queue );
 
+void 
+magmablas_zsyrk_internal_batched(
+    magma_uplo_t uplo, magma_trans_t trans, 
+    magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+    magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex **dC_array, magma_int_t lddc, 
+    magma_int_t batchCount, magma_queue_t queue );
+
+void
+magmablas_zherk_internal_batched(
+    magma_uplo_t uplo, magma_trans_t trans, 
+    magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+    magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex **dC_array, magma_int_t lddc, 
+    magma_int_t batchCount, magma_queue_t queue );
+
+void
+magmablas_zsyrk_batched(
+    magma_uplo_t uplo, magma_trans_t trans, 
+    magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex **dC_array, magma_int_t lddc, 
+    magma_int_t batchCount, magma_queue_t queue );
+    
 void
 magma_zherk_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
@@ -122,6 +154,24 @@ magmablas_zherk_batched(
     magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
     double beta,
     magmaDoubleComplex **dC_array, magma_int_t lddc,
+    magma_int_t batchCount, magma_queue_t queue );
+
+void
+magmablas_zher2k_batched(
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+    magmaDoubleComplex const * const * dB_array, magma_int_t lddb, 
+    double beta, magmaDoubleComplex **dC_array, magma_int_t lddc, 
+    magma_int_t batchCount, magma_queue_t queue );
+
+void 
+magmablas_zsyr2k_batched(
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+    magmaDoubleComplex const * const * dB_array, magma_int_t lddb, 
+    magmaDoubleComplex beta, magmaDoubleComplex **dC_array, magma_int_t lddc, 
     magma_int_t batchCount, magma_queue_t queue );
 
 magma_int_t 

@@ -188,6 +188,8 @@ testing_src += \
 	$(cdir)/testing_zlacpy_batched.cpp	\
 	$(cdir)/testing_ztrsm_batched.cpp	\
 	$(cdir)/testing_ztrsv_batched.cpp	\
+	$(cdir)/testing_zher2k_batched.cpp	\
+	$(cdir)/testing_zsyr2k_batched.cpp	\
 	\
 	$(cdir)/testing_zgeqrf_batched.cpp	\
 	\
@@ -206,7 +208,9 @@ testing_src += \
 	$(cdir)/testing_zgemm_vbatched.cpp	\
 	$(cdir)/testing_zherk_vbatched.cpp	\
 	$(cdir)/testing_zsyrk_vbatched.cpp	\
-
+	$(cdir)/testing_zher2k_vbatched.cpp	\
+	$(cdir)/testing_zsyr2k_vbatched.cpp	\
+	
 # ----------
 # fortran.c and fortran_thunking.c are provided by NVIDIA in $(CUDADIR)/src
 ifeq ($(FORT), pgfortran)

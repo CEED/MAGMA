@@ -132,7 +132,9 @@ libmagma_src += \
 	$(cdir)/ztrsm_batched.cpp		\
 	$(cdir)/ztrsv_batched.cu		\
 	$(cdir)/ztrtri_diag_batched.cu		\
-
+	$(cdir)/zher2k_batched.cpp		\
+	$(cdir)/zsyr2k_batched.cpp		\
+	
 # vbatched files
 libmagma_src += \
 	$(cdir)/zgemm_vbatched_core.cu	\
@@ -146,7 +148,9 @@ libmagma_src += \
 
 libmagma_src += \
 	$(cdir)/zgemm_vbatched.cpp		\
+	$(cdir)/zher2k_vbatched.cpp		\
 	$(cdir)/zherk_vbatched.cpp		\
+	$(cdir)/zsyr2k_vbatched.cpp		\
 	$(cdir)/zsyrk_vbatched.cpp		\
 
 # aux vbatched files
