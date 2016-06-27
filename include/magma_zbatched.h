@@ -124,16 +124,6 @@ magmablas_zherk_batched(
     magmaDoubleComplex **dC_array, magma_int_t lddc,
     magma_int_t batchCount, magma_queue_t queue );
 
-void
-magmablas_zherk_vbatched(
-    magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
-    double alpha,
-    magmaDoubleComplex const * const * dA_array, magma_int_t* ldda,
-    double beta,
-    magmaDoubleComplex **dC_array, magma_int_t* lddc, 
-    magma_int_t max_n, magma_int_t max_k,
-    magma_int_t batchCount, magma_queue_t queue );
-
 magma_int_t 
 magma_zpotf2_tile_batched(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,

@@ -139,7 +139,15 @@ libmagma_src += \
 	$(cdir)/cgemm_vbatched_core.cu	\
 	$(cdir)/dgemm_vbatched_core.cu	\
 	$(cdir)/sgemm_vbatched_core.cu	\
+	$(cdir)/ssyrk_vbatched_core.cu	\
+	$(cdir)/dsyrk_vbatched_core.cu	\
+	$(cdir)/cherk_vbatched_core.cu	\
+	$(cdir)/zherk_vbatched_core.cu	\
+
+libmagma_src += \
 	$(cdir)/zgemm_vbatched.cpp		\
+	$(cdir)/zherk_vbatched.cpp		\
+	$(cdir)/zsyrk_vbatched.cpp		\
 
 # aux vbatched files
 libmagma_src += \
@@ -217,6 +225,13 @@ $(cdir)/sgemm_vbatched_core.$(o_ext): $(cdir)/gemm_template_kernel_vbatched.cuh 
 $(cdir)/dgemm_vbatched_core.$(o_ext): $(cdir)/gemm_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
 $(cdir)/cgemm_vbatched_core.$(o_ext): $(cdir)/gemm_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
 $(cdir)/zgemm_vbatched_core.$(o_ext): $(cdir)/gemm_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
+
+$(cdir)/zherk_batched_core.$(o_ext): $(cdir)/herk_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
+$(cdir)/cherk_batched_core.$(o_ext): $(cdir)/herk_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
+$(cdir)/dsyrk_batched_core.$(o_ext): $(cdir)/herk_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
+$(cdir)/ssyrk_batched_core.$(o_ext): $(cdir)/herk_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
+$(cdir)/zsyrk_batched_core.$(o_ext): $(cdir)/herk_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
+$(cdir)/csyrk_batched_core.$(o_ext): $(cdir)/herk_template_kernel_vbatched.cuh $(cdir)/gemm_template_device.cuh $(cdir)/gemm_template_device_defs.cuh
 
 $(cdir)/zgemm_fermi.$(o_ext): $(cdir)/zgemm_fermi_kernels.h $(cdir)/gemm_stencil.cuh $(cdir)/gemm_kernel.cuh $(cdir)/gemm_stencil_defs.h
 $(cdir)/cgemm_fermi.$(o_ext): $(cdir)/cgemm_fermi_kernels.h $(cdir)/gemm_stencil.cuh $(cdir)/gemm_kernel.cuh $(cdir)/gemm_stencil_defs.h

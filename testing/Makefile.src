@@ -204,6 +204,8 @@ testing_src += \
 # vbatched BLAS, QR, LU, Cholesky
 testing_src += \
 	$(cdir)/testing_zgemm_vbatched.cpp	\
+	$(cdir)/testing_zherk_vbatched.cpp	\
+	$(cdir)/testing_zsyrk_vbatched.cpp	\
 
 # ----------
 # fortran.c and fortran_thunking.c are provided by NVIDIA in $(CUDADIR)/src
