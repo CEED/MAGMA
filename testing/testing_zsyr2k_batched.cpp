@@ -46,7 +46,6 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
-    magma_int_t NN;
     magma_int_t batchCount;
 
     magmaDoubleComplex *h_A, *h_B, *h_C, *h_Cmagma;
@@ -104,8 +103,6 @@ int main( int argc, char** argv)
             
             ldc = N;
             
-            NN = N * batchCount;
-
             ldda = magma_roundup( lda, opts.align );  // multiple of 32 by default
             lddb = magma_roundup( ldb, opts.align );  // multiple of 32 by default
             lddc = magma_roundup( ldc, opts.align );  // multiple of 32 by default
