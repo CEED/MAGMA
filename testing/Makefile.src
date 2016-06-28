@@ -206,6 +206,7 @@ testing_src += \
 # vbatched BLAS, QR, LU, Cholesky
 testing_src += \
 	$(cdir)/testing_zgemm_vbatched.cpp	\
+	$(cdir)/testing_zgemv_vbatched.cpp	\
 	$(cdir)/testing_zherk_vbatched.cpp	\
 	$(cdir)/testing_zsyrk_vbatched.cpp	\
 	$(cdir)/testing_zher2k_vbatched.cpp	\
