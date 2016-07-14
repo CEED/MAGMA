@@ -437,9 +437,6 @@ if ( opts.ilu_exact_prec ):
 if ( opts.ilut_prec ):
     precs += ['--precond PARILUT --prestart 1 --psweeps 5 --plevels 0 --prtol 0.05 --patol 0.2 ']
 # end
-if ( opts.iter_ilu_prec ):
-    precs += ['--precond AILU']
-# end
 if ( opts.ilu_jac_prec ):
     precs += ['--precond ILU --trisolver JACOBI --ppattern 1 --piters 5 ']
 # end
