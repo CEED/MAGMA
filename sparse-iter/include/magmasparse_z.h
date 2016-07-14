@@ -1079,7 +1079,7 @@ magma_zisai_r(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmiluspai_sizecheck(
+magma_zmiluisai_sizecheck(
     magma_z_matrix A,
     magma_index_t batchsize,
     magma_index_t *maxsize,
