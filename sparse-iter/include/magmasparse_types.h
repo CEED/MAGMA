@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 2.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,6 @@
 #ifndef MAGMASPARSE_TYPES_H
 #define MAGMASPARSE_TYPES_H
 
-#include "magma_types.h"
 
 #if defined(HAVE_PASTIX)
 //PaStiX include
@@ -450,8 +449,12 @@ typedef struct magma_s_solver_par
 typedef struct magma_z_preconditioner
 {
     magma_solver_type       solver;
+    magma_solver_type       trisolver;
     magma_int_t             levels;
     magma_int_t             sweeps;
+    magma_int_t             pattern;
+    magma_int_t             bsize;
+    magma_int_t             offset;
     magma_precision         format;
     double                  atol;                
     double                  rtol;    
@@ -491,8 +494,12 @@ typedef struct magma_z_preconditioner
 typedef struct magma_c_preconditioner
 {
     magma_solver_type       solver;
+    magma_solver_type       trisolver;
     magma_int_t             levels;
     magma_int_t             sweeps;
+    magma_int_t             pattern;
+    magma_int_t             bsize;
+    magma_int_t             offset;
     magma_precision         format;
     float                   atol;                
     float                   rtol;               
@@ -533,8 +540,12 @@ typedef struct magma_c_preconditioner
 typedef struct magma_d_preconditioner
 {
     magma_solver_type       solver;
+    magma_solver_type       trisolver;
     magma_int_t             levels;
     magma_int_t             sweeps;
+    magma_int_t             pattern;
+    magma_int_t             bsize;
+    magma_int_t             offset;
     magma_precision         format;
     double                  atol;                
     double                  rtol; 
@@ -575,8 +586,12 @@ typedef struct magma_d_preconditioner
 typedef struct magma_s_preconditioner
 {
     magma_solver_type       solver;
+    magma_solver_type       trisolver;
     magma_int_t             levels;
     magma_int_t             sweeps;
+    magma_int_t             pattern;
+    magma_int_t             bsize;
+    magma_int_t             offset;
     magma_precision         format;
     float                   atol;                
     float                   rtol;    

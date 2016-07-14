@@ -578,8 +578,12 @@ subs = {
     ('siterilu',       'diterilu',       'citerilu',       'ziterilu'        ),
     ('siteric',        'diteric',        'citeric',        'ziteric'         ),
     ('sdummy',         'ddummy',         'cdummy',         'zdummy'          ),
-
-
+    ('stest',          'dtest',	         'ctest',          'ztest'           ),
+    ('sgeisai',        'dgeisai',        'cgeisai',        'zgeisai'         ),
+    ('ssyisai',        'dsyisai',        'csyisai',        'zsyisai'         ),
+    ('silu',           'dilu',           'cilu',           'zilu'            ),	
+    ('sgeblock',       'dgeblock',       'cilugeblock',    'zgeblock'        ),	
+	
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
     ('slsqr',          'dlsqr',          'clsqr',          'zlsqr'           ),
@@ -599,6 +603,7 @@ subs = {
     ('spidr',          'dpidr',          'cpidr',          'zpidr'           ),
     ('sp1gmres',       'dp1gmres',       'cp1gmres',       'zp1gmres'        ),
     ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
+    ('sftjacobi',      'dftjacobi',      'cftjacobi',      'zftjacobi'       ),
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),
     ('silu',           'dilu',           'cilu',           'zilu'            ),
     ('sailu',          'dailu',          'cailu',          'zailu'           ),
@@ -611,6 +616,8 @@ subs = {
     ('sbaiter',        'dbaiter',        'cbaiter',        'zbaiter'         ),
     ('sbombard',       'dbombard',       'cbombard',       'zbombard'        ),
     ('scustom',        'dcustom',        'ccustom',        'zcustom'         ),
+    ('sparilu',        'dparilu',        'cparilu',        'zparilu'         ),
+    ('sparic',         'dparic',         'cparic',         'zparic'          ),
 
     # ----- SPARSE Iterative Eigensolvers
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),

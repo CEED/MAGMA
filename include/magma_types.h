@@ -471,7 +471,8 @@ typedef enum {
     Magma_CSRL         = 627,
     Magma_CSRU         = 628,
     Magma_CSRCOO       = 629,
-    Magma_CUCSR        = 630
+    Magma_CUCSR        = 630,
+    Magma_COOLIST      = 631
 } magma_storage_t;
 
 
@@ -528,7 +529,8 @@ typedef enum {
     Magma_PBICGMERGE   = 503,
     Magma_LSQR         = 504,
     Magma_PARILUT      = 505,
-    Magma_ISAI         = 506
+    Magma_ISAI         = 506,
+    Magma_CUSOLVE      = 507
 } magma_solver_type;
 
 typedef enum {

@@ -32,21 +32,24 @@ static const char *usage_sparse =
 "               1   symmetric scaling to unit diagonal\n"
 " --solver      Possibility to choose a solver:\n"
 "               CG, PCG, BICGSTAB, PBICGSTAB, GMRES, PGMRES, LOBPCG, JACOBI,\n"
-"               BAITER, IDR, PIDR, CGS, PCGS, TFQMR, PTFQMR, QMR, BICG\n"
-"               BOMBARDMENT, ITERREF.\n"
+"               BAITER, IDR, PIDR, CGS, PCGS, TFQMR, PTFQMR, QMR, PQMR, BICG,\n"
+"               PBICG, BOMBARDMENT, ITERREF.\n"
 " --basic       Use non-optimized version\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
 " --precond x   Possibility to choose a preconditioner:\n"
 "               CG, BICGSTAB, GMRES, LOBPCG, JACOBI,\n"
 "               BAITER, IDR, CGS, TFQMR, QMR, BICG\n"
-"               BOMBARDMENT, ITERREF, ILU, PARILU, NONE.\n"
+"               BOMBARDMENT, ITERREF, ILU, PARILU, PARILUT, NONE.\n"
 "                   --patol atol  Absolute residual stopping criterion for preconditioner.\n"
 "                   --prtol rtol  Relative residual stopping criterion for preconditioner.\n"
-"                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"
-"                   --piter k     Iteration count for iterative preconditioner.\n"
+"                   --piters k    Iteration count for iterative preconditioner.\n"
 "                   --plevels k   Number of ILU levels.\n"
-"                   --psweeps x   Number of iterative ILU sweeps.\n"
+"                   --triolver k  Solver for triangular ILU factors: e.g. CUSOLVE, JACOBI, ISAI.\n"
+"                   --ppattern k  Pattern used for ISAI preconditioner.\n"
+"                   --psweeps x   Number of iterative ParILU sweeps.\n"
+" --trisolver   Possibility to choose a triangular solver for ILU preconditioning: e.g. JACOBI, ISAI.\n"
+" --ppattern k  Possibility to choose a pattern for the trisolver: ISAI(k) or Block Jacobi.\n"
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --verbose x   Possibility to print intermediate residuals every x iteration.\n"
 " --maxiter x   Set an upper limit for the iteration count.\n"
@@ -102,7 +105,7 @@ magma_zparse_opts(
     opts->input_format = Magma_CSR;
     opts->blocksize = 32;
     opts->alignment = 1;
-    opts->output_format = Magma_CUCSR;
+    opts->output_format = Magma_CSR;
     opts->input_location = Magma_CPU;
     opts->output_location = Magma_CPU;
     opts->scaling = Magma_NOSCALE;
@@ -119,11 +122,12 @@ magma_zparse_opts(
     opts->solver_par.restart = 50;
     opts->solver_par.num_eigenvalues = 0;
     opts->precond_par.solver = Magma_NONE;
+    opts->precond_par.trisolver = Magma_CUSOLVE;
     #if defined(PRECISION_z) | defined(PRECISION_d)
         opts->precond_par.atol = 1e-16;
         opts->precond_par.rtol = 1e-10;
     #else
-        opts->precond_par.atol = 1e-8;
+        opts->precond_par.atol = 0;
         opts->precond_par.rtol = 1e-5;
     #endif
     opts->precond_par.maxiter = 100;
@@ -143,7 +147,7 @@ magma_zparse_opts(
         if ( strcmp("--format", argv[i]) == 0 && i+1 < argc ) {
             i++;
             if ( strcmp("CSR", argv[i]) == 0 ) {
-                opts->output_format = Magma_CUCSR;
+                opts->output_format = Magma_CSR;
             } else if ( strcmp("ELL", argv[i]) == 0 ) {
                 opts->output_format = Magma_ELL;
             } else if ( strcmp("SELLP", argv[i]) == 0 ) {
@@ -151,7 +155,7 @@ magma_zparse_opts(
             } else if ( strcmp("CUSPARSECSR", argv[i]) == 0 ) {
                 opts->output_format = Magma_CUCSR;
             } else {
-                printf( "error: invalid format, use default (CSR).\n" );
+                printf( "%%error: invalid format, use default (CSR).\n" );
             }
         } else if ( strcmp("--mscale", argv[i]) == 0 && i+1 < argc ) {
             i++;
@@ -165,7 +169,7 @@ magma_zparse_opts(
                 opts->scaling = Magma_UNITROW;
             }
             else {
-                printf( "error: invalid scaling, use default.\n" );
+                printf( "%%error: invalid scaling, use default.\n" );
             }
         } else if ( strcmp("--solver", argv[i]) == 0 && i+1 < argc ) {
             i++;
@@ -239,7 +243,7 @@ magma_zparse_opts(
                 opts->solver_par.solver = Magma_ITERREF;
             }
             else {
-                printf( "error: invalid solver.\n" );
+                printf( "%%error: invalid solver.\n" );
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.restart = atoi( argv[++i] );
@@ -308,26 +312,80 @@ magma_zparse_opts(
             else if ( strcmp("PARICT", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_PARICT;
             }
+            else if ( strcmp("PARILUT", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PARILUT;
+            }
             else if ( strcmp("CUSTOMIC", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_CUSTOMIC;
             }
             else if ( strcmp("CUSTOMILU", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_CUSTOMILU;
             }
+            else if ( strcmp("ISAI", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_ISAI;
+            }
             else if ( strcmp("NONE", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_NONE;
             }
             else {
-                printf( "error: invalid preconditioner.\n" );
+                printf( "%%error: invalid preconditioner.\n" );
+            }
+        } else if ( strcmp("--trisolver", argv[i]) == 0 && i+1 < argc ) {
+            i++;
+            if ( strcmp("CG", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_CGMERGE;
+            }
+            else if ( strcmp("BICGSTAB", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_BICGSTABMERGE;
+            }
+            else if ( strcmp("QMR", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_QMRMERGE;
+            }
+            else if ( strcmp("TFQMR", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_TFQMRMERGE;
+            }
+            else if ( strcmp("GMRES", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_GMRES;
+            }
+            else if ( strcmp("JACOBI", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_JACOBI;
+            }
+            else if ( strcmp("BA", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_BAITER;
+            }
+            else if ( strcmp("BAO", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_BAITERO;
+            }
+            else if ( strcmp("IDR", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_IDRMERGE;
+            }
+            else if ( strcmp("CGS", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_CGSMERGE;
+            }
+            else if ( strcmp("CUSOLVE", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_CUSOLVE;
+            }
+            else if ( strcmp("ISAI", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_ISAI;
+            }
+            else if ( strcmp("NONE", argv[i]) == 0 ) {
+                opts->precond_par.trisolver = Magma_NONE;
+            }
+            else {
+                printf( "%%error: invalid trisolver.\n" );
             }
         } else if ( strcmp("--basic", argv[i]) == 0 && i+1 < argc ) {
             basic = 1;
+        } else if ( strcmp("--prestart", argv[i]) == 0 && i+1 < argc ) {
+            opts->precond_par.restart = atoi( argv[++i] );
         } else if ( strcmp("--patol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.atol );
         }else if ( strcmp("--prtol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.rtol );
-        } else if ( strcmp("--piter", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--piters", argv[i]) == 0 && i+1 < argc ) {
             opts->precond_par.maxiter = atoi( argv[++i] );
+        } else if ( strcmp("--ppattern", argv[i]) == 0 && i+1 < argc ) {
+            opts->precond_par.pattern = atoi( argv[++i] );
         } else if ( strcmp("--psweeps", argv[i]) == 0 && i+1 < argc ) {
             opts->precond_par.sweeps = atoi( argv[++i] );
         } else if ( strcmp("--plevels", argv[i]) == 0 && i+1 < argc ) {
@@ -418,6 +476,7 @@ magma_zparse_opts(
          opts->solver_par.solver != Magma_PCGS  &&
          opts->solver_par.solver != Magma_PCGSMERGE &&
          opts->solver_par.solver != Magma_PTFQMR &&
+         opts->solver_par.solver != Magma_PQMRMERGE &&
          opts->solver_par.solver != Magma_PTFQMRMERGE &&
          opts->solver_par.solver != Magma_PQMR &&
          opts->solver_par.solver != Magma_PBICG &&

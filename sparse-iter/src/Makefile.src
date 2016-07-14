@@ -35,12 +35,15 @@ libsparse_src += \
 	$(cdir)/ztfqmr.cpp                    \
 	$(cdir)/ztfqmr_unrolled.cpp           \
 	$(cdir)/ztfqmr_merge.cpp              \
+	$(cdir)/zpqmr.cpp                     \
+	$(cdir)/zpqmr_merge.cpp               \
 	$(cdir)/zptfqmr.cpp                   \
 	$(cdir)/zptfqmr_merge.cpp             \
 	$(cdir)/zidr.cpp                      \
 	$(cdir)/zidr_merge.cpp                \
 	$(cdir)/zidr_strms.cpp                \
 	$(cdir)/ziterref.cpp                  \
+	$(cdir)/zftjacobi.cpp                 \
 	$(cdir)/zjacobi.cpp                   \
 	$(cdir)/zbaiter.cpp                   \
 	$(cdir)/zbaiter_overlap.cpp           \
