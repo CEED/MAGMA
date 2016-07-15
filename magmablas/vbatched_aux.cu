@@ -263,7 +263,7 @@ void magma_ivec_roundup( magma_int_t vecsize,
 }
 //============================================================================================
 // set vector to a const value
-template<class T>
+template<typename T>
 __global__ 
 void magma_setvector_const_gpu_kernel(int vecsize, T *x, T value)
 {

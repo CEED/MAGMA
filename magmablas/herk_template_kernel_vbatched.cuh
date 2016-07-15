@@ -17,7 +17,7 @@
 #include "gemm_template_device_defs.cuh"
 #include "gemm_template_device.cuh"
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -30,8 +30,8 @@ void herk_template_vbatched_nt_kernel(
 {
     const int batchid = blockIdx.z; 
     const int my_N = (int)N[batchid];
-    if( blockIdx.x >= (my_N+BLK_M-1)/BLK_M ) return;
-    if( blockIdx.y >= (my_N+BLK_N-1)/BLK_N ) return;
+    if( blockIdx.x >= magma_ceildiv( my_N, BLK_M ) ) return;
+    if( blockIdx.y >= magma_ceildiv( my_N, BLK_N ) ) return;
     
     // for lower: each thread-block checks its bottom left corner of its corresponding C block
     if ( ( uplo == MagmaLower ) && ( blockIdx.y*BLK_N > (blockIdx.x+1)*BLK_M ) )
@@ -45,7 +45,7 @@ void herk_template_vbatched_nt_kernel(
     ( my_N, my_N, (int)K[batchid], Aarray[batchid], (int)LDA[batchid], Barray[batchid], (int)LDB[batchid], Carray[batchid], (int)LDC[batchid], alpha, beta );
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -57,8 +57,8 @@ void herk_template_vbatched_tn_kernel(
 {
     const int batchid = blockIdx.z; 
     const int my_N = (int)N[batchid];
-    if( blockIdx.x >= (my_N+BLK_M-1)/BLK_M ) return;
-    if( blockIdx.y >= (my_N+BLK_N-1)/BLK_N ) return;
+    if( blockIdx.x >= magma_ceildiv( my_N, BLK_M ) ) return;
+    if( blockIdx.y >= magma_ceildiv( my_N, BLK_N ) ) return;
 
     // for lower: each thread-block checks its bottom left corner of its corresponding C block
     if ( ( uplo == MagmaLower ) && ( blockIdx.y*BLK_N > (blockIdx.x+1)*BLK_M ) )
@@ -76,7 +76,7 @@ void herk_template_vbatched_tn_kernel(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // NT, NC 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void herk_template_vbatched_nt(
@@ -96,7 +96,7 @@ void herk_template_vbatched_nt(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TN, CN 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void herk_template_vbatched_tn(
