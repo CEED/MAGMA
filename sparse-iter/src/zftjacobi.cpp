@@ -132,8 +132,7 @@ magma_zftjacobi(
     CHECK( magma_index_malloc( &flag_t, b.num_rows ));
     CHECK( magma_index_malloc( &flag_fp, b.num_rows ));
     
-    if( solver_par->verbose != 0 ){
-    
+    if ( solver_par->verbose != 0 ) {
         // k iterations for startup
         tempo1 = magma_sync_wtime( queue );
         CHECK( magma_zjacobispmvupdate(k, ACSR, r, b, d, x, queue ));
@@ -164,8 +163,7 @@ magma_zftjacobi(
     }
     
     // Jacobi iterator
-    do
-    {
+    do {
         tempo1 = magma_sync_wtime( queue );
         solver_par->numiter = solver_par->numiter+jacobiiter_par.maxiter;
         CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, ACSR, r, b, d, x, queue ));

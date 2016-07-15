@@ -527,7 +527,6 @@ magma_zpidr_strms(
                 info = MAGMA_SUCCESS;
                 break;
             }
-
         }
 
         // smoothing disabled

@@ -72,7 +72,6 @@ magma_zbcsrtrsv(
     magmaDoubleComplex_ptr x,
     magma_queue_t queue )
 {
-
     // some useful variables
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex mone = MAGMA_Z_MAKE(-1.0, 0.0);

@@ -378,7 +378,6 @@ magma_zidr(
                 // f(k+1:s) = f(k+1:s) - beta * M(k+1:s,k)
                 magma_zaxpy( sk-1, -hbeta.val[k], &dM.dval[k*dM.ld+(k+1)], 1, &df.dval[k+1], 1, queue );
             }
-
         }
 
         // smoothing disabled

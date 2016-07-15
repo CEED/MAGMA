@@ -73,11 +73,9 @@ magma_zgedensereimsplit(
     magma_z_matrix *ImA,
     magma_queue_t queue )
 {
-    
     magma_zmtransfer( A, ReA, Magma_DEV, Magma_DEV, queue );
     magma_zmtransfer( A, ImA, Magma_DEV, Magma_DEV, queue );
-    
-    
+        
     int m = A.num_rows;
     int n = A.num_cols;
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );

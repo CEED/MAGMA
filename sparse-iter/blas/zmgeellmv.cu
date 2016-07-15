@@ -135,5 +135,5 @@ magma_zmgeellmv(
         ( m, n, num_vecs, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
 
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }

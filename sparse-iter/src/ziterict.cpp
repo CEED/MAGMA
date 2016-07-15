@@ -56,7 +56,6 @@ magma_ziterictsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
 #ifdef _OPENMP
@@ -184,5 +183,3 @@ magma_ziterictsetup(
 #endif
     return info;
 }
-    
-

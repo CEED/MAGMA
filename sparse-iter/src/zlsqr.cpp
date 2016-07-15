@@ -234,8 +234,7 @@ magma_zlsqr(
         magma_zaxpy( n, c_one, vt.dval, 1, v.dval, 1, queue );
         alpha = magma_dznrm2( n, v.dval, 1, queue );
         magma_zscal( n, MAGMA_Z_MAKE(1./alpha, 0.0 ), v.dval, 1, queue ); 
-        normar = alpha * fabs(s*phi);
-         
+        normar = alpha * fabs(s*phi);    
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     

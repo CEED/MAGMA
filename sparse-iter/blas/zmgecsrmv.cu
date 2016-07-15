@@ -131,5 +131,5 @@ magma_zmgecsrmv(
     zmgecsrmv_kernel<<< grid, threads, MEM_SIZE, queue->cuda_stream()>>>
             (m, n, num_vecs, alpha, dval, drowptr, dcolind, dx, beta, dy);
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }

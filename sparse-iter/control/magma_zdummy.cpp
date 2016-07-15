@@ -21,7 +21,6 @@ magma_zparilutsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -36,7 +35,6 @@ magma_zparictsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -55,7 +53,6 @@ magma_zparict_insert(
     omp_lock_t *rowlock,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -76,7 +73,6 @@ magma_zparilut_rm_thrs(
     omp_lock_t *rowlock,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -95,7 +91,6 @@ magma_zparilut_set_thrs(
     magmaDoubleComplex *thrs,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -111,7 +106,6 @@ magma_zparict_sweep(
     magma_z_matrix *LU,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -159,7 +153,6 @@ magma_zparict_residuals(
     magma_z_matrix *LU_new,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -201,7 +194,6 @@ magma_zparict_candidates(
     magma_z_matrix *LU_new,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -249,7 +241,6 @@ magma_ziluisaisetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -301,7 +292,6 @@ magma_zisai_l(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -350,7 +340,6 @@ magma_zisai_r(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
@@ -398,15 +387,9 @@ magma_zicisaisetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
 
     return info;
 }
-    
-
-
-
-

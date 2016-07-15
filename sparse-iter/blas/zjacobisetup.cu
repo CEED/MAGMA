@@ -679,7 +679,6 @@ magma_zftjacobicontractions(
     magma_z_matrix *c,
     magma_queue_t queue )
 {
-
     dim3 grid( magma_ceildiv( xk.num_rows, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
 
@@ -801,7 +800,6 @@ magma_zftjacobiupdatecheck(
     magma_int_t *flag_fp,
     magma_queue_t queue )
 {
-
     dim3 grid( magma_ceildiv( xnew->num_rows, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
 
@@ -811,4 +809,3 @@ magma_zftjacobiupdatecheck(
     
     return MAGMA_SUCCESS;
 }
-

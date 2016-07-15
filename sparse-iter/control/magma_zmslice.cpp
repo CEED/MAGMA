@@ -211,7 +211,6 @@ magma_zmslice(
         B->nnz = k;
         *start = lstart;
         *end = lend;
-        
     }
     else {
         printf("error: mslice only supported for CSR matrices on the CPU: %d %d.\n", 
@@ -221,7 +220,3 @@ magma_zmslice(
 cleanup:
     return info;
 }
-
-
-
-

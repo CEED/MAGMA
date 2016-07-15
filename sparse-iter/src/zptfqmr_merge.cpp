@@ -288,8 +288,7 @@ magma_zptfqmr_merge(
         Au.dval, 
         queue );
         
-        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1, queue ); 
-    
+        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1, queue );
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     

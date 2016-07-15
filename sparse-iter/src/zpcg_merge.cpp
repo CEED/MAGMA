@@ -171,8 +171,8 @@ magma_zpcg_merge(
             CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
             // computes scalars and updates d
             CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, r.dval, r.dval, d.dval, skp, queue ));
-        } else {
-        
+        }
+        else {
             // updates x, r
             CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
             

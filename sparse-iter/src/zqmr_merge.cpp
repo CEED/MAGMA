@@ -259,7 +259,6 @@ magma_zqmr_merge(
         }
         
         if( solver_par->numiter == 1 ){
-            
                 // d = eta * p + pds * d;
                 // s = eta * pt + pds * d;
                 // x = x + d;
@@ -277,7 +276,6 @@ magma_zqmr_merge(
             queue );
         }
         else{
-
             pds = (thet1 * gamm) * (thet1 * gamm);
             
                 // d = eta * p + pds * d;
@@ -330,7 +328,6 @@ magma_zqmr_merge(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
- 
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     

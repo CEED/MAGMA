@@ -718,7 +718,6 @@ magma_zmconvert(
                     B->row[i+1]-1,
                     queue );
                 }
-            
             }
             
             // CSRCOO to CSR

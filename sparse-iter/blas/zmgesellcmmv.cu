@@ -1091,5 +1091,5 @@ magma_zmgesellpmv(
         }
     }
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }

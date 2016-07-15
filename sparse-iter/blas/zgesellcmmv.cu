@@ -960,5 +960,5 @@ magma_zgesellpmv(
         }
     #endif
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }

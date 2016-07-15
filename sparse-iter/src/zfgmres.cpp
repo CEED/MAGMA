@@ -231,9 +231,7 @@ magma_zfgmres(
         s[0] = beta;
 
         i = -1;
-        do
-        {
-
+        do {
             i++;
             
             // M.apply(n, 1, V(i), n, W(i), n);

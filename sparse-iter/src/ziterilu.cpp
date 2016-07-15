@@ -267,9 +267,7 @@ magma_ziteriluupdate(
     hUT={Magma_CSR}, hAtmp={Magma_CSR},
     dL={Magma_CSR}, dU={Magma_CSR};
 
-        
-    if( updates > 0 ){
-        
+    if ( updates > 0 ){
         CHECK( magma_zmtransfer( precond->M, &hAcopy, Magma_DEV, Magma_CPU , queue ));
         // in case using fill-in
         CHECK( magma_zsymbilu( &hAcopy, precond->levels, &hAL, &hAUt,  queue ));
@@ -549,7 +547,6 @@ magma_zitericupdate(
 
         CHECK( magma_zjacobisetup_diagscal( precond->L, &precond->d, queue ));
         CHECK( magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue ));
-    
     }
     
 cleanup:

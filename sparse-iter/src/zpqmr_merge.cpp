@@ -287,7 +287,7 @@ magma_zpqmr_merge(
             queue );
         }
         else{
-                // pds = (thet1 * gamm)^2 ;
+                // pds = (thet1 * gamm)^2;
             pds = (thet1 * gamm) * (thet1 * gamm);
                 // d = eta * p + pds * d;
                 // s = eta * pt + pds * d;
@@ -340,7 +340,6 @@ magma_zpqmr_merge(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
- 
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     

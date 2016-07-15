@@ -184,8 +184,7 @@ magma_zmdynamicic_insert_LU(
                 else if( new_col == L->col[ old_rowstart ] ){
                     ; //printf("tried to insert duplicate!\n");
                 }
-                else{
-        
+                else {
                     j = old_rowstart;
                     jn = L->list[j];
                     // this will finish, as we consider the lower triangular
@@ -194,7 +193,8 @@ magma_zmdynamicic_insert_LU(
                         if( L->col[jn]==new_col ){
                             //printf("tried to insert duplicate!\n");
                             j=0; //break;
-                        }else if( L->col[jn]>new_col ){
+                        }
+                        else if( L->col[jn]>new_col ){
                             L->list[j]=loc;
                             L->list[loc]=jn;
                             L->rowidx[ loc ] = new_row;
@@ -202,8 +202,8 @@ magma_zmdynamicic_insert_LU(
                             L->val[ loc ] = MAGMA_Z_ZERO;
                             success[ tid*8 ] = 1;
                             j=0; //break;
-                            
-                        } else{
+                        }
+                        else {
                             j=jn;
                             jn=L->list[jn];
                         }
@@ -224,7 +224,6 @@ magma_zmdynamicic_insert_LU(
     }
     //#pragma omp parallel for private(loc_i) schedule(static,3) shared(num_insert)
     for(int loc_i=0; loc_i<LU_new->nnz; loc_i++ ) {
-
         magma_int_t tid = omp_get_thread_num();
         if( success[ tid*8 ] > -1 ){
             if( success[ tid*8 ] == 1 ){
@@ -234,7 +233,6 @@ magma_zmdynamicic_insert_LU(
                     num_insert++;
                 }
                 success[ tid*8 ] = 0;
-
             }
 
             if( insert_loc[ tid*8 ] >= num_rm ){
@@ -277,8 +275,7 @@ magma_zmdynamicic_insert_LU(
                         U->val[ loc ] = MAGMA_Z_ONE;
                         success[ tid*8 ] = 1;
                         jn=0; //break;
-                        
-                    } 
+                    }
                 }
                 //#pragma omp critical(rowlock__)
                 omp_unset_lock( &(rowlock[new_row]) );
@@ -457,8 +454,7 @@ magma_zmdynamicic_insert(
                 else if( new_col == LU->col[ old_rowstart ] ){
                     ; //printf("tried to insert duplicate!\n");
                 }
-                else{
-        
+                else {
                     j = old_rowstart;
                     jn = LU->list[j];
                     // this will finish, as we consider the lower triangular
@@ -467,9 +463,8 @@ magma_zmdynamicic_insert(
                         if( LU->col[jn]==new_col ){
                             //printf("tried to insert duplicate!\n");
                             j=0; //break;
-                        }else if( LU->col[jn]>new_col ){
-                            
-                            
+                        }
+                        else if( LU->col[jn]>new_col ) {
                             printf("insert: (%d,%d)\n", new_row, new_col);
                             LU->list[j]=loc;
                             LU->list[loc]=jn;
@@ -478,8 +473,8 @@ magma_zmdynamicic_insert(
                             LU->val[ loc ] = MAGMA_Z_ZERO;
                             success[ tid*8 ] = 1;
                             j=0; //break;
-                            
-                        } else{
+                        }
+                        else {
                             j=jn;
                             jn=LU->list[jn];
                         }
@@ -663,8 +658,7 @@ magma_zmdynamicic_insert_U(
                 else if( new_col == LU->col[ old_rowstart ] ){
                     printf("tried to insert duplicate!\n"); fflush(stdout);
                 }
-                else{
-        
+                else {
                     j = old_rowstart;
                     jn = LU->list[j];
                     // this will finish, as we consider the lower triangular
@@ -677,9 +671,8 @@ magma_zmdynamicic_insert_U(
                         if( LU->col[jn]==new_col ){
                             printf("tried to insert duplicate!\n");
                             j=breakpoint; //break;
-                        }else if( LU->col[jn]>new_col ){
-                            
-                            
+                        }
+                        else if( LU->col[jn]>new_col ) {
                             printf("insert: (%d,%d)\t", new_row, new_col); fflush(stdout);
                             LU->list[j]=loc;
                             LU->list[loc]=jn;
@@ -688,8 +681,8 @@ magma_zmdynamicic_insert_U(
                             LU->val[ loc ] = MAGMA_Z_ONE;
                             success[ tid*8 ] = 1;
                             j=breakpoint; //break;
-                            
-                        } else{
+                        }
+                        else {
                             j=jn;
                             jn=LU->list[jn];
                         }
@@ -818,7 +811,6 @@ magma_zmdynamicilu_rm_thrs(
                 i = nexti;
                 nexti = LU->list[nexti];
             }
-            
         }
     }
     // never forget elements
@@ -944,10 +936,9 @@ magma_zmdynamicilu_rm_thrs_U(
                 i = nexti;
                 nexti = U->list[nexti];
             }
-            
         }
     }
-     //   printf("second part done.\n"); fflush(stdout);
+    //   printf("second part done.\n"); fflush(stdout);
     omp_destroy_lock(&(counter));
     return info;
 }
@@ -1077,14 +1068,12 @@ magma_zmdynamicilu_rm_thrs_LU(
                             nexti_U = U->list[ i_U ];
                         }
                     }
-                    
             }
             else{
                 lasti = i;
                 i = nexti;
                 nexti = L->list[nexti];
             }
-            
         }
     }
     // never forget elements
@@ -1244,7 +1233,6 @@ magma_zmdynamicic_sweep(
                 LU->val[ e ] =  ( A_e - sum ) / LU->val[jold];
             }
         }// end check whether part of LU
-        
     }// end omp parallel section
         
     return info;
@@ -1333,7 +1321,6 @@ magma_zmdynamicic_residuals(
         
         // write back to location e
         LU_new->val[ e ] =  ( A_e - sum );
-        
     }// end omp parallel section
         
     return info;

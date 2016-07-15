@@ -34,7 +34,6 @@ magma_zqmr_1_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
-            
             magmaDoubleComplex ytmp = y[ i+j*num_rows ] / rho;
             y[ i+j*num_rows ] = ytmp;
             v[ i+j*num_rows ] = ytmp;
@@ -42,7 +41,6 @@ magma_zqmr_1_kernel(
             magmaDoubleComplex ztmp = z[ i+j*num_rows ] / psi;
             z[ i+j*num_rows ] = ztmp;
             w[ i+j*num_rows ] = ztmp;
-            
         }
     }
 }
@@ -115,7 +113,7 @@ magma_zqmr_1(
     magma_zqmr_1_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, rho, psi,
                      y, z, v, w );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -210,7 +208,7 @@ magma_zqmr_2(
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_zqmr_2_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, pde, rde, y, z, p, q );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -294,7 +292,7 @@ magma_zqmr_3(
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_zqmr_3_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, beta, pt, v, y );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -315,7 +313,6 @@ magma_zqmr_4_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
-            
             magmaDoubleComplex tmpd = eta * p[ i+j*num_rows ];
             d[ i+j*num_rows ] = tmpd;
             x[ i+j*num_rows ] = x[ i+j*num_rows ] + tmpd;
@@ -401,7 +398,7 @@ magma_zqmr_4(
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_zqmr_4_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, eta, p, pt, d, s, x, r );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -421,7 +418,6 @@ magma_zqmr_5_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
-            
             magmaDoubleComplex tmpd = eta * p[ i+j*num_rows ] + pds * d[ i+j*num_rows ];
             d[ i+j*num_rows ] = tmpd;
             x[ i+j*num_rows ] = x[ i+j*num_rows ] + tmpd;
@@ -512,7 +508,7 @@ magma_zqmr_5(
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_zqmr_5_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, eta, pds, p, pt, d, s, x, r );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -532,7 +528,6 @@ magma_zqmr_6_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
-            
             magmaDoubleComplex wttmp = wt[ i+j*num_rows ]
                                 - MAGMA_Z_CONJ( beta ) * w[ i+j*num_rows ];
                                 
@@ -545,7 +540,6 @@ magma_zqmr_6_kernel(
             magmaDoubleComplex ytmp = y[ i+j*num_rows ] / rho;
             y[ i+j*num_rows ] = ytmp;
             v[ i+j*num_rows ] = ytmp;
-            
         }
     }
 }
@@ -629,7 +623,7 @@ magma_zqmr_6(
     magma_zqmr_6_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, beta, rho, psi,
                      y, z, v, w, wt );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -708,7 +702,7 @@ magma_zqmr_7(
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_zqmr_7_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, beta, pt, v, vt );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -733,7 +727,6 @@ magma_zqmr_8_kernel(
             v[ i+j*num_rows ] = vt[ i+j*num_rows ] / rho;
             z[ i+j*num_rows ] = z[ i+j*num_rows ] / psi;
             w[ i+j*num_rows ] = wt[ i+j*num_rows ] / psi;
-            
         }
     }
 }
@@ -816,5 +809,5 @@ magma_zqmr_8(
     magma_zqmr_8_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, rho, psi,
                      vt, wt, y, z, v, w );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }

@@ -549,4 +549,3 @@ magma_zorderstatistics(
 cleanup:
     return info;
 }
-

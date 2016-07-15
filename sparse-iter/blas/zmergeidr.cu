@@ -88,7 +88,7 @@ magma_zidr_smoothing_1(
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_zidr_smoothing_1_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, drs, dr, dt );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -162,5 +162,5 @@ magma_zidr_smoothing_2(
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_zidr_smoothing_2_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, omega, dx, dxs);
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }

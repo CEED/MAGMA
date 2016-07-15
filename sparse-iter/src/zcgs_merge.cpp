@@ -202,7 +202,6 @@ magma_zcgs_merge(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
-
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     

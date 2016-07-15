@@ -165,7 +165,7 @@ magma_zgeelltmv(
     }
 
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -269,5 +269,5 @@ magma_zgeelltmv_shift(
                             beta, offset, blocksize, addrows, dy );
 
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }

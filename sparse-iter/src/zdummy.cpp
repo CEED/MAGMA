@@ -56,13 +56,9 @@ magma_ziterictsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     printf("error: not yet released\n");
 
     return info;
 }
-    
-    
-
