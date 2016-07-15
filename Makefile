@@ -131,14 +131,20 @@ CXXFLAGS  += -DMIN_CUDA_ARCH=$(MIN_ARCH)
 
 # ----------------------------------------
 # Define the pointer size for fortran compilation
+# If there's an issue compiling sizeptr, assume 8 byte (64 bit) pointers
 PTRFILE = control/sizeptr.c
 PTROBJ  = control/sizeptr.$(o_ext)
 PTREXEC = control/sizeptr
-PTRSIZE = $(shell $(PTREXEC))
+PTRSIZE = $(shell if [ -x $(PTREXEC) ]; then $(PTREXEC); else echo xxx; fi)
 PTROPT  = -Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
 
 $(PTREXEC): $(PTROBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+	-$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+	touch $@
+
+$(PTROBJ): $(PTRFILE)
+	-$(CC) $(CFLAGS) -c -o $@ $<
+	touch $@
 
 
 # ----------------------------------------
@@ -371,46 +377,46 @@ ifneq ($(have_fpic),)
 
 # --------------------
 # if all flags have -fPIC: compile shared & static
-lib: static shared
-
-sparse-lib: sparse-static sparse-shared
-
-shared: $(libmagma_so)
-
-sparse-shared: $(libsparse_so)
-
-# as a shared library, changing libmagma.so does NOT require re-linking testers,
-# so use order-only prerequisite (after "|").
-$(testers):        | $(libmagma_a) $(libmagma_so)
-$(testers_f):      | $(libmagma_a) $(libmagma_so)
-$(sparse_testers): | $(libmagma_a) $(libmagma_so) $(libsparse_a) $(libsparse_so)
-
-libs := $(libmagma_a) $(libmagma_so) $(libsparse_a) $(libsparse_so)
+    lib: static shared
+    
+    sparse-lib: sparse-static sparse-shared
+    
+    shared: $(libmagma_so)
+    
+    sparse-shared: $(libsparse_so)
+    
+    # as a shared library, changing libmagma.so does NOT require re-linking testers,
+    # so use order-only prerequisite (after "|").
+    $(testers):        | $(libmagma_a) $(libmagma_so)
+    $(testers_f):      | $(libmagma_a) $(libmagma_so)
+    $(sparse_testers): | $(libmagma_a) $(libmagma_so) $(libsparse_a) $(libsparse_so)
+                                      
+    libs := $(libmagma_a) $(libmagma_so) $(libsparse_a) $(libsparse_so)
 
 else
 
 # --------------------
 # else: some flags are missing -fPIC: compile static only
-lib: static
-
-sparse-lib: sparse-static
-
-shared:
+    lib: static
+    
+    sparse-lib: sparse-static
+    
+    shared:
 	@echo "Error: 'make shared' requires CFLAGS, CXXFLAGS, FFLAGS, F90FLAGS, and NVCCFLAGS to have -fPIC."
 	@echo "This is now the default in most example make.inc.* files, except atlas."
 	@echo "Please edit your make.inc file and uncomment FPIC."
 	@echo "After updating make.inc, please 'make clean && make shared && make test'."
 	@echo "To compile only a static library, use 'make static'."
-
-sparse-shared: shared
-
-# as a static library, changing libmagma.a does require re-linking testers,
-# so use regular prerequisite.
-$(testers):        $(libmagma_a)
-$(testers_f):      $(libmagma_a)
-$(sparse_testers): $(libmagma_a) $(libsparse_a)
-
-libs := $(libmagma_a) $(libsparse_a)
+    
+    sparse-shared: shared
+    
+    # as a static library, changing libmagma.a does require re-linking testers,
+    # so use regular prerequisite.
+    $(testers):        $(libmagma_a)
+    $(testers_f):      $(libmagma_a)
+    $(sparse_testers): $(libmagma_a) $(libsparse_a)
+    
+    libs := $(libmagma_a) $(libsparse_a)
 
 endif
 
