@@ -290,6 +290,8 @@ class SourceFile( object ):
             line = 0
             for (orig, search, replace) in zip( subs_o[1:], subs_s[1:], subs_r[1:] ):
                 line += 1
+                if orig[jfrom] == '':  # skip blank substitutions
+                    continue
                 if search[jfrom] is None:
                     search[jfrom] = re.compile( orig[jfrom] )
                 text = re.sub( search[jfrom], replace[jto], text )
