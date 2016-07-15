@@ -200,40 +200,26 @@ magma_int_t magma_init()
             }
             
             #ifndef MAGMA_NO_V1
-            #ifdef HAVE_PTHREAD_KEY
-                // create thread-specific key
-                // currently, this is needed only for MAGMA v1 compatability
-                // see magma_init, magmablas(Set|Get)KernelStream, magmaGetQueue
-                info = pthread_key_create( &g_magma_queue_key, NULL );
-                if ( info != 0 ) {
-                    info = MAGMA_ERR_UNKNOWN;
+                #ifdef HAVE_PTHREAD_KEY
+                    // create thread-specific key
+                    // currently, this is needed only for MAGMA v1 compatability
+                    // see magma_init, magmablas(Set|Get)KernelStream, magmaGetQueue
+                    info = pthread_key_create( &g_magma_queue_key, NULL );
+                    if ( info != 0 ) {
+                        info = MAGMA_ERR_UNKNOWN;
+                        goto cleanup;
+                    }
+                #endif
+                
+                // ----- queues with NULL streams (for backwards compatability with MAGMA 1.x)
+                // allocate array of queues with NULL stream
+                size = max( 1, g_magma_devices_cnt ) * sizeof(magma_queue_t);
+                magma_malloc_cpu( (void**) &g_null_queues, size );
+                if ( g_null_queues == NULL ) {
+                    info = MAGMA_ERR_HOST_ALLOC;
                     goto cleanup;
                 }
-            #endif
-            
-            // ----- queues with NULL streams (for backwards compatability with MAGMA 1.x)
-            // allocate array of queues with NULL stream
-            size = max( 1, g_magma_devices_cnt ) * sizeof(magma_queue_t);
-            magma_malloc_cpu( (void**) &g_null_queues, size );
-            if ( g_null_queues == NULL ) {
-                info = MAGMA_ERR_HOST_ALLOC;
-                goto cleanup;
-            }
-            memset( g_null_queues, 0, size );
-            
-            // create queue with NULL stream on each device
-            if ( g_magma_devices_cnt > 0 ) {
-                magma_device_t cdev;
-                magma_getdevice( &cdev );
-                
-                for( int dev=0; dev < g_magma_devices_cnt; ++dev ) {
-                    magma_queue_create_from_cuda( dev, NULL, NULL, NULL, &g_null_queues[dev] );
-                }
-                
-                // set default queue on current device
-                magma_setdevice( cdev );
-                magmablasSetKernelStream( g_null_queues[cdev] );
-            }
+                memset( g_null_queues, 0, size );
             #endif // MAGMA_NO_V1
         }
 cleanup:
@@ -545,10 +531,16 @@ magma_queue_t magmablasGetQueue()
     if ( queue == NULL ) {
         magma_device_t dev;
         magma_getdevice( &dev );
-        if ( dev >= g_magma_devices_cnt || g_null_queues == NULL || g_null_queues[dev] == NULL ) {
+        if ( dev >= g_magma_devices_cnt || g_null_queues == NULL ) {
             fprintf( stderr, "Error: %s requires magma_init() to be called first for MAGMA v1 compatability.\n",
                      __func__ );
             return NULL;
+        }
+        // create queue w/ NULL stream first time that NULL queue is used
+        if ( g_null_queues[dev] == NULL ) {
+            magma_queue_create_from_cuda( dev, NULL, NULL, NULL, &g_null_queues[dev] );
+            printf( "dev %d create queue %p\n", dev, (void*) g_null_queues[dev] );
+            assert( g_null_queues[dev] != NULL );
         }
         queue = g_null_queues[dev];
     }
