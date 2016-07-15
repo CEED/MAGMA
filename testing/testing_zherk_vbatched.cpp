@@ -185,7 +185,6 @@ int main( int argc, char** argv)
             
             h_A_tmp = h_A; h_C_tmp = h_C;
             for(int i = 0; i < batchCount; i++){
-                
                 magma_zsetmatrix( An[i], Ak[i], h_A_tmp, h_lda[i], h_A_array[i], h_ldda[i], opts.queue );
                 magma_zsetmatrix( h_N[i], h_N[i], h_C_tmp, h_ldc[i], h_C_array[i], h_lddc[i], opts.queue );
                 h_A_tmp += Ak[i] * h_lda[i];
@@ -251,7 +250,6 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                
                 #ifdef MAGMA_WITH_MKL
                 // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
                 int threads = magma_get_lapack_numthreads();

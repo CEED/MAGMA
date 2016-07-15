@@ -221,5 +221,4 @@ magmablas_ssyrk_batched(
     }
     
     magmablas_ssyrk_internal_batched(uplo, trans, n, k, alpha, dA_array, ldda, dA_array, ldda, beta, dC_array, lddc, batchCount, queue );
-    
 }

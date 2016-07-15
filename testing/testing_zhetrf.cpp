@@ -146,12 +146,10 @@ double get_residual_aasen(
     magma_int_t i, j, piv;
     magma_int_t nb = magma_get_zhetrf_aasen_nb(n);
     // extract L
-    for (i=0; i < min(n,nb); i++) 
-    {
+    for (i=0; i < min(n,nb); i++) {
         L(i,i) = c_one;
     }
-    for (i=nb; i < n; i++)
-    {
+    for (i=nb; i < n; i++) {
         for (j=0; j < i-nb; j++) {
             L(i,nb+j) = A(i,j);
         }
@@ -187,8 +185,7 @@ double get_residual_aasen(
       // extract T
       TESTING_CHECK( magma_zmalloc_cpu( &T, n*n ));
       memset( T, 0, n*n*sizeof(magmaDoubleComplex) );
-      for (i=0; i < n; i++)
-      {
+      for (i=0; i < n; i++) {
           magma_int_t istart = max(0, i-nb);
           for (j=istart; j <= i; j++) {
               T(i,j) = A(i,j);
@@ -208,8 +205,12 @@ double get_residual_aasen(
       for (j=0; j<n; j++) {
           magma_int_t i0 = max(0, j-nb);
           magma_int_t i1 = min(n-1, j+nb);
-          for (i=i0; i<j; i++) T[nb + i-(j-nb) + j*ldtb] = MAGMA_Z_CONJ(A(j,i));
-          for (i=j; i<=i1; i++) T[nb + i-(j-nb) + j*ldtb] = A(i,j);
+          for (i=i0; i<j; i++) {
+              T[nb + i-(j-nb) + j*ldtb] = MAGMA_Z_CONJ(A(j,i));
+          }
+          for (i=j; i<=i1; i++) {
+              T[nb + i-(j-nb) + j*ldtb] = A(i,j);
+          }
       }
       // solve with T
       lapackf77_zgbsv(&n,&nb,&nb, &nrhs, T,&ldtb, p,x,&n, &info);

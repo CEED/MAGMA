@@ -141,7 +141,6 @@ int main( int argc, char** argv)
                 total_size_C_dev += h_N[i] * h_lddc[i];
                 
                 gflops += FLOPS_ZHERK( h_K[i], h_N[i] ) / 1e9;
-                 
             }
             
             TESTING_CHECK( magma_zmalloc_cpu(&h_A, total_size_A_cpu) );
@@ -247,7 +246,6 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                
                 #ifdef MAGMA_WITH_MKL
                 // MKL (11.1.2) has bug in multi-threaded zlansy; use single thread to work around
                 int threads = magma_get_lapack_numthreads();

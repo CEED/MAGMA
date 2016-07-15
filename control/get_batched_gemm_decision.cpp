@@ -126,11 +126,8 @@ magma_int_t magma_drecommend_cublas_gemm_batched(
     }
     //printf("decision  ==========================================================================>      m%4d     n%4d    k%4d  for cublas %d\n",m,n,k,use_cublas_gemm_batched);
     return use_cublas_gemm_batched;
-
-
-
-
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 magma_int_t magma_crecommend_cublas_gemm_batched(
             magma_trans_t transa, magma_trans_t transb,

@@ -45,15 +45,15 @@ magmablas_dgemm_vbatched_core(
     if(max_m <=0 || max_n <= 0 || max_k <= 0) return;
     
     magma_int_t shape = 0;
-    if      (transA == MagmaNoTrans   && transB == MagmaNoTrans)   {shape = 0;} // nn
-    else if (transA == MagmaNoTrans   && transB == MagmaTrans)     {shape = 1;} // nt
-    else if (transA == MagmaNoTrans   && transB == MagmaConjTrans) {shape = 2;} // nc
-    else if (transA == MagmaTrans     && transB == MagmaNoTrans)   {shape = 3;} // tn
-    else if (transA == MagmaTrans     && transB == MagmaTrans)     {shape = 4;} // tt
-    else if (transA == MagmaTrans     && transB == MagmaConjTrans) {shape = 5;} // tc
-    else if (transA == MagmaConjTrans && transB == MagmaNoTrans)   {shape = 6;} // cn
-    else if (transA == MagmaConjTrans && transB == MagmaTrans)     {shape = 7;} // ct
-    else if (transA == MagmaConjTrans && transB == MagmaConjTrans) {shape = 8;} // cc
+    if      (transA == MagmaNoTrans   && transB == MagmaNoTrans)   { shape = 0; } // nn
+    else if (transA == MagmaNoTrans   && transB == MagmaTrans)     { shape = 1; } // nt
+    else if (transA == MagmaNoTrans   && transB == MagmaConjTrans) { shape = 2; } // nc
+    else if (transA == MagmaTrans     && transB == MagmaNoTrans)   { shape = 3; } // tn
+    else if (transA == MagmaTrans     && transB == MagmaTrans)     { shape = 4; } // tt
+    else if (transA == MagmaTrans     && transB == MagmaConjTrans) { shape = 5; } // tc
+    else if (transA == MagmaConjTrans && transB == MagmaNoTrans)   { shape = 6; } // cn
+    else if (transA == MagmaConjTrans && transB == MagmaTrans)     { shape = 7; } // ct
+    else if (transA == MagmaConjTrans && transB == MagmaConjTrans) { shape = 8; } // cc
     
     switch(shape)
     {

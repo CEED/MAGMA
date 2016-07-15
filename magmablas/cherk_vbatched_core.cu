@@ -46,8 +46,8 @@ magmablas_csyrkherk_vbatched(
     
     // we have two shapes
     magma_int_t shape;
-    if      (trans == MagmaNoTrans)   {shape = 0;} // nc or nt
-    else                              {shape = 1;} // cn or tn
+    if      (trans == MagmaNoTrans)   { shape = 0; } // nc or nt
+    else                              { shape = 1; } // cn or tn
         
     switch(shape)
     {

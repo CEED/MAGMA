@@ -52,7 +52,6 @@ magmablas_zher2k_vbatched_max(
     magma_int_t batchCount, 
     magma_int_t max_n, magma_int_t max_k, magma_queue_t queue )
 {
-    
     magma_int_t info = 0;
     #if defined(PRECISION_c) || defined(PRECISION_z)
     info =  magma_her2k_vbatched_checker(    uplo, trans, n, k, ldda, lddb, lddc, batchCount, queue );

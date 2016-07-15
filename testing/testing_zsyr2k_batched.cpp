@@ -87,7 +87,7 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             K = opts.ksize[itest];
-            gflops = (batchCount * FLOPS_ZHER2K( K, N )) / 1e9 ;
+            gflops = (batchCount * FLOPS_ZHER2K( K, N )) / 1e9;
 
             if ( opts.transA == MagmaNoTrans ) {
                 lda = An = N;
@@ -178,7 +178,6 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                
                 #ifdef MAGMA_WITH_MKL
                 // work around MKL bug in multi-threaded zlansy
                 magma_int_t la_threads = magma_get_lapack_numthreads();

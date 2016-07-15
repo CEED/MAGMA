@@ -106,7 +106,6 @@ int main( int argc, char** argv)
     printf("%%============================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-        
             M = opts.msize[itest];
             N = opts.nsize[itest];
             

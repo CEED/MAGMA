@@ -42,8 +42,8 @@ magmablas_ssyrk_internal_vbatched(
     
     // we have two shapes only (nt or tn)
     magma_int_t shape;
-    if      (trans == MagmaNoTrans)   {shape = 0;} // nt
-    else                              {shape = 1;} // tn
+    if      (trans == MagmaNoTrans)   { shape = 0; } // nt
+    else                              { shape = 1; } // tn
     
     switch(shape)
     {
