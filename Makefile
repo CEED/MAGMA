@@ -76,6 +76,9 @@ endif
 ifneq ($(findstring Maxwell, $(GPU_TARGET)),)
     GPU_TARGET += sm50
 endif
+ifneq ($(findstring Pascal, $(GPU_TARGET)),)
+    GPU_TARGET += sm60
+endif
 
 # Next, add compile options for specific smXX
 # sm_xx is binary, compute_xx is PTX for forward compatability
@@ -121,8 +124,13 @@ ifneq ($(findstring sm50, $(GPU_TARGET)),)
     NV_SM    += -gencode arch=compute_50,code=sm_50
     NV_COMP  := -gencode arch=compute_50,code=compute_50
 endif
+ifneq ($(findstring sm60, $(GPU_TARGET)),)
+    MIN_ARCH ?= 600
+    NV_SM    += -gencode arch=compute_60,code=sm_60
+    NV_COMP  := -gencode arch=compute_60,code=compute_60
+endif
 ifeq ($(NV_COMP),)
-    $(error GPU_TARGET, currently $(GPU_TARGET), must contain one or more of Fermi, Kepler, Maxwell, or sm{20,30,35,50}. Please edit your make.inc file)
+    $(error GPU_TARGET, currently $(GPU_TARGET), must contain one or more of Fermi, Kepler, Maxwell, Pascal, or sm{20,30,35,50,60}. Please edit your make.inc file)
 endif
 NVCCFLAGS += $(NV_SM) $(NV_COMP)
 CFLAGS    += -DMIN_CUDA_ARCH=$(MIN_ARCH)
