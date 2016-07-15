@@ -38,18 +38,17 @@ int main( int argc, char** argv)
     #ifdef COMPLEX
     double      *rwork;
     #endif
-    double      eps, result[2];
+    double      result[2];
     magma_int_t N, n2, lda, nb, lwork, ltwork, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
-    
-    eps   = lapackf77_dlamch( "E" );
-    
+        
     magma_opts opts;
     opts.parse_opts( argc, argv );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
+    double eps = lapackf77_dlamch( "E" );
     
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = abs( opts.ngpu );
@@ -152,6 +151,10 @@ int main( int argc, char** argv)
                 #ifdef COMPLEX
                 magma_free_cpu( rwork );
                 #endif
+                
+                // lapack normalizes by eps
+                result[0] *= eps;
+                result[1] *= eps;
             }
             
             /* =====================================================================
@@ -180,10 +183,10 @@ int main( int argc, char** argv)
                        (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                bool okay = (result[0]*eps < tol) && (result[1]*eps < tol);
+                bool okay = (result[0] < tol) && (result[1] < tol);
                 status += ! okay;
                 printf("   %8.2e        %8.2e   %s\n",
-                       result[0]*eps, result[1]*eps,
+                       result[0], result[1],
                        (okay ? "ok" : "failed") );
             }
             else {

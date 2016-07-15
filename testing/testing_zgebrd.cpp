@@ -35,18 +35,17 @@ int main( int argc, char** argv)
     magmaDoubleComplex *h_A, *h_Q, *h_PT, *h_work;
     magmaDoubleComplex *taup, *tauq;
     double      *diag, *offdiag;
-    double      eps, result[3] = {0., 0., 0.};
+    double      result[3] = {0., 0., 0.};
     magma_int_t M, N, n2, lda, lhwork, info, minmn, nb;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-
-    eps = lapackf77_dlamch( "E" );
     magma_int_t status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
+    double eps = lapackf77_dlamch( "E" );
     
     printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |A-QBP^H|/N|A|   |I-QQ^H|/N   |I-PP^H|/N\n");
     printf("%%=============================================================================================\n");
@@ -155,6 +154,11 @@ int main( int argc, char** argv)
                 #ifdef COMPLEX
                 magma_free_cpu( rwork_err );
                 #endif
+                
+                // lapack normalizes by eps
+                result[0] *= eps;
+                result[1] *= eps;
+                result[2] *= eps;
             }
             
             /* =====================================================================
@@ -185,10 +189,10 @@ int main( int argc, char** argv)
                        (int) M, (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                bool okay = (result[0]*eps < tol) && (result[1]*eps < tol) && (result[2]*eps < tol);
+                bool okay = (result[0] < tol) && (result[1] < tol) && (result[2] < tol);
                 status += ! okay;
                 printf("   %8.2e         %8.2e     %8.2e   %s\n",
-                       result[0]*eps, result[1]*eps, result[2]*eps,
+                       result[0], result[1], result[2],
                        (okay ? "ok" : "failed") );
             } else {
                 printf("     ---            --- \n");
