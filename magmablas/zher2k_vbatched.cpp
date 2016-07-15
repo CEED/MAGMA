@@ -63,9 +63,6 @@ magmablas_zher2k_vbatched_max(
         return;
     }
     
-    magmaDoubleComplex cbeta = MAGMA_Z_MAKE(beta, 0.);
-    magmaDoubleComplex c_one = MAGMA_Z_MAKE(1., 0.);
-    
     magmablas_zher2k_vbatched_max_nocheck( 
             uplo, trans, 
             n, k, 
@@ -90,9 +87,6 @@ magmablas_zher2k_vbatched_nocheck(
     magma_getvector(1, sizeof(magma_int_t), &n[batchCount], 1, &max_n, 1, queue);
     magma_getvector(1, sizeof(magma_int_t), &k[batchCount], 1, &max_k, 1, queue);
         
-    magmaDoubleComplex cbeta = MAGMA_Z_MAKE(beta, 0.);
-    magmaDoubleComplex c_one = MAGMA_Z_MAKE(1., 0.);
-    
     magmablas_zher2k_vbatched_max_nocheck( 
             uplo, trans, 
             n, k, 
@@ -252,9 +246,6 @@ magmablas_zher2k_vbatched(
     magma_getvector(1, sizeof(magma_int_t), &n[batchCount], 1, &max_n, 1, queue);
     magma_getvector(1, sizeof(magma_int_t), &k[batchCount], 1, &max_k, 1, queue);
         
-    magmaDoubleComplex cbeta = MAGMA_Z_MAKE(beta, 0.);
-    magmaDoubleComplex c_one = MAGMA_Z_MAKE(1., 0.);
-    
     magmablas_zher2k_vbatched_max_nocheck( 
             uplo, trans, 
             n, k, 
