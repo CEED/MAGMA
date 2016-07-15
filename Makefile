@@ -143,7 +143,7 @@ CXXFLAGS  += -DMIN_CUDA_ARCH=$(MIN_ARCH)
 PTRFILE = control/sizeptr.c
 PTROBJ  = control/sizeptr.$(o_ext)
 PTREXEC = control/sizeptr
-PTRSIZE = $(shell if [ -x $(PTREXEC) ]; then $(PTREXEC); else echo xxx; fi)
+PTRSIZE = $(shell if [ -x $(PTREXEC) ]; then $(PTREXEC); else echo 8; fi)
 PTROPT  = -Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
 
 $(PTREXEC): $(PTROBJ)
@@ -186,6 +186,7 @@ subdirs := \
 Makefiles := $(addsuffix /Makefile.src, $(subdirs))
 
 include $(Makefiles)
+-include testing_v1/Makefile.src
 
 -include Makefile.internal
 -include Makefile.local
@@ -381,10 +382,10 @@ have_fpic = $(and $(findstring -fPIC, $(CFLAGS)),   \
                   $(findstring -fPIC, $(F90FLAGS)), \
                   $(findstring -fPIC, $(NVCCFLAGS)))
 
-ifneq ($(have_fpic),)
-
 # --------------------
 # if all flags have -fPIC: compile shared & static
+ifneq ($(have_fpic),)
+
     lib: static shared
     
     sparse-lib: sparse-static sparse-shared
@@ -401,10 +402,10 @@ ifneq ($(have_fpic),)
                                       
     libs := $(libmagma_a) $(libmagma_so) $(libsparse_a) $(libsparse_so)
 
-else
-
 # --------------------
 # else: some flags are missing -fPIC: compile static only
+else
+
     lib: static
     
     sparse-lib: sparse-static
@@ -427,6 +428,7 @@ else
     libs := $(libmagma_a) $(libsparse_a)
 
 endif
+# --------------------
 
 ifeq ($(blas_fix),1)
     libs += $(libblas_fix_a)
