@@ -23,20 +23,25 @@ static const char *usage_sparse_short =
 
 static const char *usage_sparse =
 "Options are:\n"
-" --format      Possibility to choose a format for the sparse matrix:\n"
-"               CSR, ELL, SELLP, CUSPARSECSR\n"
-" --blocksize x Set a specific blocksize for SELL-P format.\n"
-" --alignment x Set a specific alignment for SELL-P format.\n"
-" --mscale      Possibility to scale the original matrix:\n"
-"               0   no scaling\n"
-"               1   symmetric scaling to unit diagonal\n"
 " --solver      Possibility to choose a solver:\n"
 "               CG, PCG, BICGSTAB, PBICGSTAB, GMRES, PGMRES, LOBPCG, JACOBI,\n"
 "               BAITER, IDR, PIDR, CGS, PCGS, TFQMR, PTFQMR, QMR, PQMR, BICG,\n"
 "               PBICG, BOMBARDMENT, ITERREF.\n"
 " --basic       Use non-optimized version\n"
+" --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
+" --atol x      Set an absolute residual stopping criterion.\n"
+" --verbose x   Possibility to print intermediate residuals every x iteration.\n"
+" --maxiter x   Set an upper limit for the iteration count.\n"
+" --rtol x      Set a relative residual stopping criterion.\n"
+" --format      Possibility to choose a format for the sparse matrix:\n"
+"               CSR, ELL, SELLP, CUSPARSECSR\n"
+" --blocksize x Set a specific blocksize for SELL-P format.\n"
+" --alignment x Set a specific alignment for SELL-P format.\n"
+" --mscale      Possibility to scale the original matrix:\n"
+"               NOSCALE   no scaling\n"
+"               UNITDIAG   symmetric scaling to unit diagonal\n"
 " --precond x   Possibility to choose a preconditioner:\n"
 "               CG, BICGSTAB, GMRES, LOBPCG, JACOBI,\n"
 "               BAITER, IDR, CGS, TFQMR, QMR, BICG\n"
@@ -50,12 +55,11 @@ static const char *usage_sparse =
 "                   --psweeps x   Number of iterative ParILU sweeps.\n"
 " --trisolver   Possibility to choose a triangular solver for ILU preconditioning: e.g. JACOBI, ISAI.\n"
 " --ppattern k  Possibility to choose a pattern for the trisolver: ISAI(k) or Block Jacobi.\n"
-" --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
-" --verbose x   Possibility to print intermediate residuals every x iteration.\n"
-" --maxiter x   Set an upper limit for the iteration count.\n"
-" --atol atol   Set an absolute residual stopping criterion.\n"
-" --rtol rtol   Set a relative residual stopping criterion.\n";
-
+" --piters k    Number of preconditioner relaxation steps, e.g. for ISAI or (Block) Jacobi trisolver.\n"
+" --patol x     Set an absolute residual stopping criterion for the preconditioner.\n"
+"                      Corresponds to the relative fill-in in PARILUT.\n"
+" --prtol x     Set a relative residual stopping criterion for the preconditioner.\n"
+"                      Corresponds to the replacement ratio in PARILUT.\n";
 
 
 /**
@@ -134,6 +138,8 @@ magma_zparse_opts(
     opts->precond_par.restart = 10;
     opts->precond_par.levels = 0;
     opts->precond_par.sweeps = 5;
+    opts->precond_par.maxiter = 1;
+    opts->precond_par.pattern = 1;
     opts->solver_par.solver = Magma_CGMERGE;
     
     printf( usage_sparse_short, argv[0] );

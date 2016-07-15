@@ -89,10 +89,18 @@ libsparse_src += \
 
 # iterative ILU
 libsparse_src += \
-	$(cdir)/zdummy.cpp                    \
 	$(cdir)/ziterilu.cpp                  \
 	$(cdir)/zcustomic.cpp                 \
 	$(cdir)/zcustomilu.cpp                \
+	$(cdir)/zparilut.cpp                  \
+	$(cdir)/zparict.cpp                   \
+#	$(cdir)/zdummy.cpp                    \
+
+# incomplete sparse approximate inverse
+libsparse_src += \
+        $(cdir)/zgeisai.cpp                   \
+	$(cdir)/zsyisai.cpp                   \
+
 
 # orthogonalization schemes and wrappers to dense MAGMA
 libsparse_src += \

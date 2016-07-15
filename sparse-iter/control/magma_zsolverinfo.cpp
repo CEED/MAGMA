@@ -184,6 +184,8 @@ magma_zsolverinfo(
                     printf("%%   Preconditioner used: IC(%d).\n", int(precond_par->levels)); break;
             case  Magma_PARIC:
                     printf("%%   Preconditioner used: iterative IC(%d).\n", int(precond_par->levels)); break;
+            case  Magma_ISAI:
+                    printf("%%   Preconditioner used: iterative ILU-SPAI.\n", int(precond_par->levels)); break;
             default:
                   break;
         }
@@ -526,20 +528,21 @@ magma_zsolverinfo_free(
         magma_free_cpu( precond_par->UT.blockinfo );
         precond_par->UT.blockinfo = NULL;
     }
-    if (  precond_par->cuinfoL != NULL ){
-        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoL ); 
+    if ( precond_par->solver == Magma_ILU ||
+        precond_par->solver == Magma_PARILU ||
+        precond_par->solver == Magma_ICC||
+        precond_par->solver == Magma_PARIC ) {
+        if( precond_par->cuinfoL != NULL )
+            cusparseDestroySolveAnalysisInfo( precond_par->cuinfoL ); 
+        if( precond_par->cuinfoU != NULL )
+            cusparseDestroySolveAnalysisInfo( precond_par->cuinfoU ); 
         precond_par->cuinfoL = NULL;
-    }
-    if (  precond_par->cuinfoU != NULL ){
-        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoU ); 
         precond_par->cuinfoU = NULL;
-    }
-    if (  precond_par->cuinfoLT != NULL ){
-        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoLT ); 
+        if( precond_par->cuinfoLT != NULL )
+            cusparseDestroySolveAnalysisInfo( precond_par->cuinfoLT ); 
+        if( precond_par->cuinfoUT != NULL )
+            cusparseDestroySolveAnalysisInfo( precond_par->cuinfoUT ); 
         precond_par->cuinfoLT = NULL;
-    }
-    if (  precond_par->cuinfoUT != NULL ){
-        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoUT ); 
         precond_par->cuinfoUT = NULL;
     }
     if ( precond_par->LD.val != NULL ) {

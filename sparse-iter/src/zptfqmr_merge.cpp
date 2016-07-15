@@ -168,6 +168,13 @@ magma_zptfqmr_merge(
         tau = tau * theta *c;
         eta = c * c * alpha;
         sigma = theta * theta / alpha * eta;  
+        if( magma_z_isnan_inf( theta ) || magma_z_isnan_inf( c ) 
+                                    || magma_z_isnan_inf( tau ) 
+                                    || magma_z_isnan_inf( eta ) 
+                                    || magma_z_isnan_inf( sigma ) ){
+            info = MAGMA_DIVERGENCE;
+            break;
+        }
         
         magma_ztfqmr_2(  
         r.num_rows, 

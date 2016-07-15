@@ -163,7 +163,7 @@ magma_zcumilusetup(
         precond->U.dval, precond->U.drow, precond->U.dcol, precond->cuinfoU ));
 
 
-    if( precond->maxiter < 50 ){
+    if( precond->trisolver != 0 && precond->trisolver != Magma_CUSOLVE ){
         //prepare for iterative solves
         
         // extract the diagonal of L into precond->d
@@ -373,7 +373,7 @@ magma_zcumilugeneratesolverinfo(
         precond->U.dval, precond->U.drow, precond->U.dcol, precond->cuinfoU ));
 
     
-    if( precond->maxiter < 50 ){
+    if( precond->trisolver != 0 && precond->trisolver != Magma_CUSOLVE ){
         //prepare for iterative solves
 
         // extract the diagonal of L into precond->d
@@ -832,7 +832,7 @@ magma_zcumiccsetup(
         precond->M.nnz, descrU,
         precond->M.dval, precond->M.drow, precond->M.dcol, precond->cuinfoU ));
 
-    if( precond->maxiter < 50 ){
+    if( precond->trisolver != 0 && precond->trisolver != Magma_CUSOLVE ){
         //prepare for iterative solves
         
         // copy the matrix to precond->L and (transposed) to precond->U
