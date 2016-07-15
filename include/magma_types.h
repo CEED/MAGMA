@@ -293,6 +293,9 @@ typedef struct magma_queue* magma_queue_t;
 #define MagmaMaxGPUs 8
 #define MagmaMaxAccelerators 8
 
+// trsv template parameter
+#define MagmaBigTileSize 1000000    
+
 
 // ----------------------------------------
 // Return codes
@@ -301,19 +304,19 @@ typedef struct magma_queue* magma_queue_t;
 #define MAGMA_SUCCESS               0
 #define MAGMA_ERR                  -100
 #define MAGMA_ERR_NOT_INITIALIZED  -101
-#define MAGMA_ERR_REINITIALIZED    -102
+#define MAGMA_ERR_REINITIALIZED    -102  // unused
 #define MAGMA_ERR_NOT_SUPPORTED    -103
-#define MAGMA_ERR_ILLEGAL_VALUE    -104
+#define MAGMA_ERR_ILLEGAL_VALUE    -104  // unused
 #define MAGMA_ERR_NOT_FOUND        -105
-#define MAGMA_ERR_ALLOCATION       -106
-#define MAGMA_ERR_INTERNAL_LIMIT   -107
-#define MAGMA_ERR_UNALLOCATED      -108
-#define MAGMA_ERR_FILESYSTEM       -109
-#define MAGMA_ERR_UNEXPECTED       -110
-#define MAGMA_ERR_SEQUENCE_FLUSHED -111
+#define MAGMA_ERR_ALLOCATION       -106  // unused
+#define MAGMA_ERR_INTERNAL_LIMIT   -107  // unused
+#define MAGMA_ERR_UNALLOCATED      -108  // unused
+#define MAGMA_ERR_FILESYSTEM       -109  // unused
+#define MAGMA_ERR_UNEXPECTED       -110  // unused
+#define MAGMA_ERR_SEQUENCE_FLUSHED -111  // unused
 #define MAGMA_ERR_HOST_ALLOC       -112
 #define MAGMA_ERR_DEVICE_ALLOC     -113
-#define MAGMA_ERR_CUDASTREAM       -114
+#define MAGMA_ERR_CUDASTREAM       -114  // unused
 #define MAGMA_ERR_INVALID_PTR      -115
 #define MAGMA_ERR_UNKNOWN          -116
 #define MAGMA_ERR_NOT_IMPLEMENTED  -117
@@ -339,13 +342,12 @@ typedef struct magma_queue* magma_queue_t;
 #define MAGMA_ERR_CUSPARSE_MATRIX_TYPE_NOT_SUPPORTED  -3008
 #define MAGMA_ERR_CUSPARSE_ZERO_PIVOT                 -3009
 
-// some template parameter
-#define MagmaBigTileSize 1000000    
 
 // ----------------------------------------
 // parameter constants
 // numbering is consistent with CBLAS and PLASMA; see plasma/include/plasma.h
 // also with lapack_cwrapper/include/lapack_enum.h
+// see http://www.netlib.org/lapack/lapwrapc/
 typedef enum {
     MagmaFalse         = 0,
     MagmaTrue          = 1
