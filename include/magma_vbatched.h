@@ -90,11 +90,11 @@ magma_axpy_vbatched_checker(
         magma_int_t batchCount, magma_queue_t queue);
 
 // routines to find the maximum dimensions
-void magma_imax_size_1(magma_int_t *n, int l, magma_queue_t queue);
+void magma_imax_size_1(magma_int_t *n, magma_int_t l, magma_queue_t queue);
 
-void magma_imax_size_2(magma_int_t *m, magma_int_t *n, int l, magma_queue_t queue);
+void magma_imax_size_2(magma_int_t *m, magma_int_t *n, magma_int_t l, magma_queue_t queue);
 
-void magma_imax_size_3(magma_int_t *m, magma_int_t *n, magma_int_t *k, int l, magma_queue_t queue);
+void magma_imax_size_3(magma_int_t *m, magma_int_t *n, magma_int_t *k, magma_int_t l, magma_queue_t queue);
 
 // aux. routines 
 magma_int_t 
@@ -200,13 +200,13 @@ void
 magma_prefix_sum_outofplace_w(magma_int_t* ivec, magma_int_t* ovec, magma_int_t length, magma_int_t* workspace, magma_int_t lwork, magma_queue_t queue);
 
 void 
-magma_imax_size_1(magma_int_t *n, int l, magma_queue_t queue);
+magma_imax_size_1(magma_int_t *n, magma_int_t l, magma_queue_t queue);
 
 void 
-magma_imax_size_2(magma_int_t *m, magma_int_t *n, int l, magma_queue_t queue);
+magma_imax_size_2(magma_int_t *m, magma_int_t *n, magma_int_t l, magma_queue_t queue);
 
 void 
-magma_imax_size_3(magma_int_t *m, magma_int_t *n, magma_int_t *k, int l, magma_queue_t queue);
+magma_imax_size_3(magma_int_t *m, magma_int_t *n, magma_int_t *k, magma_int_t l, magma_queue_t queue);
 
 #ifdef __cplusplus
 }

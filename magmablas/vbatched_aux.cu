@@ -69,7 +69,9 @@ magma_int_t magma_ivec_max( magma_int_t vecsize,
 {
     dim3 threads(MAX_REDUCE_TX, 1, 1);
     dim3 grid( magma_ceildiv( vecsize, MAX_REDUCE_SEGMENT ) , 1, 1);
-    if(lwork < (magma_int_t)grid.x){printf("error in magma_ivec_max: lwork must be at least %d, input is %d\n", (magma_int_t)grid.x, lwork);}
+    if (lwork < (magma_int_t)grid.x) {
+        printf("error in magma_ivec_max: lwork must be at least %d, input is %d\n", (magma_int_t)grid.x, lwork);
+    }
     
     magma_ivec_max_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, work, 0);
     magma_int_t new_vecsize = grid.x;
@@ -137,7 +139,9 @@ magma_int_t magma_isum_reduce( magma_int_t vecsize,
 {
     dim3 threads(ISUM_REDUCE_TX, 1, 1);
     dim3 grid( magma_ceildiv( vecsize, ISUM_REDUCE_SEGMENT ) , 1, 1);
-    if(lwork < (magma_int_t)grid.x){printf("error in magma_isum_reduce: lwork must be at least %d, input is %d\n", (magma_int_t)grid.x, lwork);}
+    if (lwork < (magma_int_t)grid.x) {
+        printf("error in magma_isum_reduce: lwork must be at least %d, input is %d\n", (magma_int_t)grid.x, lwork);
+    }
     
     magma_isum_reduce_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, work, 0);
     magma_int_t new_vecsize = grid.x;
@@ -492,7 +496,7 @@ __global__ void magma_imax_size_kernel_1(magma_int_t *n, int l)
 // Kernel Driver
 //--------------
 extern "C"
-void magma_imax_size_1(magma_int_t *n, int l, magma_queue_t queue)
+void magma_imax_size_1(magma_int_t *n, magma_int_t l, magma_queue_t queue)
 {
     dim3 grid(1, 1, 1);
     dim3 threads(AUX_MAX_TX, 1, 1);
@@ -535,7 +539,7 @@ __global__ void magma_imax_size_kernel_2(magma_int_t *m, magma_int_t *n, int l)
 // Kernel Driver
 //--------------
 extern "C"
-void magma_imax_size_2(magma_int_t *m, magma_int_t *n, int l, magma_queue_t queue)
+void magma_imax_size_2(magma_int_t *m, magma_int_t *n, magma_int_t l, magma_queue_t queue)
 {
     dim3 grid(2, 1, 1);
     dim3 threads(AUX_MAX_TX, 1, 1);
@@ -579,7 +583,7 @@ __global__ void magma_imax_size_kernel_3(magma_int_t *m, magma_int_t *n, magma_i
 // Kernel Driver
 //--------------
 extern "C"
-void magma_imax_size_3(magma_int_t *m, magma_int_t *n, magma_int_t *k, int l, magma_queue_t queue)
+void magma_imax_size_3(magma_int_t *m, magma_int_t *n, magma_int_t *k, magma_int_t l, magma_queue_t queue)
 {
     dim3 grid(3, 1, 1);
     dim3 threads(AUX_MAX_TX, 1, 1);
