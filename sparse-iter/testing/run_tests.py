@@ -404,7 +404,7 @@ if ( opts.pgmres ):
 if ( opts.pidr ):
     precsolvers += ['--solver PIDR']
 # end
-if ( opts.pidr ):
+if ( opts.pqmr ):
     precsolvers += ['--solver PQMR']
 # end
 if ( opts.pidr ):
@@ -416,6 +416,7 @@ if ( opts.pbicg ):
 if ( opts.lsqr ):
     precsolvers += ['--solver PLSQR']
 # end
+
 
 
 # looping over eigensolvers
