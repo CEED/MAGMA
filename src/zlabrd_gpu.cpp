@@ -263,7 +263,7 @@ magma_zlabrd_gpu(
                              dA(i,i), ione, c_zero,
                              dY(i+1,i),   ione, queue );
                 
-                // 3. Put the result back ----------------------------------
+                // 3. Get the result back ----------------------------------
                 magma_zgetmatrix_async( n_i1, 1,
                                         dY(i+1,i), lddy,
                                         Y(i+1,i),  ldy, queue );
@@ -335,7 +335,7 @@ magma_zlabrd_gpu(
                              c_zero,
                              dX(i+1,i), ione, queue );
 
-                // 3. Put the result back ----------------------------------
+                // 3. Get the result back ----------------------------------
                 magma_zgetmatrix_async( m_i1, 1,
                                         dX(i+1,i), lddx,
                                         X(i+1,i),  ldx, queue );
@@ -425,7 +425,7 @@ magma_zlabrd_gpu(
                              c_zero,
                              dX(i+1,i), ione, queue );
                 
-                // 3. Put the result back ----------------------------------
+                // 3. Get the result back ----------------------------------
                 magma_zgetmatrix_async( m_i1, 1,
                                         dX(i+1,i), lddx,
                                         X(i+1,i),  ldx, queue );
@@ -497,7 +497,7 @@ magma_zlabrd_gpu(
                              dA(i+1,i), ione, c_zero,
                              dY(i+1,i), ione, queue );
                 
-                // 3. Put the result back ----------------------------------
+                // 3. Get the result back ----------------------------------
                 magma_zgetmatrix_async( n_i1, 1,
                                         dY(i+1,i), lddy,
                                         Y(i+1,i),  ldy, queue );
