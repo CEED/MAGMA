@@ -153,7 +153,7 @@ magma_zunmbr(
     #define A(i,j)  (A + (i) + (j)*lda)
     #define C(i,j)  (C + (i) + (j)*ldc)
             
-    magma_int_t i1, i2, nb, mi, ni, nq, nq_1, nw, iinfo, lwkopt;
+    magma_int_t i1, i2, nb, mi, ni, nq, nq_1, minwrk, iinfo, lwkopt;
     magma_int_t left, notran, applyq, lquery;
     magma_trans_t transt;
     
@@ -165,17 +165,17 @@ magma_zunmbr(
     notran = (trans == MagmaNoTrans);
     lquery = (lwork == -1);
 
-    /* NQ is the order of Q or P and NW is the minimum dimension of WORK */
+    /* NQ is the order of Q or P and MINWRK (previously "nw") is the minimum dimension of WORK */
     if (left) {
         nq = m;
-        nw = n;
+        minwrk = n;
     }
     else {
         nq = n;
-        nw = m;
+        minwrk = m;
     }
     if (m == 0 || n == 0) {
-        nw = 0;
+        minwrk = 0;
     }
     
     /* check arguments */
@@ -204,16 +204,16 @@ magma_zunmbr(
     else if (ldc < max(1,m)) {
         *info = -11;
     }
-    else if (lwork < max(1,nw) && ! lquery) {
+    else if (lwork < max(1,minwrk) && ! lquery) {
         *info = -13;
     }
 
     if (*info == 0) {
-        if (nw > 0) {
+        if (minwrk > 0) {
             // TODO have get_zunmqr_nb and get_zunmlq_nb routines? see original LAPACK zunmbr.
             // TODO make them dependent on m, n, and k?
             nb = magma_get_zgebrd_nb( m, n );
-            lwkopt = max(1, nw*nb);
+            lwkopt = max(1, minwrk*nb);
         }
         else {
             lwkopt = 1;
