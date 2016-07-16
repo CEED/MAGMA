@@ -168,18 +168,19 @@ magma_z_precondsetup(
     }
     else if ( precond->solver == Magma_PARILU ) {
         info = magma_ziterilusetup( A, b, precond, queue );
+        if( precond->trisolver == Magma_ISAI 
+                    || precond->trisolver == Magma_JACOBI ){
+            info = magma_ziluisaisetup( A, b, precond, queue );
+        }
     }
     else if ( precond->solver == Magma_PARILUT ) {
         #ifdef _OPENMP
             info = magma_zparilutsetup( A, b, precond, queue );
-            // if( precond->trisolver == Magma_ISAI 
-            //             || precond->trisolver == Magma_JACOBI ){
-            //     info = magma_ziluisaisetup( A, b, precond, queue );
-            // }
-            // info = magma_zcumilusetup( A, precond, queue );
-            //=info = magma_zparilutsetup( A, b, precond, queue );
+            if( precond->trisolver == Magma_ISAI 
+                        || precond->trisolver == Magma_JACOBI ){
+                info = magma_ziluisaisetup( A, b, precond, queue );
+            }
             precond->solver = Magma_PARILU; // handle as PARILU
-            precond->trisolver = Magma_CUSOLVE; // for now only allow cusolve
         #else
             printf( "error: preconditioner requires OpenMP.\n" );
             info = MAGMA_ERR_NOT_SUPPORTED;

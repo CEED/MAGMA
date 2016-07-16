@@ -12,6 +12,8 @@
 
 #include "magmasparse_internal.h"
 
+#include <cuda.h>  // for CUDA_VERSION
+
 #define PRECISION_z
 
 
@@ -67,6 +69,13 @@ magma_zicisaisetup(
     magma_int_t z;
     // magma_int_t timing = 1;
     
+    
+#if (CUDA_VERSION <= 6000) // this won't work, just to have something...
+    printf( "%% error: ISAI preconditioner requires CUDA > 6.0.\n" );
+    info = MAGMA_ERR_NOT_SUPPORTED;
+    goto cleanup;
+#endif
+
     CHECK( magma_index_malloc( &sizes_d, A.num_rows ) );
     CHECK( magma_index_malloc_cpu( &sizes_h, A.num_rows+1 ) );
     CHECK( magma_index_malloc( &locations_d, A.num_rows*warpsize ) );

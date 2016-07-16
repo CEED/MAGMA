@@ -472,6 +472,18 @@ magma_zparilutsetup(
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->U.num_rows,
         precond->U.nnz, descrU,
         precond->U.val, precond->U.row, precond->U.col, precond->cuinfoU ));
+    
+    if( precond->trisolver != 0 && precond->trisolver != Magma_CUSOLVE ){
+        //prepare for iterative solves
+        
+        // extract the diagonal of L into precond->d
+        CHECK( magma_zjacobisetup_diagscal( precond->L, &precond->d, queue ));
+        CHECK( magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue ));
+        
+        // extract the diagonal of U into precond->d2
+        CHECK( magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue ));
+        CHECK( magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue ));
+    }
 
     
     cleanup:
