@@ -67,8 +67,9 @@ magma_zparilutsetup(
 {
     magma_int_t info = 0;
     real_Double_t start, end;
-    real_Double_t t_rm, t_res, t_sweep1, t_sweep2, t_cand, t_thres, 
-                  t_reorder1, t_reorder2, t_rowmajor, t_select, t_insert, accum=0.;
+    real_Double_t t_rm=0.0, t_res=0.0, t_sweep1=0.0, t_sweep2=0.0, t_cand=0.0, 
+                    t_thres=0.0, t_reorder1=0.0, t_reorder2=0.0, t_rowmajor=0.0, 
+                    t_select=0.0, t_insert=0.0, accum=0.0;
 #ifdef _OPENMP
 
     cusparseHandle_t cusparseHandle=NULL;
@@ -76,13 +77,10 @@ magma_zparilutsetup(
     cusparseMatDescr_t descrU=NULL;
     magma_index_t *rm_locL = NULL; 
     magma_index_t *rm_locU = NULL; 
-    int offset=80;
-    magma_int_t num, num_rmLt, num_rmUt;
-    magmaDoubleComplex element;
+    magma_int_t num_rmLt, num_rmUt;
     magma_z_matrix hA={Magma_CSR}, hAT={Magma_CSR}, hL={Magma_CSR}, hU={Magma_CSR}, 
                     L={Magma_CSR}, U={Magma_CSR}, L_new={Magma_CSR}, U_new={Magma_CSR}, 
-                    LCSR={Magma_CSR}, UCSR={Magma_CSR}, UR={Magma_CSR};
-                   
+                    UR={Magma_CSR};
     magma_int_t num_rmL, num_rmU, num_rm_glL, num_rm_glU;
     magmaDoubleComplex thrsL = MAGMA_Z_ZERO;
     magmaDoubleComplex thrsU = MAGMA_Z_ZERO;
@@ -100,7 +98,6 @@ magma_zparilutsetup(
     CHECK( magma_index_malloc_cpu( &rm_locU, A.nnz ) ); 
     num_rm_glL = A.nnz*precond->rtol;
     num_rm_glU = A.nnz*precond->rtol;
-    offset =num_rm_glL;
     num_rmL = num_rm_glL;
     num_rmU = num_rm_glU;
     

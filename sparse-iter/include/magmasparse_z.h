@@ -628,8 +628,8 @@ magma_zmLdiagadd(
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE iterative dynamic ILU
 */
-#ifdef _OPENMP
-
+// #ifdef _OPENMP
+/*
 magma_int_t
 magma_zparict_insert(
     magma_int_t tri,
@@ -639,6 +639,7 @@ magma_zparict_insert(
     magma_z_matrix *LU,
     omp_lock_t *rowlock,
     magma_queue_t queue );
+
 
 magma_int_t
 magma_zparict_insert_U(
@@ -661,7 +662,7 @@ magma_zparict_insert_LU(
     magma_z_matrix *U,
     omp_lock_t *rowlock,
     magma_queue_t queue );
-
+    */
 magma_int_t
 magma_zparilut_insert_LU(
     magma_int_t num_rm,
@@ -707,7 +708,7 @@ magma_zparilut_copy(
     magma_z_matrix LU,
     magma_z_matrix *LUCSR,
     magma_queue_t queue );
-
+/*
 magma_int_t
 magma_zparilut_rm_thrs(
     magmaDoubleComplex *thrs,
@@ -738,7 +739,7 @@ magma_zparilut_rm_thrs_LU(
     magma_index_t *rm_loc,
     omp_lock_t *rowlock,
     magma_queue_t queue );
-
+    */
 magma_int_t
 magma_zparict_sweep(
     magma_z_matrix *A,
@@ -1187,7 +1188,7 @@ magma_zisai_generator_regs3(
     magmaDoubleComplex *rhs,    
     magma_queue_t queue );
 
-#endif
+// #endif
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE function definitions / Data on CPU
 */

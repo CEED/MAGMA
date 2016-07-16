@@ -129,8 +129,8 @@ magma_zftjacobi(
     CHECK( magma_zvinit( &z, Magma_DEV, b.num_rows, 1, c_zero, queue ));
     CHECK( magma_zvinit( &c, Magma_DEV, b.num_rows, 1, c_zero, queue ));
 
-    CHECK( magma_index_malloc( &flag_t, b.num_rows ));
-    CHECK( magma_index_malloc( &flag_fp, b.num_rows ));
+    CHECK( magma_imalloc( &flag_t, b.num_rows ));
+    CHECK( magma_imalloc( &flag_fp, b.num_rows ));
     
     if ( solver_par->verbose != 0 ) {
         // k iterations for startup
