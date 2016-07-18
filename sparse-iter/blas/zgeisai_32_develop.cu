@@ -20,17 +20,8 @@
 
 #include <cuda.h>  // for CUDA_VERSION
 
-#if (CUDA_VERSION <= 6000) // this won't work, just to have something...
-// CUDA 6.5 adds Double precision version; here's an implementation for CUDA 6.0 and earlier.
-// from https://devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
-__device__ inline
-real_Double_t __shfl(real_Double_t var, unsigned int srcLane, int width=32) {
-  int2 a = *reinterpret_cast<int2*>(&var);
-  a.x = __shfl(a.x, srcLane, width);
-  a.y = __shfl(a.y, srcLane, width);
-  return *reinterpret_cast<double*>(&a);
-}
-#endif
+#if (CUDA_VERSION > 6000) // only for cuda>6000
+
          
 
 
@@ -10767,6 +10758,8 @@ magmaDoubleComplex *Mval )
     }                                                                                                   
 }                                                                                                       
                                                                                                         
+#endif
+
 
 /**
     Purpose
@@ -10857,7 +10850,8 @@ magma_zisai_generator_regs(
     dim3 r2block( r2bs1, r2bs2, 1 );
     dim3 r2grid( r2dg1, r2dg2, r2dg3 );
     
-    
+#if (CUDA_VERSION > 6000)
+
     if( uplotype == MagmaLower ){//printf("in here lower new kernel\n");
         //cudaProfilerStart();
         magma_zlowerisai_regs_inv_switch<<< r1grid, r1block, 0, queue->cuda_stream() >>>(                                                                           
@@ -10880,6 +10874,10 @@ magma_zisai_generator_regs(
             M->col,
             M->val );
     }
+#else
+   printf( "%% error: ISAI preconditioner requires CUDA > 6.0.\n" );
+   info = MAGMA_ERR_NOT_SUPPORTED; 
+#endif
     
     return info;
 }

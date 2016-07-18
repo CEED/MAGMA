@@ -22,20 +22,8 @@
 
 #include <cuda.h>  // for CUDA_VERSION
 
-#if (CUDA_VERSION <= 6000) // this won't work, just to have something...
-// CUDA 6.5 adds Double precision version; here's an implementation for CUDA 6.0 and earlier.
-// from https://devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
-__device__ inline
-real_Double_t __shfl(real_Double_t var, unsigned int srcLane, int width=32) {
-  int2 a = *reinterpret_cast<int2*>(&var);
-  a.x = __shfl(a.x, srcLane, width);
-  a.y = __shfl(a.y, srcLane, width);
-  return *reinterpret_cast<double*>(&a);
-}
-#endif
-         
+#if (CUDA_VERSION > 6000)
                                                                                                 
-
 
 __device__
 void ztrsv_lower_kernel_general(magmaDoubleComplex *dA, magmaDoubleComplex *dB, int *sizes)
@@ -2292,6 +2280,7 @@ void ztrsv_upper_kernel_switch(magmaDoubleComplex *dA, magmaDoubleComplex *dB, i
     }                                                                                                   
     }                                                                                                   
 }                                                                                                       
+#endif
 
 /**
     Purpose
@@ -2368,7 +2357,8 @@ magma_zmtrisolve_batched_gpu(
     
     dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
     dim3 block( blocksize1, blocksize2, 1 );
-
+    
+#if (CUDA_VERSION > 6000)
     if( uplotype == MagmaLower ){ 
         //cudaProfilerStart();
         ztrsv_lower_kernel_switch<<< grid, block, 0, queue->cuda_stream() >>>(
@@ -2384,7 +2374,8 @@ magma_zmtrisolve_batched_gpu(
                 sizes,
                 LC.num_rows );
     }
-    
+#endif
+
     return info;
 
 
