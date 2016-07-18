@@ -68,7 +68,7 @@ libsparse_src += \
 	$(cdir)/zgeisai_trsv.cu           \
 	$(cdir)/zgeblockstruct.cu	\
 	$(cdir)/zgeisai_maxblock.cu	\
-#	$(cdir)/zgeisai_32_development.cu      \
+	$(cdir)/zgeisai_32_develop.cu      \
 
 # Tester routines
 libsparse_src += \

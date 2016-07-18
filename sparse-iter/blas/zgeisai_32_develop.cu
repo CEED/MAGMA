@@ -10860,7 +10860,7 @@ magma_zisai_generator_regs(
     
     if( uplotype == MagmaLower ){//printf("in here lower new kernel\n");
         //cudaProfilerStart();
-        magma_zlowerisai_regs_inv_switch<<< r1grid, r1block, 0, queue->cuda_stream() >>>(                                                                           
+        magma_zlowerisai_regs_switch<<< r1grid, r1block, 0, queue->cuda_stream() >>>(                                                                           
             L.num_rows,                                                                                   
             L.row,
             L.col,
@@ -10871,7 +10871,7 @@ magma_zisai_generator_regs(
          //cudaProfilerStop(); 
          //exit(-1);
     } else {// printf("in here upper new kernel\n");
-        magma_zupperisai_regs_inv_switch<<< r1grid, r1block, 0, queue->cuda_stream() >>>(                                                                           
+        magma_zupperisai_regs_switch<<< r1grid, r1block, 0, queue->cuda_stream() >>>(                                                                           
             L.num_rows,                                                                                   
             L.row,
             L.col,

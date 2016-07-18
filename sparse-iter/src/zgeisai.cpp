@@ -73,11 +73,12 @@ magma_ziluisaisetup(
     goto cleanup;
 #endif
     
-    CHECK( magma_index_malloc( &sizes_d, A.num_rows ) );
     CHECK( magma_index_malloc_cpu( &sizes_h, A.num_rows+1 ) );
-    CHECK( magma_index_malloc( &locations_d, A.num_rows*warpsize ) );
-    CHECK( magma_zmalloc( &trisystems_d, min(320000,A.num_rows) *warpsize*warpsize ) ); // fixed size - go recursive
-    CHECK( magma_zmalloc( &rhs_d, A.num_rows*warpsize ) );
+    // only needed in case the systems are generated in GPU main memory
+    // CHECK( magma_index_malloc( &sizes_d, A.num_rows ) );
+    // CHECK( magma_index_malloc( &locations_d, A.num_rows*warpsize ) );
+    // CHECK( magma_zmalloc( &trisystems_d, min(320000,A.num_rows) *warpsize*warpsize ) ); // fixed size - go recursive
+    // CHECK( magma_zmalloc( &rhs_d, A.num_rows*warpsize ) );
     
     if( precond->trisolver == Magma_JACOBI ){
         precond->pattern = -precond->pattern;    
@@ -142,20 +143,21 @@ magma_ziluisaisetup(
        info = -(maxsize - warpsize);     
        goto cleanup;
     }
- 
-    if( maxsize <= 8 ){
-        CHECK( magma_zisaigenerator_8_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-                    LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    } else if( maxsize <= 16 ){
-        CHECK( magma_zisaigenerator_16_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-                    LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    } else {
-        CHECK( magma_zisaigenerator_32_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-                    LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    }
-    
-    //CHECK( magma_zisai_generator_regs( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-      //              LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // via main memory
+    //  if( maxsize <= 8 ){
+    //      CHECK( magma_zisaigenerator_8_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+    //                  LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    //  } else if( maxsize <= 16 ){
+    //      CHECK( magma_zisaigenerator_16_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+    //                  LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    //  } else {
+    //      CHECK( magma_zisaigenerator_32_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+    //                  LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    //  }
+    // via registers
+    CHECK( magma_zisai_generator_regs( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+                    precond->L, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+      
     
     
     CHECK( magma_zmtranspose( MT, &precond->LD, queue ) );
@@ -215,30 +217,30 @@ magma_ziluisaisetup(
        info = -(maxsize - warpsize);     
        goto cleanup;
     }
-    
-    if( maxsize <= 8 ){
-        CHECK( magma_zisaigenerator_8_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-                    LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    } else if( maxsize <= 16 ){
-        CHECK( magma_zisaigenerator_16_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-                    LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    } else {
-        CHECK( magma_zisaigenerator_32_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-                    LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    }
-    
-    //CHECK( magma_zisai_generator_regs( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-    //                LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // via main memory
+    //   if( maxsize <= 8 ){
+    //       CHECK( magma_zisaigenerator_8_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+    //                   LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    //   } else if( maxsize <= 16 ){
+    //       CHECK( magma_zisaigenerator_16_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+    //                   LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    //   } else {
+    //       CHECK( magma_zisaigenerator_32_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+    //                   LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    //   }
+    // via registers
+    CHECK( magma_zisai_generator_regs( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+                    precond->U, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
 
     CHECK( magma_zmtranspose( MT, &precond->UD, queue ) );
     // magma_z_mvisu( precond->UD, queue ); 
      
 cleanup:
-    magma_free( sizes_d );
+    // magma_free( sizes_d );
     magma_free_cpu( sizes_h );
-    magma_free( locations_d );
-    magma_free( trisystems_d );
-    magma_free( rhs_d );
+    // magma_free( locations_d );
+    // magma_free( trisystems_d );
+    // magma_free( rhs_d );
     magma_zmfree( &LT, queue );
     magma_zmfree( &MT, queue );
     magma_zmfree( &QT, queue );

@@ -202,9 +202,9 @@ parser.add_option(      '--ilut-prec'        , action='store_true', dest='ilut_p
 
 # default if no sizes given is all sizes
 if ( not opts.small and not opts.med and not opts.large and not opts.nonsym ):
-    opts.small = True
-    opts.med   = True
-    opts.large = True
+    opts.small  = True
+    opts.med    = False
+    opts.large  = False
     opts.nonsym = True
 # end
 
@@ -221,14 +221,6 @@ if (     not opts.sparse_blas
     opts.csr         = True
     opts.ell         = True
     opts.sellp       = True
-# end
-
-# default if no sizes given is all sizes
-if ( not opts.small and not opts.med and not opts.large and not opts.nonsym ):
-    opts.small = True
-    opts.med   = True
-    opts.large = True
-    opts.nonsym = True
 # end
 
 # default if no solvers given is all solvers
@@ -301,9 +293,9 @@ if (     not opts.jacobi_prec
     opts.jacobi_prec      = True
     opts.ilu_prec         = True
     opts.ilu_jac_prec     = True
-    opts.ilu_isai_prec    = False
-    opts.ilu_bjac_prec    = False
-    opts.ilut_prec        = False
+    opts.ilu_isai_prec    = True
+    opts.ilu_bjac_prec    = True
+    opts.ilut_prec        = True
 # end
 
 # default if no sizes given is all sizes

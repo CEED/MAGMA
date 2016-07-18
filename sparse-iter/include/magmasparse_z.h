@@ -971,9 +971,7 @@ magma_zmpilut_select_candidates_U(
     magma_queue_t queue );
 
 
-
-
-// Huckle's SPAI ideas
+// ISAI preconditioner
 
 magma_int_t
 magma_zmprepare_batched(
