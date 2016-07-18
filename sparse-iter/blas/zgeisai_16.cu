@@ -20,7 +20,7 @@
 
 #include <cuda.h>  // for CUDA_VERSION
 
-#if (CUDA_VERSION > 6000) 
+#if (__CUDA_ARCH__ >= 300 && CUDA_VERSION > 6000)
          
 
 __device__
@@ -1566,7 +1566,7 @@ magma_zisaigenerator_16_gpu(
     
     int recursive = magma_ceildiv( M->num_rows, 32000 );
     
-#if (CUDA_VERSION > 6000)
+#if (__CUDA_ARCH__ >= 300 && CUDA_VERSION > 6000)
 
     magma_zgpumemzero_16kernel<<< r1grid, r1block, 0, queue->cuda_stream() >>>(  
             rhs, L.num_rows, WARP_SIZE, 1);
