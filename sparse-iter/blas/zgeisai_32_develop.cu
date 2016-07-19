@@ -20,7 +20,7 @@
 
 #include <cuda.h>  // for CUDA_VERSION
 
-#if (__CUDA_ARCH__ >= 300 && CUDA_VERSION > 6000) // only for cuda>6000
+#if (CUDA_VERSION > 6000) // only for cuda>6000
 
          
 
@@ -10850,7 +10850,7 @@ magma_zisai_generator_regs(
     dim3 r2block( r2bs1, r2bs2, 1 );
     dim3 r2grid( r2dg1, r2dg2, r2dg3 );
     
-#if (__CUDA_ARCH__ >= 300 && CUDA_VERSION > 6000)
+#if (CUDA_VERSION > 6000)
 
     if( uplotype == MagmaLower ){//printf("in here lower new kernel\n");
         //cudaProfilerStart();
