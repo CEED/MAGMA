@@ -85,7 +85,8 @@ void magma_zpotf2_zdotc_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
     2) updates x[n] = sqrt(x[n]-sum);
     */
     if (n > MAX_NTHREADS) {
-        fprintf( stderr, "%s: n = %d > %d is not supported\n", __func__, (int) n, (int) MAX_NTHREADS );
+        fprintf( stderr, "%s: n = %ld > %ld is not supported\n",
+                 __func__, long(n), long(MAX_NTHREADS) );
     }
     int threadSize;
 

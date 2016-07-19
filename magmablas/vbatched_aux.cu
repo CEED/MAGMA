@@ -68,9 +68,10 @@ magma_int_t magma_ivec_max( magma_int_t vecsize,
                               magma_int_t* work, magma_int_t lwork, magma_queue_t queue)
 {
     dim3 threads(MAX_REDUCE_TX, 1, 1);
-    dim3 grid( magma_ceildiv( vecsize, MAX_REDUCE_SEGMENT ) , 1, 1);
+    dim3 grid( magma_ceildiv( vecsize, MAX_REDUCE_SEGMENT ), 1, 1);
     if (lwork < (magma_int_t)grid.x) {
-        printf("error in magma_ivec_max: lwork must be at least %d, input is %d\n", (magma_int_t)grid.x, lwork);
+        printf("error in %s: lwork must be at least %ld, input is %ld\n",
+               __func__, long(grid.x), long(lwork) );
     }
     
     magma_ivec_max_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, work, 0);
@@ -138,9 +139,10 @@ magma_int_t magma_isum_reduce( magma_int_t vecsize,
                               magma_int_t* work, magma_int_t lwork, magma_queue_t queue)
 {
     dim3 threads(ISUM_REDUCE_TX, 1, 1);
-    dim3 grid( magma_ceildiv( vecsize, ISUM_REDUCE_SEGMENT ) , 1, 1);
+    dim3 grid( magma_ceildiv( vecsize, ISUM_REDUCE_SEGMENT ), 1, 1);
     if (lwork < (magma_int_t)grid.x) {
-        printf("error in magma_isum_reduce: lwork must be at least %d, input is %d\n", (magma_int_t)grid.x, lwork);
+        printf("error in %s: lwork must be at least %ld, input is %ld\n",
+               __func__, long(grid.x), long(lwork) );
     }
     
     magma_isum_reduce_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, work, 0);
@@ -182,7 +184,7 @@ void magma_ivec_add( magma_int_t vecsize,
                            magma_int_t *y, magma_queue_t queue)
 {
     dim3 threads(BLK_X, 1, 1);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1, 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1, 1);
     magma_ivec_add_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, a1, x1, a2, x2, y);
 }
 //============================================================================================
@@ -210,7 +212,7 @@ void magma_ivec_mul( magma_int_t vecsize,
                            magma_int_t *y, magma_queue_t queue)
 {
     dim3 threads(BLK_X, 1, 1);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1, 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1, 1);
     magma_ivec_mul_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x1, x2, y);
 }
 //============================================================================================
@@ -236,7 +238,7 @@ void magma_ivec_ceildiv( magma_int_t vecsize,
                         magma_int_t *y, magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_ivec_ceildiv_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, nb, y);
 }
@@ -261,7 +263,7 @@ void magma_ivec_roundup( magma_int_t vecsize,
                         magma_int_t *y, magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_ivec_roundup_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, nb, y);
 }
@@ -287,7 +289,7 @@ void magma_ivec_setc( magma_int_t vecsize,
                                 magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_setvector_const_gpu_kernel<magma_int_t><<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value);
 }
@@ -299,7 +301,7 @@ void magma_zsetvector_const( magma_int_t vecsize,
                                 magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_setvector_const_gpu_kernel<magmaDoubleComplex><<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value);
 }
@@ -311,7 +313,7 @@ void magma_csetvector_const( magma_int_t vecsize,
                                 magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_setvector_const_gpu_kernel<magmaFloatComplex><<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value);
 }
@@ -323,7 +325,7 @@ void magma_dsetvector_const( magma_int_t vecsize,
                                 magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_setvector_const_gpu_kernel<double><<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value);
 }
@@ -335,7 +337,7 @@ void magma_ssetvector_const( magma_int_t vecsize,
                                 magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_setvector_const_gpu_kernel<float><<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value);
 }
@@ -357,7 +359,7 @@ extern "C"
 void magma_ivec_addc(magma_int_t vecsize, magma_int_t *x, magma_int_t value, magma_int_t *y, magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_ivec_addc_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value, y);
 }
@@ -379,7 +381,7 @@ extern "C"
 void magma_ivec_mulc(magma_int_t vecsize, magma_int_t *x, magma_int_t value, magma_int_t *y, magma_queue_t queue)
 {
     dim3 threads(BLK_X);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1);
     
     magma_ivec_mulc_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value, y);
 }
@@ -402,7 +404,7 @@ extern "C"
 void magma_ivec_minc(magma_int_t vecsize, magma_int_t *x, magma_int_t value, magma_int_t *y, magma_queue_t queue)
 {
     dim3 threads(BLK_X, 1, 1);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1, 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1, 1);
     
     magma_ivec_minc_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value, y);
 }
@@ -425,7 +427,7 @@ extern "C"
 void magma_ivec_maxc(magma_int_t vecsize, magma_int_t* x, magma_int_t value, magma_int_t* y, magma_queue_t queue)
 {
     dim3 threads(BLK_X, 1, 1);
-    dim3 grid( magma_ceildiv( vecsize, BLK_X ) , 1, 1);
+    dim3 grid( magma_ceildiv( vecsize, BLK_X ), 1, 1);
     
     magma_ivec_maxc_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, value, y);
 }
@@ -455,7 +457,7 @@ void magma_compute_trsm_jb(magma_int_t vecsize, magma_int_t* m, magma_int_t tri_
 {
     const int nthreads = 128;
     dim3 threads(nthreads);
-    dim3 grid( magma_ceildiv( vecsize, nthreads ) , 1);
+    dim3 grid( magma_ceildiv( vecsize, nthreads ), 1);
     
     magma_compute_trsm_jb_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, m, tri_nb, jbv);
 }

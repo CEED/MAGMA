@@ -144,10 +144,6 @@
     queue   magma_queue_t
             Queue to execute in.
     
-    @param[in]
-    myhandle    cublasHandle_t
-              Handlde to use cuBLAS routines
-
     @ingroup magma_zblas3
     ********************************************************************/
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,19 +179,20 @@ magma_zgemm_batched( magma_trans_t transA, magma_trans_t transB,
     magma_int_t use_cublas = magma_zrecommend_cublas_gemm_batched(transA, transB, m, n, k);
 
     if (use_cublas) {
-        cublasZgemmBatched(queue->cublas_handle(), cublas_trans_const(transA), cublas_trans_const(transB),
-                     m, n, k,
-                     &alpha, (const magmaDoubleComplex**)dA_array,    ldda,
-                             (const magmaDoubleComplex**)dB_array,    lddb,
-                     &beta, dC_array, lddc, batchCount);
+        cublasZgemmBatched(
+                queue->cublas_handle(), cublas_trans_const(transA), cublas_trans_const(transB),
+                int(m), int(n), int(k),
+                &alpha, (const magmaDoubleComplex**)dA_array, int(ldda),
+                     (const magmaDoubleComplex**)dB_array, int(lddb),
+                &beta, dC_array, int(lddc), int(batchCount) );
     }
     else {
         magmablas_zgemm_batched(
-                    transA, transB, m, n, k,
-                    alpha, dA_array, ldda,
-                    dB_array, lddb,
-                    beta, dC_array, lddc, 
-                    batchCount, queue );
+                transA, transB, m, n, k,
+                alpha, dA_array, ldda,
+                dB_array, lddb,
+                beta, dC_array, lddc, 
+                batchCount, queue );
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////

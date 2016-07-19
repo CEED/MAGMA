@@ -37,8 +37,8 @@ magmablas_zgetmatrix_transpose_mgpu(
         return;
 
     if (lda < m || ngpu*ldda < n || lddw < m) {
-        fprintf( stderr, "%s: wrong arguments (%d<%d), (%d*%d<%d), or (%d<%d).\n",
-                 __func__, (int) lda, (int) m, (int) ngpu, (int) ldda, (int) n, (int) lddw, (int) m );
+        fprintf( stderr, "%s: wrong arguments (%ld < %ld), (%ld*%ld < %ld), or (%ld < %ld).\n",
+                 __func__, long(lda), long(m), long(ngpu), long(ldda), long(n), long(lddw), long(m) );
         return;
     }
     
