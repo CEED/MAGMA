@@ -56,7 +56,7 @@ public:
                        T, ldt, lambda, x, &s, cnorm, &info );
         *scale = MAGMA_Z_MAKE( s, 0 );
         if ( info != 0 ) {
-            fprintf( stderr, "zlatrsd info %d\n", (int) info );
+            fprintf( stderr, "zlatrsd info %ld\n", long(info) );
         }
     }
     
@@ -392,7 +392,7 @@ magma_int_t magma_ztrevc3_mt(
     magma_set_lapack_numthreads( 1 );
     magma_thread_queue queue;
     queue.launch( nthread );
-    //printf( "nthread %d, %d\n", nthread, lapack_nthread );
+    //printf( "nthread %ld, %ld\n", long(nthread), long(lapack_nthread) );
     
     // gemm_nb = N/thread, rounded up to multiple of 16,
     // but avoid multiples of page size, e.g., 512*8 bytes = 4096.

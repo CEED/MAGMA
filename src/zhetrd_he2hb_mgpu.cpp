@@ -254,7 +254,7 @@ magma_zhetrd_he2hb_mgpu(
     magma_int_t ncmplx=0;
     magma_buildconnection_mgpu(gnode, &ncmplx,  ngpu);
     #ifdef ENABLE_DEBUG
-    printf(" Initializing communication pattern.... GPU-ncmplx %d\n\n", ncmplx);
+    printf(" Initializing communication pattern.... GPU-ncmplx %ld\n\n", long(ncmplx) );
     #endif
 
     magmaDoubleComplex *dspace[MagmaMaxGPUs];

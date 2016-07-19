@@ -336,14 +336,14 @@ magma_zheevdx_2stage(
     }
 
 
-    timer_printf("using %d parallel_threads\n", (int) parallel_threads);
+    timer_printf("using %ld parallel_threads\n", long(parallel_threads) );
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t ntiles = n/nb;
     if ( ( ntiles < 2 ) || ( n <= 128 ) ) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
-        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
+        printf("  warning matrix too small N=%ld NB=%ld, calling lapack on CPU\n", long(n), long(nb) );
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zheevd(jobz_, uplo_, &n,
@@ -439,7 +439,7 @@ magma_zheevdx_2stage(
     magma_zhetrd_he2hb(uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dT1, info);
 
     timer_stop( time );
-    timer_printf( "  N= %10d  nb= %5d time zhetrd_he2hb= %6.2f\n", (int)n, (int)nb, time );
+    timer_printf( "  N= %10ld  nb= %5ld time zhetrd_he2hb= %6.2f\n", long(n), long(nb), time );
     timer_start( time );
 
     /* copy the input matrix into WORK(INDWRK) with band storage */
@@ -458,15 +458,15 @@ magma_zheevdx_2stage(
     }
 
     timer_stop( time );
-    timer_printf( "  N= %10d  nb= %5d time zhetrd_convert = %6.2f\n", (int)n, (int)nb, time );
+    timer_printf( "  N= %10ld  nb= %5ld time zhetrd_convert = %6.2f\n", long(n), long(nb), time );
     timer_start( time );
 
     magma_zhetrd_hb2st(uplo, n, nb, Vblksiz, A2, lda2, W, E, V2, ldv, TAU2, wantz, T2, ldt);
 
     timer_stop( time );
     timer_stop( time_total );
-    timer_printf( "  N= %10d  nb= %5d time zhetrd_hb2st= %6.2f\n", (int)n, (int)nb, time );
-    timer_printf( "  N= %10d  nb= %5d time zhetrd= %6.2f\n", (int)n, (int)nb, time_total );
+    timer_printf( "  N= %10ld  nb= %5ld time zhetrd_hb2st= %6.2f\n", long(n), long(nb), time );
+    timer_printf( "  N= %10ld  nb= %5ld time zhetrd= %6.2f\n", long(n), long(nb), time_total );
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
        ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
@@ -479,7 +479,7 @@ magma_zheevdx_2stage(
         magma_dmove_eig(range, n, W, &il, &iu, vl, vu, m);
 
         timer_stop( time );
-        timer_printf( "  N= %10d  nb= %5d time dstedc = %6.2f\n", (int)n, (int)nb, time );
+        timer_printf( "  N= %10ld  nb= %5ld time dstedc = %6.2f\n", long(n), long(nb), time );
     }
     else {
         timer_start( time_total );
@@ -499,7 +499,7 @@ magma_zheevdx_2stage(
 
 
         timer_stop( time );
-        timer_printf( "  N= %10d  nb= %5d time zstedx = %6.2f\n", (int)n, (int)nb, time );
+        timer_printf( "  N= %10ld  nb= %5ld time zstedx = %6.2f\n", long(n), long(nb), time );
         magma_free( dwedc );
         magma_dmove_eig(range, n, W, &il, &iu, vl, vu, m);
 
@@ -518,7 +518,7 @@ magma_zheevdx_2stage(
                           V2, ldv, TAU2, T2, ldt, info);
 
         timer_stop( time );
-        timer_printf( "  N= %10d  nb= %5d time zbulge_back = %6.2f\n", (int)n, (int)nb, time );
+        timer_printf( "  N= %10ld  nb= %5ld time zbulge_back = %6.2f\n", long(n), long(nb), time );
 
         magmaDoubleComplex *dA;
         magma_int_t ldda = n;
@@ -546,11 +546,11 @@ magma_zheevdx_2stage(
         magma_queue_destroy( queue );
 
         timer_stop( time );
-        timer_printf( "  N= %10d  nb= %5d time zunmqr + copy = %6.2f\n", (int)n, (int)nb, time );
+        timer_printf( "  N= %10ld  nb= %5ld time zunmqr + copy = %6.2f\n", long(n), long(nb), time );
         magma_free(dZ);
         magma_free(dA);
         timer_stop( time_total );
-        timer_printf( "  N= %10d  nb= %5d time eigenvectors backtransf. = %6.2f\n", (int)n, (int)nb, time_total );
+        timer_printf( "  N= %10ld  nb= %5ld time eigenvectors backtransf. = %6.2f\n", long(n), long(nb), time_total );
     }
 
     magma_free(dT1);

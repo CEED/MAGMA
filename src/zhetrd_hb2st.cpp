@@ -84,12 +84,14 @@ void magma_zbulge_data_init(
     zbulge_data_S->ldt = ldt;
     zbulge_data_S->prog = prog;
 
-    pthread_barrier_init(&(zbulge_data_S->myptbarrier), NULL, zbulge_data_S->threads_num);
+    pthread_barrier_init(&(zbulge_data_S->myptbarrier), NULL, (unsigned) zbulge_data_S->threads_num);
 }
+
 void magma_zbulge_data_destroy(magma_zbulge_data *zbulge_data_S)
 {
     pthread_barrier_destroy(&(zbulge_data_S->myptbarrier));
 }
+
 typedef struct magma_zbulge_id_data_s {
     magma_int_t id;
     magma_zbulge_data* data;
@@ -222,7 +224,7 @@ magma_zhetrd_hb2st(
     // Set one thread per core
     pthread_attr_init(&thread_attr);
     pthread_attr_setscope(&thread_attr, PTHREAD_SCOPE_SYSTEM);
-    pthread_setconcurrency(parallel_threads);
+    pthread_setconcurrency( (unsigned)parallel_threads );
 
     //timing
     #ifdef ENABLE_TIMER
@@ -541,7 +543,7 @@ static void magma_ztile_bulge_parallel(
     if (grsiz <= 0)
         return;
 
-    //printf("=================> my core id %d of %d \n",my_core_id, cores_num);
+    //printf("=================> my core id %ld of %ld\n", long(my_core_id), long(cores_num) );
 
     /* As I store V in the V vector there are overlap between
      * tasks so shift is now 4 where group need to be always
@@ -577,10 +579,11 @@ static void magma_ztile_bulge_parallel(
         if (cores_num > maxrequiredcores)
         {
             printf("==================================================================================\n");
-            printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
+            printf("  WARNING only %3ld threads are required to run this test optimizing cache reuse\n", long(maxrequiredcores) );
             printf("==================================================================================\n");
         }
-        printf("  SS_COND Static bulgechasing version v9_9col threads  %4d   threads_used  %4d   n %5d      nb %5d    grs %4d thgrsiz %4d  wantz %4d\n",cores_num, allcoresnb, n, nb, grsiz,thgrsiz,wantz);
+        printf("  SS_COND Static bulgechasing version v9_9col threads  %4ld   threads_used  %4ld   n %5ld      nb %5ld    grs %4ld thgrsiz %4ld  wantz %4ld\n",
+               long(cores_num), long(allcoresnb), long(n), long(nb), long(grsiz), long(thgrsiz), long(wantz) );
     }
     #endif
 
@@ -690,7 +693,7 @@ static void magma_ztile_bulge_computeT_parallel(
 
     #ifdef ENABLE_DEBUG
     if (my_core_id == 0)
-        printf("  COMPUTE T parallel threads %d with  n %d   nb %d   Vblksiz %d \n", cores_num, n, nb, Vblksiz);
+        printf("  COMPUTE T parallel threads %ld with  n %ld   nb %ld   Vblksiz %ld\n", long(cores_num), long(n), long(nb), long(Vblksiz) );
     #endif
 
 

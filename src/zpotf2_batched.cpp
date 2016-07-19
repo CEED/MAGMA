@@ -35,7 +35,7 @@ magma_zpotf2_ztrsm_batched(
     magma_int_t arginfo = 0;
     if ( m > MAX_NTHREADS )
     {
-        printf("magma_zpotf2_ztrsm_batched m=%d > %d not supported today\n", (int) m, (int) MAX_NTHREADS);
+        printf("magma_zpotf2_ztrsm_batched m=%ld > %ld not supported today\n", long(m), long(MAX_NTHREADS) );
         arginfo = -13;
         return arginfo;
     }
@@ -49,7 +49,7 @@ magma_zpotf2_ztrsm_batched(
     magmaDoubleComplex beta  = MAGMA_Z_ONE;
 
     if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
+        printf("Upper side is unavailable\n");
     }
     else {
         for (j = 0; j < n; j++) {
@@ -117,7 +117,7 @@ magma_zpotf2_batched(
     magma_int_t crossover = magma_get_zpotrf_batched_crossover();
 
     if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
+        printf("Upper side is unavailable\n");
     }
     else {
         if ( n <= crossover )

@@ -164,7 +164,7 @@ magma_int_t magma_dlaqtrsd(
         }
         smin = max( ulp*(fabs(wr) + fabs(wi)), smlnum );
         
-        //printf( "n %d, w %5.2f + %5.2fi\n", n, wr, wi );
+        //printf( "n %ld, w %5.2f + %5.2fi\n", n, wr, wi );
 
         if ( wi == c_zero ) {
             // ------------------------------------------------------------

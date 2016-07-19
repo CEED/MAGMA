@@ -156,8 +156,8 @@ magma_zpotrf_m(
         NB = (NB/nb) * nb;   /* making sure it's devisable by nb   */
     }
     #ifdef CHECK_ZPOTRF_OOC
-    if ( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d, lddla=%d, freeMem=%.2e).\n", n, NB, nb, lddla, (double)freeMem );
-    else           printf( "      * running in in-core mode  (n=%d, NB=%d, nb=%d, lddla=%d, freeMem=%.2e).\n", n, NB, nb, lddla, (double)freeMem );
+    if ( NB != n ) printf( "      * running in out-core mode (n=%ld, NB=%ld, nb=%ld, lddla=%ld, freeMem=%.2e).\n", long(n), long(NB), long(nb), long(lddla), double(freeMem) );
+    else           printf( "      * running in in-core mode  (n=%ld, NB=%ld, nb=%ld, lddla=%ld, freeMem=%.2e).\n", long(n), long(NB), long(nb), long(lddla), double(freeMem) );
     fflush(stdout);
     #endif
     for (d=0; d < ngpu; d++ ) {
@@ -451,7 +451,7 @@ magma_zpotrf_m(
     }
     magma_setdevice( orig_dev );
     
-    // timer_printf( "\n n=%d NB=%d nb=%d\n", (int) n, (int) NB, (int) nb );
+    // timer_printf( "\n n=%ld NB=%ld nb=%ld\n", long(n), long(NB), long(nb) );
     // timer_printf( " Without memory allocation: %f / %f = %f GFlop/s\n",
     //               FLOPS_ZPOTRF(n) / 1e9,  time_total,
     //               FLOPS_ZPOTRF(n) / 1e9 / time_total );

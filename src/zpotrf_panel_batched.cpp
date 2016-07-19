@@ -35,7 +35,7 @@ magma_zpotrf_panel_batched(
     //  panel factorization
     //===============================================
     if (n < nb) {
-        printf("magma_zpotrf_panel error n < nb %d < %d \n",(int) n, (int) nb);
+        printf("magma_zpotrf_panel error n < nb %ld < %ld\n", long(n), long(nb) );
         return -101;
     }
 
@@ -102,13 +102,13 @@ magma_zpotrf_recpanel_batched(
         return arginfo;
     }
     if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
+        printf("Upper side is unavailable\n");
         arginfo = -1;
         magma_xerbla( __func__, -(arginfo) );
         return arginfo;
     }
     if (m < n) {
-        printf("error m < n %d < %d \n", (int) m, (int) n);
+        printf("error m < n %ld < %ld\n", long(m), long(n) );
         arginfo = -101;
         magma_xerbla( __func__, -(arginfo) );
         return arginfo;
@@ -213,11 +213,11 @@ magma_zpotrf_rectile_batched(
         return 1;
     }
     if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
+        printf("Upper side is unavailable\n");
         return -100;
     }
     if (m < n) {
-        printf("error m < n %d < %d \n", (int) m, (int) n);
+        printf("error m < n %ld < %ld\n", long(m), long(n) );
         return -101;
     }
 

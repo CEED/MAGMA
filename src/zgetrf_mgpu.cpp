@@ -126,8 +126,8 @@ magma_zgetrf_mgpu(
         magma_getdevice( &orig_dev );
         
         maxm = magma_roundup( m, 32 );
-        if ( ngpu > ceil((double)n/nb) ) {
-            printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) ngpu );
+        if ( ngpu > magma_ceildiv( n, nb )) {
+            printf( " * too many GPUs for the matrix size, using %ld GPUs\n", long(ngpu) );
             *info = -1;
             return *info;
         }

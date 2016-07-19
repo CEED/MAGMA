@@ -333,7 +333,7 @@ magma_zhegvd_m(
                 trans = MagmaConjTrans;
             }
             #ifdef ENABLE_DEBUG
-            printf("--- the multi GPU version is falling back to 1 GPU to perform the last TRMM since there is no TRMM_mgpu --- \n");
+            printf("--- the multi GPU version is falling back to 1 GPU to perform the last TRMM since there is no TRMM_mgpu ---\n");
             #endif
             magmaDoubleComplex *dA=NULL, *dB=NULL;
             magma_int_t ldda = magma_roundup( n, 32 );

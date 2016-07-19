@@ -155,8 +155,8 @@ magma_zbulge_applyQ_v2(
      *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
 
     #ifdef ENABLE_DEBUG
-    printf("  APPLY Q_v22 GPU with  N %5d, NE %5d,  NB %5d, Vblksiz %5d, versionL %5d versionR %5d  SIDE %5d \n",
-           N, NE, NB, Vblksiz, versionL, versionR, side);
+    printf("  APPLY Q_v22 GPU with  N %5ld, NE %5ld,  NB %5ld, Vblksiz %5ld, versionL %5ld versionR %5ld  SIDE %5d\n",
+           long(N), long(NE), long(NB), long(Vblksiz), long(versionL), long(versionR), side );
     #endif
 
     /*

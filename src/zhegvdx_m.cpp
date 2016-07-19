@@ -326,7 +326,7 @@ magma_zhegvdx_m(
     if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
-        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
+        printf("  warning matrix too small N=%ld NB=%ld, calling lapack on CPU\n", long(n), long(nb) );
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zhegvd(&itype, jobz_, uplo_,
@@ -389,7 +389,7 @@ magma_zhegvdx_m(
                 trans = MagmaConjTrans;
             }
             #ifdef ENABLE_DEBUG
-            printf("--- the multi GPU version is falling back to 1 GPU to perform the last TRMM since there is no TRMM_mgpu --- \n");
+            printf("--- the multi GPU version is falling back to 1 GPU to perform the last TRMM since there is no TRMM_mgpu ---\n");
             #endif
             magmaDoubleComplex *dA=NULL, *dB=NULL;
             magma_int_t ldda = magma_roundup( n, 32 );

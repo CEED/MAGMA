@@ -95,12 +95,12 @@ magma_zpotrf_lg_batched(
 
     if ( n > 2048 ) {
         #ifndef MAGMA_NOWARNING
-        printf("=========================================================================================\n");
-        printf("   WARNING batched routines are designed for small sizes it might be better to use the\n   Native/Hybrid classical routines if you want performance\n");
-        printf("=========================================================================================\n");
+        printf("=========================================================================================\n"
+               "   WARNING batched routines are designed for small sizes. It might be better to use the\n"
+               "   Native/Hybrid classical routines if you want good performance.\n"
+               "=========================================================================================\n");
         #endif
     }
-
 
     magma_int_t j, k, ib, use_stream;
     magma_int_t nb, recnb;
@@ -168,7 +168,7 @@ magma_zpotrf_lg_batched(
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1, queue);
 
     if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
+        printf("Upper side is unavailable\n");
         goto fin;
     }
     else {
@@ -257,7 +257,8 @@ magma_zpotrf_lg_batched(
             //gpu_time = magma_sync_wtime(NULL) - gpu_time;
             //real_Double_t flops = (n-j-ib) * (n-j-ib) * ib / 1e9 * batchCount;
             //real_Double_t gpu_perf = flops / gpu_time;
-            //printf("Rows= %d, Colum=%d, herk time = %7.2fms, Gflops= %7.2f\n", n-j-ib, ib, gpu_time*1000, gpu_perf);
+            //printf("Rows= %ld, Colum=%ld, herk time = %7.2fms, Gflops= %7.2f\n",
+            //       long(n-j-ib), long(ib), gpu_time*1000, gpu_perf);
 #endif
         }
     }

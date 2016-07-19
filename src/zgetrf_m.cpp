@@ -140,8 +140,8 @@ magma_zgetrf_m(
         NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
     //NB = 5*max(nb,32);
 
-    if ( ngpu0 > ceil((double)NB/nb) ) {
-        ngpu = (int)ceil((double)NB/nb);
+    if ( ngpu0 > magma_ceildiv( NB, nb )) {
+        ngpu = magma_ceildiv( NB, nb );
         h = 1+(2+ngpu);
         NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     } else {
@@ -161,8 +161,8 @@ magma_zgetrf_m(
     }
 
     #ifdef CHECK_ZGETRF_OOC
-    if ( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d, freeMem=%.2e).\n", n, NB, nb, (double)freeMem );
-    else           printf( "      * running in in-core mode  (n=%d, NB=%d, nb=%d, freeMem=%.2e).\n", n, NB, nb, (double)freeMem );
+    if ( NB != n ) printf( "      * running in out-core mode (n=%ld, NB=%ld, nb=%ld, freeMem=%.2e).\n", long(n), long(NB), long(nb), double(freeMem) );
+    else           printf( "      * running in in-core mode  (n=%ld, NB=%ld, nb=%ld, freeMem=%.2e).\n", long(n), long(NB), long(nb), double(freeMem) );
     #endif
 
     if ( (nb <= 1) || (nb >= min(m,n)) ) {
@@ -201,8 +201,8 @@ magma_zgetrf_m(
             //s = min( max(m-I,0), N )/nb; /* number of small block-columns in this big panel */
     
             maxm = magma_roundup( M, 32 );
-            if ( ngpu0 > ceil((double)N/nb) ) {
-                ngpu = (int)ceil((double)N/nb);
+            if ( ngpu0 > magma_ceildiv( NB, nb ) ) {
+                ngpu = magma_ceildiv( NB, nb );
             } else {
                 ngpu = ngpu0;
             }
@@ -334,7 +334,7 @@ magma_zgetrf_m(
         //timer_stop( time_total );
         //flops = FLOPS_ZGETRF( m, n ) / 1e9;
         //timer_printf(" memory-allocation time: %e\n", time_alloc );
-        //timer_printf(" NB=%d nb=%d\n", (int) NB, (int) nb );
+        //timer_printf(" NB=%ld nb=%ld\n", long(NB), long(nb) );
         //timer_printf(" memcopy and transpose %e seconds\n", time_set );
         //timer_printf(" total time %e seconds\n", time_total );
         //timer_printf(" Performance %f GFlop/s, %f seconds without htod and dtoh\n",     flops / (time_comp),               time_comp               );

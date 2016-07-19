@@ -507,10 +507,10 @@ CLEANUP:
     
     timer_stop( time_total );
     flops_stop( flop_total );
-    timer_printf( "dgeev times n %5d, gehrd %7.3f, unghr %7.3f, hseqr %7.3f, trevc %7.3f, total %7.3f, sum %7.3f\n",
-                  (int) n, time_gehrd, time_unghr, time_hseqr, time_trevc, time_total, time_sum );
-    timer_printf( "dgeev flops n %5d, gehrd %7lld, unghr %7lld, hseqr %7lld, trevc %7lld, total %7lld, sum %7lld\n",
-                  (int) n, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_total, flop_sum );
+    timer_printf( "dgeev times n %5ld, gehrd %7.3f, unghr %7.3f, hseqr %7.3f, trevc %7.3f, total %7.3f, sum %7.3f\n",
+                  long(n), time_gehrd, time_unghr, time_hseqr, time_trevc, time_total, time_sum );
+    timer_printf( "dgeev flops n %5ld, gehrd %7lld, unghr %7lld, hseqr %7lld, trevc %7lld, total %7lld, sum %7lld\n",
+                  long(n), flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_total, flop_sum );
     
     work[0] = magma_dmake_lwork( optwrk );
     

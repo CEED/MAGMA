@@ -176,8 +176,8 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
         // note that myrow = prev_n + mycol;
         if (prev_n > 0 && mycol > 0) {
             if (DEBUG == 3) {
-                printf("doing gemm on the rectangular portion of size %d %d of T(%d,%d)\n",
-                        (int) prev_n, (int) mycol, 0, (int) j );
+                printf("doing gemm on the rectangular portion of size %ld %ld of T(%ld,%ld)\n",
+                        long(prev_n), long(mycol), long(0), long(j) );
             }
 
             magma_zdisplace_pointers(dW1_displ, dTstep_array, ldtstep, 0, j, batchCount, queue);
@@ -197,8 +197,8 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
             {
                 rows = min(nb,prev_n-i);
                 if (DEBUG == 3) {
-                    printf("        doing recztrmv on the rectangular portion of size %d %d of T(%d,%d)\n",
-                            (int) rows, (int) mycol, (int) i, (int) j );
+                    printf("        doing recztrmv on the rectangular portion of size %ld %ld of T(%ld,%ld)\n",
+                            long(rows), long(mycol), long(i), long(j) );
                 }
 
                 if (rows > 0 && mycol > 0)
@@ -212,8 +212,8 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
         // the upper rectangular protion is updated, now if needed update the triangular portion
         if (stair_T == 0) {
             if (DEBUG == 3) {
-                printf("doing ztrmv on the triangular portion of size %d %d of T(%d,%d)\n",
-                        (int) mycol, (int) mycol, (int) j, (int) j );
+                printf("doing ztrmv on the triangular portion of size %ld %ld of T(%ld,%ld)\n",
+                        long(mycol), long(mycol), long(j), long(j) );
             }
 
             if (mycol > 0)

@@ -366,7 +366,7 @@ magma_zhegvdx_2stage(
     if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
-        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
+        printf("  warning matrix too small N=%ld NB=%ld, calling lapack on CPU\n", long(n), long(nb) );
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zhegvd(&itype, jobz_, uplo_,

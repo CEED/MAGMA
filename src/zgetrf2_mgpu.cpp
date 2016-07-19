@@ -144,7 +144,7 @@ magma_zgetrf2_mgpu(
 
     /* Function Body */
     mindim = min(m, n);
-    if ( ngpu > ceil((double)n/nb) ) {
+    if ( ngpu > magma_ceildiv( n, nb )) {
         *info = -1;
         return *info;
     }

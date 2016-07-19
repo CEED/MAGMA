@@ -298,7 +298,7 @@ magma_zhetrd_he2hb(
                Prepare the V and T matrices.
                ==========================================================  */
             #ifdef TRACING
-            snprintf( buf, sizeof(buf), "panel %d", i );
+            snprintf( buf, sizeof(buf), "panel %ld", long(i) );
             #endif
             trace_cpu_start( 0, "geqrf", buf );
             lapackf77_zgeqrf(&pm, &pn, A(indi, indj), &lda,

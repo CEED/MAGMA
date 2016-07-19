@@ -159,8 +159,8 @@ magma_zgetrf(
         if ( ngr_nb_char != NULL )
             NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
 
-        if ( ngpu > ceil((double)NB/nb) ) {
-            ngpu2 = (magma_int_t)ceil((double)NB/nb);
+        if ( ngpu > magma_ceildiv( NB, nb )) {
+            ngpu2 = magma_ceildiv( NB, nb );
             h = 1+(2+ngpu2);
             NB = (magma_int_t)(0.8*mem_size/maxm - h*nb);
         }

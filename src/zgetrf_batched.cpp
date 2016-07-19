@@ -114,9 +114,10 @@ magma_zgetrf_batched(
 
     if ( m >  2048 || n > 2048 ) {
         #ifndef MAGMA_NOWARNING
-        printf("=========================================================================================\n");
-        printf("   WARNING batched routines are designed for small sizes it might be better to use the\n   Native/Hybrid classical routines if you want performance\n");
-        printf("=========================================================================================\n");
+        printf("=========================================================================================\n"
+               "   WARNING batched routines are designed for small sizes. It might be better to use the\n"
+               "   Native/Hybrid classical routines if you want good performance.\n"
+               "=========================================================================================\n");
         #endif
     }
 
@@ -338,7 +339,7 @@ magma_zgetrf_batched(
                     magma_zdisplace_pointers(dA_displ, dA_array,  ldda, i+ib,    i, batchCount, queue);
                     magma_zdisplace_pointers(dW1_displ, dA_array, ldda,    i, i+ib, batchCount, queue);
                     magma_zdisplace_pointers(dW2_displ, dA_array, ldda, i+ib, i+ib, batchCount, queue);
-                    //printf("caling batched dgemm %d %d %d \n", m-i-ib, n-i-ib, ib);
+                    //printf("caling batched dgemm %ld %ld %ld\n", long(m-i-ib), long(n-i-ib), long(ib) );
                     magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib, 
                                          c_neg_one, dA_displ,  ldda, 
                                                     dW1_displ, ldda, 

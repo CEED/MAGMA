@@ -170,7 +170,7 @@ magma_zgeqrf_ooc(
     /* start the main loop over the blocks that fit in the GPU memory */
     for (i=0; i < n; i += NB) {
         IB = min( n-i, NB );
-        //printf("Processing %5d columns -- %5d to %5d ... \n", IB, i, i+IB);
+        //printf("Processing %5ld columns -- %5ld to %5ld ...\n", long(IB), long(i), long(i+IB) );
 
         /* 1. Copy the next part of the matrix to the GPU */
         magma_zsetmatrix_async( m, IB,
