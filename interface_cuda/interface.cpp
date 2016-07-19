@@ -398,7 +398,7 @@ void magma_print_environment()
 extern "C"
 magma_int_t magma_getdevice_arch()
 {
-    magma_device_t dev;
+    int dev;
     cudaError_t err;
     err = cudaGetDevice( &dev );
     check_error( err );
@@ -422,7 +422,7 @@ void magma_getdevices(
     err = cudaGetDeviceCount( &cnt );
     check_error( err );
     
-    cnt = min( cnt, size );
+    cnt = min( cnt, int(size) );
     for( int i = 0; i < cnt; ++i ) {
         devices[i] = i;
     }
@@ -433,8 +433,10 @@ void magma_getdevices(
 extern "C"
 void magma_getdevice( magma_device_t* device )
 {
+    int dev;
     cudaError_t err;
-    err = cudaGetDevice( device );
+    err = cudaGetDevice( &dev );
+    *device = dev;
     check_error( err );
 }
 
@@ -443,7 +445,7 @@ extern "C"
 void magma_setdevice( magma_device_t device )
 {
     cudaError_t err;
-    err = cudaSetDevice( device );
+    err = cudaSetDevice( int(device) );
     check_error( err );
 }
 
@@ -539,7 +541,7 @@ magma_queue_t magmablasGetQueue()
         // create queue w/ NULL stream first time that NULL queue is used
         if ( g_null_queues[dev] == NULL ) {
             magma_queue_create_from_cuda( dev, NULL, NULL, NULL, &g_null_queues[dev] );
-            printf( "dev %d create queue %p\n", dev, (void*) g_null_queues[dev] );
+            printf( "dev %ld create queue %p\n", long(dev), (void*) g_null_queues[dev] );
             assert( g_null_queues[dev] != NULL );
         }
         queue = g_null_queues[dev];
@@ -556,7 +558,7 @@ void magma_queue_create_internal(
     magma_queue_t* queue_ptr,
     const char* func, const char* file, int line )
 {
-    magma_device_t device;
+    int device;
     cudaError_t err;
     err = cudaGetDevice( &device );
     check_xerror( err, func, file, line );

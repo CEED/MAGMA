@@ -78,9 +78,9 @@ magma_setmatrix_internal(
 {
     cublasStatus_t status;
     status = cublasSetMatrix(
-        m, n, elemSize,
-        hA_src, ldha,
-        dB_dst, lddb );
+        int(m), int(n), int(elemSize),
+        hA_src, int(ldha),
+        dB_dst, int(lddb) );
     check_xerror( status, func, file, line );
 }
 
@@ -94,9 +94,9 @@ magma_getmatrix_internal(
 {
     cublasStatus_t status;
     status = cublasGetMatrix(
-        m, n, elemSize,
-        dA_src, ldda,
-        hB_dst, ldhb );
+        int(m), int(n), int(elemSize),
+        dA_src, int(ldda),
+        hB_dst, int(ldhb) );
     check_xerror( status, func, file, line );
 }
 
@@ -110,9 +110,9 @@ magma_copymatrix_internal(
 {
     cudaError_t status;
     status = cudaMemcpy2D(
-        dB_dst, lddb*elemSize,
-        dA_src, ldda*elemSize,
-        m*elemSize, n, cudaMemcpyDeviceToDevice );
+        dB_dst, int(lddb*elemSize),
+        dA_src, int(ldda*elemSize),
+        int(m*elemSize), int(n), cudaMemcpyDeviceToDevice );
     check_xerror( status, func, file, line );
 }
 

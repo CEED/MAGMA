@@ -45,7 +45,7 @@ magma_izamax_q(
     magma_queue_t queue )
 {
     int result; /* not magma_int_t */
-    cublasIzamax( queue->cublas_handle(), n, dx, incx, &result );
+    cublasIzamax( queue->cublas_handle(), int(n), dx, int(incx), &result );
     return result;
 }
 
@@ -75,7 +75,7 @@ magma_izamin_q(
     magma_queue_t queue )
 {
     int result; /* not magma_int_t */
-    cublasIzamin( queue->cublas_handle(), n, dx, incx, &result );
+    cublasIzamin( queue->cublas_handle(), int(n), dx, int(incx), &result );
     return result;
 }
 
@@ -105,7 +105,7 @@ magma_dzasum_q(
     magma_queue_t queue )
 {
     double result;
-    cublasDzasum( queue->cublas_handle(), n, dx, incx, &result );
+    cublasDzasum( queue->cublas_handle(), int(n), dx, int(incx), &result );
     return result;
 }
 
@@ -146,7 +146,7 @@ magma_zaxpy_q(
     magmaDoubleComplex_ptr       dy, magma_int_t incy,
     magma_queue_t queue )
 {
-    cublasZaxpy( queue->cublas_handle(), n, &alpha, dx, incx, dy, incy );
+    cublasZaxpy( queue->cublas_handle(), int(n), &alpha, dx, int(incx), dy, int(incy) );
 }
 
 // --------------------
@@ -182,7 +182,7 @@ magma_zcopy_q(
     magmaDoubleComplex_ptr       dy, magma_int_t incy,
     magma_queue_t queue )
 {
-    cublasZcopy( queue->cublas_handle(), n, dx, incx, dy, incy );
+    cublasZcopy( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy) );
 }
 
 // --------------------
@@ -219,7 +219,7 @@ magmaDoubleComplex magma_zdotc(
     magma_queue_t queue )
 {
     magmaDoubleComplex result;
-    cublasZdotc( queue->cublas_handle(), n, dx, incx, dy, incy, &result );
+    cublasZdotc( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), &result );
     return result;
 }
 
@@ -258,7 +258,7 @@ magmaDoubleComplex magma_zdotu(
     magma_queue_t queue )
 {
     magmaDoubleComplex result;
-    cublasZdotu( queue->cublas_handle(), n, dx, incx, dy, incy, &result );
+    cublasZdotu( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), &result );
     return result;
 }
 #endif // COMPLEX
@@ -289,7 +289,7 @@ magma_dznrm2_q(
     magma_queue_t queue )
 {
     double result;
-    cublasDznrm2( queue->cublas_handle(), n, dx, incx, &result );
+    cublasDznrm2( queue->cublas_handle(), int(n), dx, int(incx), &result );
     return result;
 }
 
@@ -337,7 +337,7 @@ magma_zrot_q(
     double c, magmaDoubleComplex s,
     magma_queue_t queue )
 {
-    cublasZrot( queue->cublas_handle(), n, dx, incx, dy, incy, &c, &s );
+    cublasZrot( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), &c, &s );
 }
 
 #ifdef COMPLEX
@@ -385,7 +385,7 @@ magma_zdrot_q(
     double c, double s,
     magma_queue_t queue )
 {
-    cublasZdrot( queue->cublas_handle(), n, dx, incx, dy, incy, &c, &s );
+    cublasZdrot( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), &c, &s );
 }
 #endif // COMPLEX
 
@@ -403,7 +403,7 @@ magma_zrotm_q(
     const double *param,
     magma_queue_t queue )
 {
-    cublasZrotm( queue->cublas_handle(), n, dx, incx, dy, incy, param );
+    cublasZrotm( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), param );
 }
 
 // --------------------
@@ -451,7 +451,7 @@ magma_zscal_q(
     magmaDoubleComplex_ptr dx, magma_int_t incx,
     magma_queue_t queue )
 {
-    cublasZscal( queue->cublas_handle(), n, &alpha, dx, incx );
+    cublasZscal( queue->cublas_handle(), int(n), &alpha, dx, int(incx) );
 }
 
 #ifdef COMPLEX
@@ -484,7 +484,7 @@ magma_zdscal_q(
     magmaDoubleComplex_ptr dx, magma_int_t incx,
     magma_queue_t queue )
 {
-    cublasZdscal( queue->cublas_handle(), n, &alpha, dx, incx );
+    cublasZdscal( queue->cublas_handle(), int(n), &alpha, dx, int(incx) );
 }
 #endif // COMPLEX
 
@@ -521,7 +521,7 @@ magma_zswap_q(
     magmaDoubleComplex_ptr dy, magma_int_t incy,
     magma_queue_t queue )
 {
-    cublasZswap( queue->cublas_handle(), n, dx, incx, dy, incy );
+    cublasZswap( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy) );
 }
 
 
@@ -592,10 +592,10 @@ magma_zgemv_q(
     cublasZgemv(
         queue->cublas_handle(),
         cublas_trans_const( transA ),
-        m, n,
-        &alpha, dA, ldda,
-                dx, incx,
-        &beta,  dy, incy );
+        int(m), int(n),
+        &alpha, dA, int(ldda),
+                dx, int(incx),
+        &beta,  dy, int(incy) );
 }
 
 // --------------------
@@ -648,10 +648,10 @@ magma_zgerc_q(
 {
     cublasZgerc(
         queue->cublas_handle(),
-        m, n,
-        &alpha, dx, incx,
-                dy, incy,
-                dA, ldda );
+        int(m), int(n),
+        &alpha, dx, int(incx),
+                dy, int(incy),
+                dA, int(ldda) );
 }
 
 #ifdef COMPLEX
@@ -705,10 +705,10 @@ magma_zgeru_q(
 {
     cublasZgeru(
         queue->cublas_handle(),
-        m, n,
-        &alpha, dx, incx,
-                dy, incy,
-                dA, ldda );
+        int(m), int(n),
+        &alpha, dx, int(incx),
+                dy, int(incy),
+                dA, int(ldda) );
 }
 #endif // COMPLEX
 
@@ -768,10 +768,10 @@ magma_zhemv_q(
     cublasZhemv(
         queue->cublas_handle(),
         cublas_uplo_const( uplo ),
-        n,
-        &alpha, dA, ldda,
-                dx, incx,
-        &beta,  dy, incy );
+        int(n),
+        &alpha, dA, int(ldda),
+                dx, int(incx),
+        &beta,  dy, int(incy) );
 }
 
 // --------------------
@@ -818,9 +818,9 @@ magma_zher_q(
     cublasZher(
         queue->cublas_handle(),
         cublas_uplo_const( uplo ),
-        n,
-        &alpha, dx, incx,
-                dA, ldda );
+        int(n),
+        &alpha, dx, int(incx),
+                dA, int(ldda) );
 }
 
 // --------------------
@@ -875,10 +875,10 @@ magma_zher2_q(
     cublasZher2(
         queue->cublas_handle(),
         cublas_uplo_const( uplo ),
-        n,
-        &alpha, dx, incx,
-                dy, incy,
-                dA, ldda );
+        int(n),
+        &alpha, dx, int(incx),
+                dy, int(incy),
+                dA, int(ldda) );
 }
 
 // --------------------
@@ -932,9 +932,9 @@ magma_ztrmv_q(
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
         cublas_diag_const( diag ),
-        n,
-        dA, ldda,
-        dx, incx );
+        int(n),
+        dA, int(ldda),
+        dx, int(incx) );
 }
 
 // --------------------
@@ -989,9 +989,9 @@ magma_ztrsv_q(
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
         cublas_diag_const( diag ),
-        n,
-        dA, ldda,
-        dx, incx );
+        int(n),
+        dA, int(ldda),
+        dx, int(incx) );
 }
 
 // ========================================
@@ -1065,10 +1065,10 @@ magma_zgemm_q(
         queue->cublas_handle(),
         cublas_trans_const( transA ),
         cublas_trans_const( transB ),
-        m, n, k,
-        &alpha, dA, ldda,
-                dB, lddb,
-        &beta,  dC, lddc );
+        int(m), int(n), int(k),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+        &beta,  dC, int(lddc) );
 }
 
 // --------------------
@@ -1138,10 +1138,10 @@ magma_zsymm_q(
         queue->cublas_handle(),
         cublas_side_const( side ),
         cublas_uplo_const( uplo ),
-        m, n,
-        &alpha, dA, ldda,
-                dB, lddb,
-        &beta,  dC, lddc );
+        int(m), int(n),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+        &beta,  dC, int(lddc) );
 }
 
 // --------------------
@@ -1203,9 +1203,9 @@ magma_zsyrk_q(
         queue->cublas_handle(),
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
-        n, k,
-        &alpha, dA, ldda,
-        &beta,  dC, lddc );
+        int(n), int(k),
+        &alpha, dA, int(ldda),
+        &beta,  dC, int(lddc) );
 }
 
 // --------------------
@@ -1276,10 +1276,10 @@ magma_zsyr2k_q(
         queue->cublas_handle(),
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
-        n, k,
-        &alpha, dA, ldda,
-                dB, lddb,
-        &beta,  dC, lddc );
+        int(n), int(k),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+        &beta,  dC, int(lddc) );
 }
 
 #ifdef COMPLEX
@@ -1350,10 +1350,10 @@ magma_zhemm_q(
         queue->cublas_handle(),
         cublas_side_const( side ),
         cublas_uplo_const( uplo ),
-        m, n,
-        &alpha, dA, ldda,
-                dB, lddb,
-        &beta,  dC, lddc );
+        int(m), int(n),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+        &beta,  dC, int(lddc) );
 }
 
 // --------------------
@@ -1415,9 +1415,9 @@ magma_zherk_q(
         queue->cublas_handle(),
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
-        n, k,
-        &alpha, dA, ldda,
-        &beta,  dC, lddc );
+        int(n), int(k),
+        &alpha, dA, int(ldda),
+        &beta,  dC, int(lddc) );
 }
 
 // --------------------
@@ -1488,10 +1488,10 @@ magma_zher2k_q(
         queue->cublas_handle(),
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
-        n, k,
-        &alpha, dA, ldda,
-                dB, lddb,
-        &beta,  dC, lddc );
+        int(n), int(k),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+        &beta,  dC, int(lddc) );
 }
 #endif // COMPLEX
 
@@ -1558,10 +1558,10 @@ magma_ztrmm_q(
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
         cublas_diag_const( diag ),
-        m, n,
-        &alpha, dA, ldda,
-                dB, lddb,
-                dB, lddb );  /* C same as B; less efficient */
+        int(m), int(n),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+                dB, int(lddb) );  /* C same as B; less efficient */
 }
 
 // --------------------
@@ -1628,9 +1628,9 @@ magma_ztrsm_q(
         cublas_uplo_const( uplo ),
         cublas_trans_const( trans ),
         cublas_diag_const( diag ),
-        m, n,
-        &alpha, dA, ldda,
-                dB, lddb );
+        int(m), int(n),
+        &alpha, dA, int(ldda),
+                dB, int(lddb) );
 }
 
 #endif // HAVE_CUBLAS
