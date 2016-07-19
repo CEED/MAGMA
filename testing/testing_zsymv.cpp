@@ -22,8 +22,23 @@
 #include "testings.h"
 
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Testing zsymv
+*/
 int main(int argc, char **argv)
 {
+    #ifdef HAVE_clBLAS
+    #define dA(i_, j_)  dA, ((i_) + (j_)*ldda)
+    #define dX(i_)      dX, ((i_))
+    #define dY(i_)      dY, ((i_))
+    #define dwork(i_)   dwork, ((i_))
+    #else
+    #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
+    #define dX(i_)     (dX + (i_))
+    #define dY(i_)     (dY + (i_))
+    #define dwork(i_)  (dwork + (i_))
+    #endif
+    
     TESTING_CHECK( magma_init() );
     magma_print_environment();
 
@@ -41,7 +56,7 @@ int main(int argc, char **argv)
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
     magmaDoubleComplex *A, *X, *Y, *Ymagma;
     magmaDoubleComplex_ptr dA, dX, dY, dwork;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -74,8 +89,8 @@ int main(int argc, char **argv)
             ldwork = ldda*blocks;
             TESTING_CHECK( magma_zmalloc( &dwork, ldwork ));
             
-            magmablas_zlaset( MagmaFull, ldwork, 1, MAGMA_Z_NAN, MAGMA_Z_NAN, dwork, ldwork, opts.queue );
-            magmablas_zlaset( MagmaFull, ldda,   N, MAGMA_Z_NAN, MAGMA_Z_NAN, dA,    ldda,   opts.queue );
+            magmablas_zlaset( MagmaFull, ldwork, 1, MAGMA_Z_NAN, MAGMA_Z_NAN, dwork(0), ldwork, opts.queue );
+            magmablas_zlaset( MagmaFull, ldda,   N, MAGMA_Z_NAN, MAGMA_Z_NAN, dA(0,0),  ldda,   opts.queue );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, A );
@@ -99,22 +114,29 @@ int main(int argc, char **argv)
                Performs operation using MAGMABLAS
                =================================================================== */
             #ifdef HAVE_CUBLAS
-                magma_zsetmatrix( N, N, A, lda, dA, ldda, opts.queue );
-                magma_zsetvector( N, X, incx, dX, incx, opts.queue );
-                magma_zsetvector( N, Y, incy, dY, incy, opts.queue );
+                magma_zsetmatrix( N, N, A, lda, dA(0,0), ldda, opts.queue );
+                magma_zsetvector( N, X, incx, dX(0), incx, opts.queue );
+                magma_zsetvector( N, Y, incy, dY(0), incy, opts.queue );
                 
                 magma_time = magma_sync_wtime( opts.queue );
                 if ( opts.version == 1 ) {
-                    magmablas_zsymv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork, opts.queue );
+                    magmablas_zsymv_work( opts.uplo, N,
+                                          alpha, dA(0,0), ldda,
+                                                 dX(0),   incx,
+                                          beta,  dY(0),   incy,
+                                          dwork(0), ldwork, opts.queue );
                 }
                 else {
                     // non-work interface (has added overhead)
-                    magmablas_zsymv( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, opts.queue );
+                    magmablas_zsymv( opts.uplo, N,
+                                     alpha, dA(0,0), ldda,
+                                            dX(0),   incx,
+                                     beta,  dY(0),   incy, opts.queue );
                 }
                 magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 
-                magma_zgetvector( N, dY, incy, Ymagma, incy, opts.queue );
+                magma_zgetvector( N, dY(0), incy, Ymagma, incy, opts.queue );
             #endif
             
             /* =====================================================================
@@ -131,12 +153,13 @@ int main(int argc, char **argv)
             blasf77_zaxpy( &N, &c_neg_one, Y, &incy, Ymagma, &incy );
             magma_error = lapackf77_zlange( "M", &N, &ione, Ymagma, &N, work ) / N;
             
+            bool okay = (magma_error < tol);
+            status += ! okay;
             printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                    long(N),
                    magma_perf,  1000.*magma_time,
                    cpu_perf,    1000.*cpu_time,
-                   magma_error, (magma_error < tol ? "ok" : "failed"));
-            status += ! (magma_error < tol);
+                   magma_error, (okay ? "ok" : "failed"));
             
             magma_free_cpu( A );
             magma_free_cpu( X );

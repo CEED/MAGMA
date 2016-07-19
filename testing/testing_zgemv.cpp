@@ -20,8 +20,21 @@
 #include "testings.h"
 
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Testing zgemv
+*/
 int main(int argc, char **argv)
 {
+    #ifdef HAVE_clBLAS
+    #define dA(i_, j_)  dA, ((i_) + (j_)*ldda)
+    #define dX(i_)      dX, ((i_))
+    #define dY(i_)      dY, ((i_))
+    #else                   
+    #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
+    #define dX(i_)     (dX + (i_))
+    #define dY(i_)     (dY + (i_))
+    #endif
+    
     TESTING_CHECK( magma_init() );
     magma_print_environment();
 
@@ -37,7 +50,12 @@ int main(int argc, char **argv)
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
     magmaDoubleComplex *A, *X, *Y, *Ydev, *Ymagma;
     magmaDoubleComplex_ptr dA, dX, dY;
-    magma_int_t status = 0;
+    int status = 0;
+    
+    // used only with CUDA
+    MAGMA_UNUSED( magma_perf );
+    MAGMA_UNUSED( magma_time );
+    MAGMA_UNUSED( magma_error );
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -89,39 +107,37 @@ int main(int argc, char **argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeY, Y );
             
             /* =====================================================================
-               Performs operation using CUBLAS
+               Performs operation using cuBLAS / clBLAS
                =================================================================== */
-            magma_zsetmatrix( M, N, A, lda, dA, ldda, opts.queue );
-            magma_zsetvector( Xm, X, incx, dX, incx, opts.queue );
-            magma_zsetvector( Ym, Y, incy, dY, incy, opts.queue );
+            magma_zsetmatrix( M, N, A, lda, dA(0,0), ldda, opts.queue );
+            magma_zsetvector( Xm, X, incx, dX(0), incx, opts.queue );
+            magma_zsetvector( Ym, Y, incy, dY(0), incy, opts.queue );
             
             dev_time = magma_sync_wtime( opts.queue );
-            #ifdef HAVE_CUBLAS
-                cublasZgemv( opts.handle, cublas_trans_const(opts.transA),
-                             M, N, &alpha, dA, ldda, dX, incx, &beta, dY, incy );
-            #else
-                magma_zgemv( opts.transA, M, N,
-                             alpha, dA, ldda,
-                                    dX, incx,
-                             beta,  dY, incy );
-            #endif
+            magma_zgemv( opts.transA, M, N,
+                         alpha, dA(0,0), ldda,
+                                dX(0),   incx,
+                         beta,  dY(0),   incy, opts.queue );
             dev_time = magma_sync_wtime( opts.queue ) - dev_time;
             dev_perf = gflops / dev_time;
             
-            magma_zgetvector( Ym, dY, incy, Ydev, incy, opts.queue );
+            magma_zgetvector( Ym, dY(0), incy, Ydev, incy, opts.queue );
             
             /* =====================================================================
                Performs operation using MAGMABLAS (currently only with CUDA)
                =================================================================== */
             #ifdef HAVE_CUBLAS
-                magma_zsetvector( Ym, Y, incy, dY, incy, opts.queue );
+                magma_zsetvector( Ym, Y, incy, dY(0), incy, opts.queue );
                 
                 magma_time = magma_sync_wtime( opts.queue );
-                magmablas_zgemv( opts.transA, M, N, alpha, dA, ldda, dX, incx, beta, dY, incy, opts.queue );
+                magmablas_zgemv( opts.transA, M, N,
+                                 alpha, dA(0,0), ldda,
+                                        dX(0),   incx,
+                                 beta,  dY(0),   incy, opts.queue );
                 magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 
-                magma_zgetvector( Ym, dY, incy, Ymagma, incy, opts.queue );
+                magma_zgetvector( Ym, dY(0), incy, Ymagma, incy, opts.queue );
             #endif
             
             /* =====================================================================

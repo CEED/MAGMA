@@ -22,8 +22,23 @@
 #include "testings.h"
 
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Testing zhemv
+*/
 int main(int argc, char **argv)
 {
+    #ifdef HAVE_clBLAS
+    #define dA(i_, j_)  dA, ((i_) + (j_)*ldda)
+    #define dX(i_)      dX, ((i_))
+    #define dY(i_)      dY, ((i_))
+    #define dwork(i_)   dwork, ((i_))
+    #else
+    #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
+    #define dX(i_)     (dX + (i_))
+    #define dY(i_)     (dY + (i_))
+    #define dwork(i_)  (dwork + (i_))
+    #endif
+    
     TESTING_CHECK( magma_init() );
     magma_print_environment();
 
@@ -31,8 +46,8 @@ int main(int argc, char **argv)
     const magma_int_t        ione      = 1;
     
     real_Double_t   atomics_perf=0, atomics_time=0;
-    real_Double_t   gflops, magma_perf=0, magma_time=0, cublas_perf, cublas_time, cpu_perf, cpu_time;
-    double          magma_error=0, atomics_error=0, cublas_error, work[1];
+    real_Double_t   gflops, magma_perf=0, magma_time=0, dev_perf, dev_time, cpu_perf, cpu_time;
+    double          magma_error=0, atomics_error=0, dev_error, work[1];
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t N, lda, ldda, sizeA, sizeX, sizeY, blocks, ldwork;
     magma_int_t incx = 1;
@@ -40,9 +55,9 @@ int main(int argc, char **argv)
     magma_int_t nb   = 64;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
-    magmaDoubleComplex *A, *X, *Y, *Yatomics, *Ycublas, *Ymagma;
+    magmaDoubleComplex *A, *X, *Y, *Yatomics, *Ydev, *Ymagma;
     magmaDoubleComplex_ptr dA, dX, dY, dwork;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -50,8 +65,15 @@ int main(int argc, char **argv)
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
     printf("%% uplo = %s\n", lapack_uplo_const(opts.uplo) );
-    printf("%%   N   MAGMA Gflop/s (ms)    Atomics Gflop/s      CUBLAS Gflop/s       CPU Gflop/s   MAGMA error  Atomics    CUBLAS\n");
-    printf("%%=====================================================================================================================\n");
+    #ifdef HAVE_CUBLAS
+        printf("%%   N   MAGMA Gflop/s (ms)    Atomics Gflop/s      %s Gflop/s       CPU Gflop/s   MAGMA error  %s\n",
+                g_platform_str, g_platform_str );
+        printf("%%==========================================================================================================\n");
+    #else
+        printf("%%   N   %s Gflop/s       CPU Gflop/s   MAGMA error  %s\n",
+                g_platform_str, g_platform_str );
+        printf("%%===============================================================\n");
+    #endif
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
@@ -66,7 +88,7 @@ int main(int argc, char **argv)
             TESTING_CHECK( magma_zmalloc_cpu( &X,        sizeX ));
             TESTING_CHECK( magma_zmalloc_cpu( &Y,        sizeY ));
             TESTING_CHECK( magma_zmalloc_cpu( &Yatomics, sizeY ));
-            TESTING_CHECK( magma_zmalloc_cpu( &Ycublas,  sizeY ));
+            TESTING_CHECK( magma_zmalloc_cpu( &Ydev,     sizeY ));
             TESTING_CHECK( magma_zmalloc_cpu( &Ymagma,   sizeY ));
             
             TESTING_CHECK( magma_zmalloc( &dA, ldda*N ));
@@ -77,8 +99,8 @@ int main(int argc, char **argv)
             ldwork = ldda*blocks;
             TESTING_CHECK( magma_zmalloc( &dwork, ldwork ));
             
-            magmablas_zlaset( MagmaFull, ldwork, 1, MAGMA_Z_NAN, MAGMA_Z_NAN, dwork, ldwork, opts.queue );
-            magmablas_zlaset( MagmaFull, ldda,   N, MAGMA_Z_NAN, MAGMA_Z_NAN, dA,    ldda,   opts.queue );
+            magmablas_zlaset( MagmaFull, ldwork, 1, MAGMA_Z_NAN, MAGMA_Z_NAN, dwork(0), ldwork, opts.queue );
+            magmablas_zlaset( MagmaFull, ldda,   N, MAGMA_Z_NAN, MAGMA_Z_NAN, dA(0,0),  ldda,   opts.queue );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, A );
@@ -97,60 +119,67 @@ int main(int argc, char **argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeY, Y );
             
             /* =====================================================================
-               Performs operation using CUBLAS
+               Performs operation using cuBLAS / clBLAS
                =================================================================== */
-            magma_zsetmatrix( N, N, A, lda, dA, ldda, opts.queue );
-            magma_zsetvector( N, X, incx, dX, incx, opts.queue );
-            magma_zsetvector( N, Y, incy, dY, incy, opts.queue );
+            magma_zsetmatrix( N, N, A, lda, dA(0,0), ldda, opts.queue );
+            magma_zsetvector( N, X, incx, dX(0), incx, opts.queue );
+            magma_zsetvector( N, Y, incy, dY(0), incy, opts.queue );
             
-            cublas_time = magma_sync_wtime( opts.queue );
-            #ifdef HAVE_CUBLAS
-                cublasZhemv( opts.handle, cublas_uplo_const(opts.uplo),
-                             N, &alpha, dA, ldda, dX, incx, &beta, dY, incy );
-            #else
-                magma_zhemv( opts.uplo, N, alpha, dA, 0, ldda, dX, 0, incx, beta, dY, 0, incy, opts.queue );
-            #endif
-            cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
-            cublas_perf = gflops / cublas_time;
+            dev_time = magma_sync_wtime( opts.queue );
+            magma_zhemv( opts.uplo, N,
+                         alpha, dA(0,0), ldda,
+                                dX(0),   incx,
+                         beta,  dY(0),   incy, opts.queue );
+            dev_time = magma_sync_wtime( opts.queue ) - dev_time;
+            dev_perf = gflops / dev_time;
             
-            magma_zgetvector( N, dY, incy, Ycublas, incy, opts.queue );
+            magma_zgetvector( N, dY(0), incy, Ydev, incy, opts.queue );
             
             /* =====================================================================
-               Performs operation using CUBLAS - using atomics
+               Performs operation using cuBLAS - using atomics
                =================================================================== */
             #ifdef HAVE_CUBLAS
                 cublasSetAtomicsMode( opts.handle, CUBLAS_ATOMICS_ALLOWED );
-                magma_zsetvector( N, Y, incy, dY, incy, opts.queue );
+                magma_zsetvector( N, Y, incy, dY(0), incy, opts.queue );
                 
                 // sync on queue doesn't work -- need device sync or use NULL stream -- bug in CUBLAS?
                 atomics_time = magma_sync_wtime( NULL /*opts.queue*/ );
-                cublasZhemv( opts.handle, cublas_uplo_const(opts.uplo),
-                             N, &alpha, dA, ldda, dX, incx, &beta, dY, incy );
+                magma_zhemv( opts.uplo,  N,
+                             alpha, dA(0,0), ldda,
+                                    dX(0),   incx,
+                             beta,  dY(0),   incy, opts.queue );
                 atomics_time = magma_sync_wtime( NULL /*opts.queue*/ ) - atomics_time;
                 atomics_perf = gflops / atomics_time;
                 
-                magma_zgetvector( N, dY, incy, Yatomics, incy, opts.queue );
+                magma_zgetvector( N, dY(0), incy, Yatomics, incy, opts.queue );
                 cublasSetAtomicsMode( opts.handle, CUBLAS_ATOMICS_NOT_ALLOWED );
             #endif
             
             /* =====================================================================
-               Performs operation using MAGMABLAS
+               Performs operation using MAGMABLAS (only with CUDA)
                =================================================================== */
             #ifdef HAVE_CUBLAS
-                magma_zsetvector( N, Y, incy, dY, incy, opts.queue );
+                magma_zsetvector( N, Y, incy, dY(0), incy, opts.queue );
                 
                 magma_time = magma_sync_wtime( opts.queue );
                 if ( opts.version == 1 ) {
-                    magmablas_zhemv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork, opts.queue );
+                    magmablas_zhemv_work( opts.uplo, N,
+                                          alpha, dA(0,0), ldda,
+                                                 dX(0),   incx,
+                                          beta,  dY(0),   incy,
+                                          dwork(0), ldwork, opts.queue );
                 }
                 else {
                     // non-work interface (has added overhead)
-                    magmablas_zhemv( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, opts.queue );
+                    magmablas_zhemv( opts.uplo, N,
+                                     alpha, dA(0,0), ldda,
+                                            dX(0),   incx,
+                                     beta,  dY(0),   incy, opts.queue );
                 }
                 magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 
-                magma_zgetvector( N, dY, incy, Ymagma, incy, opts.queue );
+                magma_zgetvector( N, dY(0), incy, Ymagma, incy, opts.queue );
             #endif
             
             /* =====================================================================
@@ -164,8 +193,8 @@ int main(int argc, char **argv)
             /* =====================================================================
                Check the result
                =================================================================== */
-            blasf77_zaxpy( &N, &c_neg_one, Y, &incy, Ycublas, &incy );
-            cublas_error = lapackf77_zlange( "M", &N, &ione, Ycublas, &N, work ) / N;
+            blasf77_zaxpy( &N, &c_neg_one, Y, &incy, Ydev, &incy );
+            dev_error = lapackf77_zlange( "M", &N, &ione, Ydev, &N, work ) / N;
             
             #ifdef HAVE_CUBLAS
                 blasf77_zaxpy( &N, &c_neg_one, Y, &incy, Yatomics, &incy );
@@ -175,21 +204,21 @@ int main(int argc, char **argv)
                 magma_error = lapackf77_zlange( "M", &N, &ione, Ymagma, &N, work ) / N;
             #endif
             
-            bool okay = (magma_error < tol && cublas_error < tol && atomics_error < tol);
+            bool okay = (magma_error < tol && dev_error < tol && atomics_error < tol);
             status += ! okay;
             printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
                    long(N),
                    magma_perf,   1000.*magma_time,
                    atomics_perf, 1000.*atomics_time,
-                   cublas_perf,  1000.*cublas_time,
+                   dev_perf,     1000.*dev_time,
                    cpu_perf,     1000.*cpu_time,
-                   magma_error, cublas_error, atomics_error,
+                   magma_error, dev_error, atomics_error,
                    (okay ? "ok" : "failed"));
             
             magma_free_cpu( A );
             magma_free_cpu( X );
             magma_free_cpu( Y );
-            magma_free_cpu( Ycublas  );
+            magma_free_cpu( Ydev     );
             magma_free_cpu( Yatomics );
             magma_free_cpu( Ymagma   );
             

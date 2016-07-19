@@ -28,11 +28,19 @@
 */
 int main( int argc, char** argv)
 {
+    #ifdef HAVE_clBLAS
+    #define dA(i_, j_)  dA, ((i_) + (j_)*ldda)
+    #define dC(i_, j_)  dC, ((i_) + (j_)*lddc)
+    #else
+    #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
+    #define dC(i_, j_) (dC + (i_) + (j_)*lddc)
+    #endif
+    
     TESTING_CHECK( magma_init() );
     magma_print_environment();
 
-    real_Double_t   gflops, cublas_perf, cublas_time, cpu_perf, cpu_time;
-    double          cublas_error, Cnorm, work[1];
+    real_Double_t   gflops, dev_perf, dev_time, cpu_perf, cpu_time;
+    double          dev_error, Cnorm, work[1];
     magma_int_t N, K;
     magma_int_t Ak, An;
     magma_int_t sizeA, sizeC;
@@ -40,12 +48,12 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     
-    magmaDoubleComplex *h_A, *h_C, *h_Ccublas;
-    magmaDoubleComplex_ptr d_A, d_C;
+    magmaDoubleComplex *hA, *hC, *hCdev;
+    magmaDoubleComplex_ptr dA, dC;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double alpha = MAGMA_D_MAKE(  0.29, -0.86 );
     double beta  = MAGMA_D_MAKE( -0.48,  0.38 );
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -88,37 +96,31 @@ int main( int argc, char** argv)
             sizeA = lda*Ak;
             sizeC = ldc*N;
             
-            TESTING_CHECK( magma_zmalloc_cpu( &h_A,       lda*Ak ));
-            TESTING_CHECK( magma_zmalloc_cpu( &h_C,       ldc*N  ));
-            TESTING_CHECK( magma_zmalloc_cpu( &h_Ccublas, ldc*N  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &hA,    lda*Ak ));
+            TESTING_CHECK( magma_zmalloc_cpu( &hC,    ldc*N  ));
+            TESTING_CHECK( magma_zmalloc_cpu( &hCdev, ldc*N  ));
             
-            TESTING_CHECK( magma_zmalloc( &d_A, ldda*Ak ));
-            TESTING_CHECK( magma_zmalloc( &d_C, lddc*N  ));
+            TESTING_CHECK( magma_zmalloc( &dA, ldda*Ak ));
+            TESTING_CHECK( magma_zmalloc( &dC, lddc*N  ));
             
             /* Initialize the matrices */
-            lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
-            lapackf77_zlarnv( &ione, ISEED, &sizeC, h_C );
+            lapackf77_zlarnv( &ione, ISEED, &sizeA, hA );
+            lapackf77_zlarnv( &ione, ISEED, &sizeC, hC );
             
             /* =====================================================================
-               Performs operation using CUBLAS
+               Performs operation using cuBLAS / clBLAS
                =================================================================== */
-            magma_zsetmatrix( An, Ak, h_A, lda, d_A, ldda, opts.queue );
-            magma_zsetmatrix( N, N, h_C, ldc, d_C, lddc, opts.queue );
+            magma_zsetmatrix( An, Ak, hA, lda, dA(0,0), ldda, opts.queue );
+            magma_zsetmatrix( N, N, hC, ldc, dC(0,0), lddc, opts.queue );
 
-            cublas_time = magma_sync_wtime( opts.queue );
-            #ifdef HAVE_CUBLAS
-                cublasZherk( opts.handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA), N, K,
-                             &alpha, d_A, ldda,
-                             &beta,  d_C, lddc );
-            #else
-                magma_zherk( opts.uplo, opts.transA, N, K,
-                             alpha, d_A, 0, ldda,
-                             beta,  d_C, 0, lddc, opts.queue );
-            #endif
-            cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
-            cublas_perf = gflops / cublas_time;
+            dev_time = magma_sync_wtime( opts.queue );
+            magma_zherk( opts.uplo, opts.transA, N, K,
+                         alpha, dA(0,0), ldda,
+                         beta,  dC(0,0), lddc, opts.queue );
+            dev_time = magma_sync_wtime( opts.queue ) - dev_time;
+            dev_perf = gflops / dev_time;
             
-            magma_zgetmatrix( N, N, d_C, lddc, h_Ccublas, ldc, opts.queue );
+            magma_zgetmatrix( N, N, dC(0,0), lddc, hCdev, ldc, opts.queue );
             
             /* =====================================================================
                Performs operation using CPU BLAS
@@ -126,8 +128,8 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 blasf77_zherk( lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA), &N, &K,
-                               &alpha, h_A, &lda,
-                               &beta,  h_C, &ldc );
+                               &alpha, hA, &lda,
+                               &beta,  hC, &ldc );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
             }
@@ -136,32 +138,33 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                // compute relative error for both magma & cublas, relative to lapack,
+                // compute relative error for both magma & cuBLAS/clBLAS, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
-                blasf77_zaxpy( &sizeC, &c_neg_one, h_C, &ione, h_Ccublas, &ione );
-                Cnorm        = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_C,       &ldc, work );
-                cublas_error = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Ccublas, &ldc, work )
+                blasf77_zaxpy( &sizeC, &c_neg_one, hC, &ione, hCdev, &ione );
+                Cnorm     = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, hC,    &ldc, work );
+                dev_error = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, hCdev, &ldc, work )
                              / Cnorm;
                 
+                bool okay = (dev_error < tol);
+                status += ! okay;
                 printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
                        long(N), long(K),
-                       cublas_perf, 1000.*cublas_time,
-                       cpu_perf,    1000.*cpu_time,
-                       cublas_error, (cublas_error < tol ? "ok" : "failed"));
-                status += ! (cublas_error < tol);
+                       dev_perf, 1000.*dev_time,
+                       cpu_perf, 1000.*cpu_time,
+                       dev_error, (okay ? "ok" : "failed"));
             }
             else {
                 printf("%5ld %5ld   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
                        long(N), long(K),
-                       cublas_perf, 1000.*cublas_time);
+                       dev_perf, 1000.*dev_time);
             }
             
-            magma_free_cpu( h_A );
-            magma_free_cpu( h_C );
-            magma_free_cpu( h_Ccublas );
+            magma_free_cpu( hA );
+            magma_free_cpu( hC );
+            magma_free_cpu( hCdev );
             
-            magma_free( d_A );
-            magma_free( d_C );
+            magma_free( dA );
+            magma_free( dC );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
