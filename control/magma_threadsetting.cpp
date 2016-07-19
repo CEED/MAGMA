@@ -80,8 +80,8 @@ magma_int_t magma_get_parallel_numthreads()
         threads = strtol( threads_str, &endptr, 10 );
         if ( threads < 1 || *endptr != '\0' ) {
             threads = 1;
-            fprintf( stderr, "$MAGMA_NUM_THREADS='%s' is an invalid number; using %d thread.\n",
-                     threads_str, (int) threads );
+            fprintf( stderr, "$MAGMA_NUM_THREADS='%s' is an invalid number; using %ld threads.\n",
+                     threads_str, long(threads) );
         }
     }
     else {
@@ -171,11 +171,11 @@ void magma_set_lapack_numthreads(magma_int_t threads)
     }
 
 #if defined(MAGMA_WITH_MKL)
-    mkl_set_num_threads( threads );
+    mkl_set_num_threads( int(threads) );
 #elif defined(_OPENMP)
     #pragma omp parallel
     {
-        omp_set_num_threads( threads );
+        omp_set_num_threads( int(threads) );
     }
 #endif
 }

@@ -81,7 +81,7 @@ struct magma_queue
 #ifdef __cplusplus
 public:
     /* getters */
-    int              device()          { return device__;   }
+    magma_device_t   device()          { return device__;   }
     cudaStream_t     cuda_stream()     { return stream__;   }
     cublasHandle_t   cublas_handle()   { return cublas__;   }
     cusparseHandle_t cusparse_handle() { return cusparse__; }
@@ -109,7 +109,7 @@ protected:
     
     /* private members -- access through getters */
     int              own__;
-    int              device__;
+    magma_device_t   device__;
     #ifdef HAVE_CUBLAS
     cudaStream_t     stream__;
     cublasHandle_t   cublas__;
