@@ -364,6 +364,11 @@ magma_z_applyprecond_left(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
+    
+        //Chronometry
+    real_Double_t tempo1, tempo2;
+    
+    tempo1 = magma_sync_wtime( queue );
 
     magma_zopts zopts;
     zopts.solver_par.solver = precond->trisolver;
@@ -459,6 +464,9 @@ magma_z_applyprecond_left(
         info = MAGMA_ERR_NOT_SUPPORTED; 
     }
     
+    tempo2 = magma_sync_wtime( queue );
+    precond->runtime += tempo2-tempo1;
+    
 cleanup:
     return info;
 }
@@ -509,6 +517,11 @@ magma_z_applyprecond_right(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
+    
+        //Chronometry
+    real_Double_t tempo1, tempo2;
+    
+    tempo1 = magma_sync_wtime( queue );
     
     magma_zopts zopts;
     zopts.solver_par.solver = precond->trisolver;
@@ -605,6 +618,9 @@ magma_z_applyprecond_right(
             info = MAGMA_ERR_NOT_SUPPORTED;
         }
     }
+    
+    tempo2 = magma_sync_wtime( queue );
+    precond->runtime += tempo2-tempo1;
         
 cleanup:
     return info;
