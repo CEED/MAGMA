@@ -93,7 +93,7 @@ int main( int argc, char** argv)
     magma_int_t ione = 1;
     magma_int_t *ipiv, *ipiv2;
     magmaInt_ptr d_ipiv;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -149,11 +149,7 @@ int main( int argc, char** argv)
             time = magma_sync_wtime( opts.queue );
             for( j=0; j < nb; j++) {
                 if ( j != (ipiv[j]-1)) {
-                    #ifdef HAVE_CUBLAS
-                        cublasZswap( opts.handle, N, d_A1(0,j), 1, d_A2(0,ipiv[j]-1), 1 );
-                    #else
-                        magma_zswap(              N, d_A1(0,j), 1, d_A2(0,ipiv[j]-1), 1, opts.queue );
-                    #endif
+                    magma_zswap( N, d_A1(0,j), 1, d_A2(0,ipiv[j]-1), 1, opts.queue );
                 }
             }
             time = magma_sync_wtime( opts.queue ) - time;
@@ -179,11 +175,7 @@ int main( int argc, char** argv)
             time = magma_sync_wtime( opts.queue );
             for( j=0; j < nb; j++) {
                 if ( j != (ipiv[j]-1)) {
-                    #ifdef HAVE_CUBLAS
-                        cublasZswap( opts.handle, N, d_A1(j,0), ldda, d_A2(ipiv[j]-1,0), ldda );
-                    #else
-                        magma_zswap(              N, d_A1(j,0), ldda, d_A2(ipiv[j]-1,0), ldda, opts.queue );
-                    #endif
+                    magma_zswap( N, d_A1(j,0), ldda, d_A2(ipiv[j]-1,0), ldda, opts.queue );
                 }
             }
             time = magma_sync_wtime( opts.queue ) - time;
@@ -408,8 +400,8 @@ int main( int argc, char** argv)
             // copy reads 1 matrix and writes 1 matrix, so has half gbytes of swap
             row_perf6 = 0.5 * gbytes / time;
 
-            printf("%5d  %3d  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f  %6.2f  %10s\n",
-                   (int) N, (int) nb,
+            printf("%5ld  %3ld  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f  %6.2f  %10s\n",
+                   long(N), long(nb),
                    row_perf0, ((check & 0x001) != 0 ? '*' : ' '),
                    col_perf0, ((check & 0x002) != 0 ? '*' : ' '),
                    row_perf1, ((check & 0x004) != 0 ? '*' : ' '),

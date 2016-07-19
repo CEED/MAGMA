@@ -36,7 +36,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex_ptr d_A;
     magma_int_t i, j, N, nb, size, lda, ldda, mstride, nstride, ntile, tile, offset;
     magma_int_t ione     = 1;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -45,8 +45,8 @@ int main( int argc, char** argv)
     mstride = 2*nb;
     nstride = 3*nb;
     
-    printf("%% uplo = %s, nb = %d, mstride = %d, nstride = %d\n",
-            lapack_uplo_const(opts.uplo), (int) nb, (int) mstride, (int) nstride );
+    printf("%% uplo = %s, nb = %ld, mstride = %ld, nstride = %ld\n",
+            lapack_uplo_const(opts.uplo), long(nb), long(mstride), long(nstride) );
     printf("%%   N ntile   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");
     printf("%%==========================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -116,8 +116,8 @@ int main( int argc, char** argv)
             blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_R, &ione);
             error = lapackf77_zlange("f", &N, &N, h_R, &lda, work);
 
-            printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
-                   (int) N, (int) ntile,
+            printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   long(N), long(ntile),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    (error == 0. ? "ok" : "failed") );
             status += ! (error == 0.);

@@ -63,7 +63,7 @@ int main( int argc, char** argv )
     magmaDoubleComplex *h_A, *h_dinvA;
     magmaDoubleComplex_ptr d_A, d_dinvA;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -121,9 +121,9 @@ int main( int argc, char** argv )
             magma_zgetvector( size_inv, d_dinvA, 1, h_dinvA, 1, opts.queue );
             
             if ( opts.verbose ) {
-                printf( "A%d=", (int) N );
+                printf( "A%ld=", long(N) );
                 magma_zprint( N, N, h_A, lda );
-                printf( "d_dinvA%d=", (int) N );
+                printf( "d_dinvA%ld=", long(N) );
                 magma_zprint( min(N+4, nb), min(N+4, nblock*nb), h_dinvA, nb );
             }
             
@@ -156,8 +156,8 @@ int main( int argc, char** argv )
                 
                 // CPU is doing N-by-N inverse, while GPU is doing (N/NB) NB-by-NB inverses.
                 // So don't compare performance.
-                printf("%5d   %7.2f (%7.2f)   %8.2e   %s\n",
-                        (int) N,
+                printf("%5ld   %7.2f (%7.2f)   %8.2e   %s\n",
+                        long(N),
                         magma_perf,  1000.*magma_time,
                         //cpu_perf,    1000.*cpu_time,
                         magma_error,
@@ -165,8 +165,8 @@ int main( int argc, char** argv )
                 status += ! (magma_error < tol);
             }
             else {
-                printf("%5d   %7.2f (%7.2f)      ---\n",
-                        (int) N,
+                printf("%5ld   %7.2f (%7.2f)      ---\n",
+                        long(N),
                         magma_perf,  1000.*magma_time );
             }
             

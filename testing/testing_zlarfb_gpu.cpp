@@ -40,7 +40,7 @@ int main( int argc, char** argv )
     magma_int_t M, N, K, size, ldc, ldv, ldt, ldw, ldw2, nv;
     magma_int_t ISEED[4] = {0,0,0,1};
     double Cnorm, error, work[1];
-    magma_int_t status = 0;
+    int status = 0;
     
     // test all combinations of input parameters
     magma_side_t   side  [] = { MagmaLeft,       MagmaRight    };
@@ -60,8 +60,8 @@ int main( int argc, char** argv )
       N = opts.nsize[itest];
       K = opts.ksize[itest];
       if ( M < K || N < K || K <= 0 ) {
-          printf( "%5d %5d %5d   skipping because zlarfb requires M >= K, N >= K, K >= 0\n",
-                  (int) M, (int) N, (int) K );
+          printf( "%5ld %5ld %5ld   skipping because zlarfb requires M >= K, N >= K, K >= 0\n",
+                  long(M), long(N), long(K) );
           continue;
       }
       for( int istor = 0; istor < 2; ++istor ) {
@@ -122,7 +122,7 @@ int main( int argc, char** argv )
                     lapackf77_zlaset( MagmaUpperStr, &K, &K, &c_zero, &c_one, &V[(nv-K)*ldv], &ldv );
                 }
             }
-            //printf( "# ldv %d, nv %d\n", ldv, nv );
+            //printf( "# ldv %ld, nv %ld\n", long(ldv), long(nv) );
             //printf( "V=" );  magma_zprint( ldv, nv, V, ldv );
             
             // T is K x K, upper triangular for forward, and lower triangular for backward
@@ -166,8 +166,8 @@ int main( int argc, char** argv )
             Cnorm = lapackf77_zlange( "Fro", &M, &N, C, &ldc, work );
             error = lapackf77_zlange( "Fro", &M, &N, R, &ldc, work ) / Cnorm;
             
-            printf( "%5d %5d %5d      %c       %c       %c       %c      %8.2e   %s\n",
-                    (int) M, (int) N, (int) K,
+            printf( "%5ld %5ld %5ld      %c       %c       %c       %c      %8.2e   %s\n",
+                    long(M), long(N), long(K),
                     lapacke_storev_const(storev[istor]), lapacke_side_const(side[iside]),
                     lapacke_direct_const(direct[idir]), lapacke_trans_const(trans[itran]),
                    error, (error < tol ? "ok" : "failed") );

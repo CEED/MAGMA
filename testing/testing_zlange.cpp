@@ -46,7 +46,7 @@ int main( int argc, char** argv)
     magma_int_t idist    = 3;  // normal distribution (otherwise max norm is always ~ 1)
     magma_int_t ISEED[4] = {0,0,0,1};
     double      error, norm_magma, norm_lapack;
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t lapack_nan_fail = 0;
     magma_int_t lapack_inf_fail = 0;
 
@@ -95,13 +95,13 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (norm_magma == -1) {
-                printf( "%5d   %4c   skipped because %s norm isn't supported\n",
-                        (int) N, lapacke_norm_const( norm[inorm] ), lapack_norm_const( norm[inorm] ));
+                printf( "%5ld   %4c   skipped because %s norm isn't supported\n",
+                        long(N), lapacke_norm_const( norm[inorm] ), lapack_norm_const( norm[inorm] ));
                 goto cleanup;
             }
             else if (norm_magma < 0) {
                 printf("magmablas_zlange returned error %f: %s.\n",
-                       norm_magma, magma_strerror( (int) norm_magma ));
+                       norm_magma, magma_strerror( magma_int_t(norm_magma) ));
             }
             
             /* =====================================================================
@@ -113,7 +113,7 @@ int main( int argc, char** argv)
             cpu_perf = gbytes / cpu_time;
             if (norm_lapack < 0) {
                 printf("lapackf77_zlange returned error %f: %s.\n",
-                       norm_lapack, magma_strerror( (int) norm_lapack ));
+                       norm_lapack, magma_strerror( magma_int_t(norm_lapack) ));
             }
             
             /* =====================================================================
@@ -159,8 +159,8 @@ int main( int argc, char** argv)
             lapack_inf_fail += ! la_inf_okay;
             status          += !    inf_okay;
             
-            printf("%5d %5d   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %-6s   %6s%1s  %6s%1s\n",
-                   (int) M, (int) N,
+            printf("%5ld %5ld   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %-6s   %6s%1s  %6s%1s\n",
+                   long(M), long(N),
                    lapacke_norm_const( norm[inorm] ),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error,

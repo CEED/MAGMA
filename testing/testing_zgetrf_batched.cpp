@@ -92,11 +92,11 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t batchCount;
+    int status = 0;
 
     magma_opts opts( MagmaOptsBatched );
     opts.parse_opts( argc, argv );
     //opts.lapack |= opts.check;
-    magma_int_t     status = 0;
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
     batchCount = opts.batchcount;
@@ -154,14 +154,14 @@ int main( int argc, char** argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %d returned internal error %d\n",
-                            i, int(cpu_info[i]) );
+                    printf("magma_zgetrf_batched matrix %ld returned internal error %ld\n",
+                            long(i), long(cpu_info[i]) );
                 }
             }
             
             if (info != 0) {
-                printf("magma_zgetrf_batched returned argument error %d: %s.\n",
-                        int(info), magma_strerror( info ));
+                printf("magma_zgetrf_batched returned argument error %ld: %s.\n",
+                        long(info), magma_strerror( info ));
             }
             
             /* ====================================================================
@@ -172,7 +172,9 @@ int main( int argc, char** argv)
 
             cublas_time = magma_sync_wtime( opts.queue );
             if (M == N ) {
-                cublasZgetrfBatched( opts.handle, N, dA_array, ldda, dipiv_cublas,  dinfo_cublas, batchCount);
+                cublasZgetrfBatched( opts.handle, int(N),
+                                     dA_array, int(ldda), dipiv_cublas,
+                                     dinfo_cublas, int(batchCount) );
             }
             else {
                 printf("M != N, CUBLAS required M == N; CUBLAS is disabled\n");
@@ -197,8 +199,8 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zgetrf(&M, &N, h_A + s * lda * N, &lda, ipiv + s * min_mn, &locinfo);
                     if (locinfo != 0) {
-                        printf("lapackf77_zgetrf matrix %d returned error %d: %s.\n",
-                               (int) s, (int) info, magma_strerror( info ));
+                        printf("lapackf77_zgetrf matrix %ld returned error %ld: %s.\n",
+                               long(s), long(info), magma_strerror( info ));
                     }
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -213,15 +215,15 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%10d %5d %5d   %7.2f (%7.2f)    %7.2f (%7.2f)     %7.2f (%7.2f)",
-                       int(batchCount), int(M), int(N),
+                printf("%10ld %5ld %5ld   %7.2f (%7.2f)    %7.2f (%7.2f)     %7.2f (%7.2f)",
+                       long(batchCount), long(M), long(N),
                        cpu_perf, cpu_time*1000.,
                        magma_perf, magma_time*1000.,
                        cublas_perf, cublas_time*1000.  );
             }
             else {
-                printf("%10d %5d %5d     ---   (  ---  )    %7.2f (%7.2f)     %7.2f (%7.2f)",
-                       int(batchCount), int(M), int(N),
+                printf("%10ld %5ld %5ld     ---   (  ---  )    %7.2f (%7.2f)     %7.2f (%7.2f)",
+                       long(batchCount), long(M), long(N),
                        magma_perf, magma_time*1000.,
                        cublas_perf, cublas_time*1000. );
             }
@@ -232,7 +234,8 @@ int main( int argc, char** argv)
                 for (int i=0; i < batchCount; i++) {
                     for (int k=0; k < min_mn; k++) {
                         if (ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M ) {
-                            printf("error for matrix %d ipiv @ %d = %d\n", i, k, int(ipiv[i*min_mn+k]));
+                            printf("error for matrix %ld ipiv @ %ld = %ld\n",
+                                    long(i), long(k), long(ipiv[i*min_mn+k]) );
                             error = -1;
                         }
                     }

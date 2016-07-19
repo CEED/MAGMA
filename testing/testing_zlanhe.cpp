@@ -46,7 +46,7 @@ int main( int argc, char** argv)
     magma_int_t idist    = 3;  // normal distribution (otherwise max norm is always ~ 1)
     magma_int_t ISEED[4] = {0,0,0,1};
     double      error, norm_magma, norm_lapack;
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t lapack_nan_fail = 0;
     magma_int_t lapack_inf_fail = 0;
     bool mkl_warning = false;
@@ -65,9 +65,9 @@ int main( int argc, char** argv)
     magma_int_t arch = magma_getdevice_arch();
     if ( arch < 200 ) {
         printf("!!!! NOTE: Double-Complex %s and %s norm are not supported\n"
-               "!!!! on CUDA architecture %d; requires arch >= 200.\n"
+               "!!!! on CUDA architecture %ld; requires arch >= 200.\n"
                "!!!! It should report \"parameter number 1 had an illegal value\" below.\n\n",
-               MagmaInfNormStr, MagmaOneNormStr, (int) arch );
+               MagmaInfNormStr, MagmaOneNormStr, long(arch) );
         for( int inorm = 0; inorm < 2; ++inorm ) {
         for( int iuplo = 0; iuplo < 2; ++iuplo ) {
             printf( "Testing that magmablas_zlanhe( %s, %s, ... ) returns -1 error...\n",
@@ -129,13 +129,13 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (norm_magma == -1) {
-                printf( "%5d   %4c   skipped because %s norm isn't supported\n",
-                        (int) N, lapacke_norm_const( norm[inorm] ), lapack_norm_const( norm[inorm] ));
+                printf( "%5ld   %4c   skipped because %s norm isn't supported\n",
+                        long(N), lapacke_norm_const( norm[inorm] ), lapack_norm_const( norm[inorm] ));
                 goto cleanup;
             }
             else if (norm_magma < 0) {
                 printf("magmablas_zlanhe returned error %f: %s.\n",
-                       norm_magma, magma_strerror( (int) norm_magma ));
+                       norm_magma, magma_strerror( magma_int_t(norm_magma) ));
             }
             
             /* =====================================================================
@@ -157,7 +157,7 @@ int main( int argc, char** argv)
             cpu_perf = gbytes / cpu_time;
             if (norm_lapack < 0) {
                 printf("lapackf77_zlanhe returned error %f: %s.\n",
-                       norm_lapack, magma_strerror( (int) norm_lapack ));
+                       norm_lapack, magma_strerror( magma_int_t(norm_lapack) ));
             }
             
             /* =====================================================================
@@ -227,8 +227,8 @@ int main( int argc, char** argv)
             }
             #endif
             
-            printf("%5d   %4c   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %-6s   %6s%1s  %6s%1s\n",
-                   (int) N,
+            printf("%5ld   %4c   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %-6s   %6s%1s  %6s%1s\n",
+                   long(N),
                    lapacke_norm_const( norm[inorm] ),
                    lapacke_uplo_const( uplo[iuplo] ),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,

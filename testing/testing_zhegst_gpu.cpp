@@ -44,7 +44,7 @@ int main( int argc, char** argv)
     double      Anorm, error, work[1];
     magma_int_t N, n2, lda, ldda, info;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -79,8 +79,8 @@ int main( int argc, char** argv)
             magma_zmake_hpd(       N, h_B, lda );
             magma_zpotrf( opts.uplo, N, h_B, lda, &info );
             if (info != 0) {
-                printf("magma_zpotrf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zpotrf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             magma_zsetmatrix( N, N, h_A, lda, d_A, ldda, opts.queue );
@@ -93,8 +93,8 @@ int main( int argc, char** argv)
             magma_zhegst_gpu( opts.itype, opts.uplo, N, d_A, ldda, d_B, ldda, &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zhegst_gpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zhegst_gpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -106,8 +106,8 @@ int main( int argc, char** argv)
                                   &N, h_A, &lda, h_B, &lda, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhegst returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zhegst returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
                 
                 magma_zgetmatrix( N, N, d_A, ldda, h_R, lda, opts.queue );
@@ -119,13 +119,13 @@ int main( int argc, char** argv)
                 
                 bool okay = (error < tol);
                 status += ! okay;
-                printf("%3d   %5d   %7.2f          %7.2f          %8.2e   %s\n",
-                       (int) opts.itype, (int) N, cpu_time, gpu_time,
+                printf("%3ld   %5ld   %7.2f          %7.2f          %8.2e   %s\n",
+                       long(opts.itype), long(N), cpu_time, gpu_time,
                        error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%3d   %5d     ---            %7.2f\n",
-                       (int) opts.itype, (int) N, gpu_time );
+                printf("%3ld   %5ld     ---            %7.2f\n",
+                       long(opts.itype), long(N), gpu_time );
             }
             
             magma_free_cpu( h_A );

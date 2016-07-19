@@ -17,6 +17,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include <algorithm>
+
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -48,11 +50,11 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
 
     magma_queue_t queues[MagmaMaxGPUs][20], queues0[MagmaMaxGPUs];
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
@@ -67,7 +69,7 @@ int main( int argc, char** argv)
 #endif
     printf( "\n" );
     
-    printf("%% nb %d, ngpu %d, nqueue %d\n", (int) nb, (int) ngpu, (int) nqueue );
+    printf("%% nb %ld, ngpu %ld, nqueue %ld\n", long(nb), long(ngpu), long(nqueue) );
     printf("%%   n     k    nb offset  CPU Gflop/s (sec)   GPU Gflop/s (sec)   |R|/(|V|*|W|+|A|)\n");
     printf("%%==================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -176,16 +178,16 @@ int main( int argc, char** argv)
                     error = safe_lapackf77_zlanhe("fro", "Lower", &n_offset, &hR[offset + offset*lda], &lda, work)
                           / Anorm;
                     
-                    printf( "%5d %5d %5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %s\n",
-                            (int) n, (int) k, (int) nb, (int) offset,
+                    printf( "%5ld %5ld %5ld %5ld   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %s\n",
+                            long(n), long(k), long(nb), long(offset),
                             cpu_perf, cpu_time, gpu_perf, gpu_time,
                             error, (error < tol ? "ok" : "failed"));
                             //, gpu_perf2, gpu_time2, error, error2 );
                     status += ! (error < tol);
                 }
                 else {
-                    printf( "%5d %5d %5d %5d     ---   (  ---  )   %7.1f (%7.4f)     ---\n",
-                            (int) n, (int) k, (int) nb, (int) offset,
+                    printf( "%5ld %5ld %5ld %5ld     ---   (  ---  )   %7.1f (%7.4f)     ---\n",
+                            long(n), long(k), long(nb), long(offset),
                             gpu_perf, gpu_time );
                 }
                 

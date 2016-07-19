@@ -55,7 +55,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex tmp;
     double  error, rwork[1];
     magma_int_t columns;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts( MagmaOptsBatched );
     opts.parse_opts( argc, argv );
@@ -80,8 +80,8 @@ int main( int argc, char** argv)
             lwork = -1;
             lapackf77_zgetri( &N, NULL, &lda, NULL, &tmp, &lwork, &info );
             if (info != 0) {
-                printf("lapackf77_zgetri returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("lapackf77_zgetri returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             lwork = magma_int_t( MAGMA_Z_REAL( tmp ));
             
@@ -122,16 +122,16 @@ int main( int argc, char** argv)
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
 
-            // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
+            // check correctness of results through "dinfo_magma" and correctness of argument through "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1, opts.queue );
             for (magma_int_t i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %d returned error %d\n", (int) i, (int)cpu_info[i] );
+                    printf("magma_zgetrf_batched matrix %ld returned error %ld\n", long(i), long(cpu_info[i]) );
                 }
             }
-            if (info1 != 0) printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info1, magma_strerror( info1 ));
-            if (info2 != 0) printf("magma_zgetri_batched returned argument error %d: %s.\n", (int) info2, magma_strerror( info2 ));
+            if (info1 != 0) printf("magma_zgetrf_batched returned argument error %ld: %s.\n", long(info1), magma_strerror( info1 ));
+            if (info2 != 0) printf("magma_zgetri_batched returned argument error %ld: %s.\n", long(info2), magma_strerror( info2 ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -149,13 +149,13 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zgetrf(&N, &N, h_Ainv + i*lda*N, &lda, ipiv + i*N, &locinfo);
                     if (locinfo != 0) {
-                        printf("lapackf77_zgetrf returned error %d: %s.\n",
-                               (int) locinfo, magma_strerror( locinfo ));
+                        printf("lapackf77_zgetrf returned error %ld: %s.\n",
+                               long(locinfo), magma_strerror( locinfo ));
                     }
                     lapackf77_zgetri(&N, h_Ainv + i*lda*N, &lda, ipiv + i*N, work + i*lwork, &lwork, &locinfo );
                     if (locinfo != 0) {
-                        printf("lapackf77_zgetri returned error %d: %s.\n",
-                               (int) locinfo, magma_strerror( locinfo ));
+                        printf("lapackf77_zgetri returned error %ld: %s.\n",
+                               long(locinfo), magma_strerror( locinfo ));
                     }
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -164,12 +164,12 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 
-                printf("%10d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       (int) batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
+                printf("%10ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       long(batchCount), long(N), cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
             }
             else {
-                printf("%10d %5d     ---   (  ---  )   %7.2f (%7.2f)",
-                       (int) batchCount, (int) N, gpu_perf, gpu_time*1000. );
+                printf("%10ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
+                       long(batchCount), long(N), gpu_perf, gpu_time*1000. );
             }
             
             /* =====================================================================
@@ -184,7 +184,8 @@ int main( int argc, char** argv)
                     for (magma_int_t k=0; k < N; k++) {
                         if (ipiv[i*N+k] < 1 || ipiv[i*N+k] > N )
                         {
-                            printf("error for matrix %d ipiv @ %d = %d\n", (int) i, (int) k, (int) ipiv[i*N+k]);
+                            printf("error for matrix %ld ipiv @ %ld = %ld\n",
+                                    long(i), long(k), long(ipiv[i*N+k]) );
                             error = -1;
                         }
                     }

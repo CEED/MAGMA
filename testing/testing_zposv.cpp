@@ -35,14 +35,14 @@ int main( int argc, char** argv)
     magma_int_t N, lda, ldb, info, sizeA, sizeB;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("%% ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
+    printf("%% ngpu = %ld, uplo = %s\n", long(opts.ngpu), lapack_uplo_const(opts.uplo) );
     printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
     printf("%%===============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -78,8 +78,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zpotrf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zpotrf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -106,17 +106,17 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zposv returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zposv returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
                 
-                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                        (int) N, (int) opts.nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
+                printf( "%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                        long(N), long(opts.nrhs), cpu_perf, cpu_time, gpu_perf, gpu_time,
                         error, (error < tol ? "ok" : "failed"));
             }
             else {
-                printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
-                        (int) N, (int) opts.nrhs, gpu_perf, gpu_time,
+                printf( "%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
+                        long(N), long(opts.nrhs), gpu_perf, gpu_time,
                         error, (error < tol ? "ok" : "failed"));
             }
             

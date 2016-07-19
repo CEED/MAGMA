@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     magma_int_t itwo     = 2;
     magma_int_t ithree   = 3;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     #ifdef COMPLEX
     double *rwork;
@@ -94,8 +94,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zhetrd returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zhetrd returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -148,8 +148,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhetrd returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zhetrd returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
             }
             
@@ -157,11 +157,11 @@ int main( int argc, char** argv)
                Print performance and error.
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
             } else {
-                printf("%5d     ---   (  ---  )   %7.2f (%7.2f)",
-                       (int) N, gpu_perf, gpu_time );
+                printf("%5ld     ---   (  ---  )   %7.2f (%7.2f)",
+                       long(N), gpu_perf, gpu_time );
             }
             if ( opts.check ) {
                 printf("   %8.2e        %8.2e   %s\n", result[0], result[1],

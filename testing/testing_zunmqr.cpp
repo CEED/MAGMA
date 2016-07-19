@@ -15,6 +15,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include <algorithm>
+
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -38,7 +40,7 @@ int main( int argc, char** argv )
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t nb, ldc, lda, lwork, lwork_max;
     magmaDoubleComplex *C, *R, *A, *W, *tau;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -48,7 +50,7 @@ int main( int argc, char** argv )
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = abs( opts.ngpu );
+    magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
     // test all combinations of input parameters
     magma_side_t  side [] = { MagmaLeft,       MagmaRight   };
@@ -71,15 +73,15 @@ int main( int argc, char** argv )
             gflops = FLOPS_ZUNMQR( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
-                printf( "%5d %5d %5d   %4c   %5c   skipping because side=left  and m < k\n",
-                        (int) m, (int) n, (int) k,
+                printf( "%5ld %5ld %5ld   %4c   %5c   skipping because side=left  and m < k\n",
+                        long(m), long(n), long(k),
                         lapacke_side_const( side[iside] ),
                         lapacke_trans_const( trans[itran] ) );
                 continue;
             }
             if ( side[iside] == MagmaRight && n < k ) {
-                printf( "%5d %5d %5d   %4c   %5c   skipping because side=right and n < k\n",
-                        (int) m, (int) n, (int) k,
+                printf( "%5ld %5ld %5ld   %4c   %5c   skipping because side=right and n < k\n",
+                        long(m), long(n), long(k),
                         lapacke_side_const( side[iside] ),
                         lapacke_trans_const( trans[itran] ) );
                 continue;
@@ -107,8 +109,8 @@ int main( int argc, char** argv )
             // compute QR factorization to get Householder vectors in A, tau
             magma_zgeqrf( mm, k, A, lda, tau, W, lwork_max, &info );
             if (info != 0) {
-                printf("magma_zgeqrf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgeqrf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -121,8 +123,8 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0) {
-                printf("lapackf77_zunmqr returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("lapackf77_zunmqr returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* ====================================================================
@@ -134,12 +136,12 @@ int main( int argc, char** argv )
                           m, n, k,
                           A, lda, tau, R, ldc, W, lwork, &info );
             if (info != 0) {
-                printf("magma_zunmqr (lwork query) returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zunmqr (lwork query) returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
             if ( lwork < 0 || lwork > lwork_max ) {
-                printf("Warning: optimal lwork %d > allocated lwork_max %d\n", (int) lwork, (int) lwork_max );
+                printf("Warning: optimal lwork %ld > allocated lwork_max %ld\n", long(lwork), long(lwork_max) );
                 lwork = lwork_max;
             }
             
@@ -156,8 +158,8 @@ int main( int argc, char** argv )
                                     A, lda, tau, R, ldc, W, lwork, &info );
                 }
                 else {
-                    printf( "%5d %5d %5d   %4c   %5c   skipping because magma_zunmqr_m doesn't support MagmaRight\n",
-                            (int) m, (int) n, (int) k,
+                    printf( "%5ld %5ld %5ld   %4c   %5c   skipping because magma_zunmqr_m doesn't support MagmaRight\n",
+                            long(m), long(n), long(k),
                             lapacke_side_const( side[iside] ),
                             lapacke_trans_const( trans[itran] ) );
                     goto cleanup;
@@ -166,8 +168,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zunmqr returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zunmqr returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -178,8 +180,8 @@ int main( int argc, char** argv )
             Cnorm = lapackf77_zlange( "Fro", &m, &n, C, &ldc, work );
             error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / (magma_dsqrt(m*n) * Cnorm);
             
-            printf( "%5d %5d %5d   %4c   %5c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                    (int) m, (int) n, (int) k,
+            printf( "%5ld %5ld %5ld   %4c   %5c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                    long(m), long(n), long(k),
                     lapacke_side_const( side[iside] ),
                     lapacke_trans_const( trans[itran] ),
                     cpu_perf, cpu_time, gpu_perf, gpu_time,

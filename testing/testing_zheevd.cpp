@@ -18,6 +18,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+
 // includes, project
 #include "magma_v2.h"
 #include "magma_lapack.h"
@@ -51,7 +53,7 @@ int main( int argc, char** argv)
     magma_int_t N, n2, info, lwork, liwork, lda;
     magma_int_t ISEED[4] = {0,0,0,1};
     eps = lapackf77_dlamch( "E" );
-    magma_int_t status = 0;
+    int status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -74,11 +76,11 @@ int main( int argc, char** argv)
     double tolulp = opts.tolerance * lapackf77_dlamch("P");
     
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = abs( opts.ngpu );
+    magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %d\n",
+    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %ld\n",
            lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           opts.fraction, int(abs_ngpu) );
+           opts.fraction, long(abs_ngpu));
 
     printf("%%   N   CPU Time (sec)   GPU Time (sec)   |S-S_magma|   |A-USU^H|   |I-U^H U|\n");
     printf("%%============================================================================\n");
@@ -202,7 +204,7 @@ int main( int argc, char** argv)
                                   &info );
                 }
                 else {
-                    //printf( "magma_zheevd_m, ngpu %d (%d)\n", opts.ngpu, abs_ngpu );
+                    //printf( "magma_zheevd_m, ngpu %ld (%ld)\n", long(opts.ngpu), long(abs_ngpu) );
                     magma_zheevd_m( abs_ngpu, opts.jobz, opts.uplo,
                                     N, h_R, lda, w1,
                                     h_work, lwork,
@@ -227,7 +229,7 @@ int main( int argc, char** argv)
                                    &info );
                 }
                 else {
-                    //printf( "magma_zheevdx_m, ngpu %d (%d)\n", opts.ngpu, abs_ngpu );
+                    //printf( "magma_zheevdx_m, ngpu %ld (%ld)\n", long(opts.ngpu), long(abs_ngpu) );
                     magma_zheevdx_m( abs_ngpu, opts.jobz, range, opts.uplo,
                                      N, h_R, lda,
                                      vl, vu, il, iu,
@@ -239,7 +241,7 @@ int main( int argc, char** argv)
                                      iwork, liwork,
                                      &info );
                 }
-                //printf( "il %d, iu %d, m1 %d\n", il, iu, m1 );
+                //printf( "il %ld, iu %ld, m1 %ld\n", long(il), long(iu), long(m1) );
             }
             else if ( opts.version == 3 ) {  // version 3: MRRR, computes selected eigenvalues/vectors
                 // only complex version available
@@ -278,8 +280,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zheevd returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zheevd returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             bool okay = true;
@@ -324,8 +326,8 @@ int main( int argc, char** argv)
                 //              iwork, liwork,
                 //              &info );
                 //if (info != 0) {
-                //    printf("magma_zheevd returned error %d: %s.\n",
-                //           (int) info, magma_strerror( info ));
+                //    printf("magma_zheevd returned error %ld: %s.\n",
+                //           long(info), magma_strerror( info ));
                 //}
                 //
                 //double maxw=0, diff=0;
@@ -387,8 +389,8 @@ int main( int argc, char** argv)
                 }
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zheevd returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zheevd returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
                 
                 // compare eigenvalues
@@ -401,12 +403,12 @@ int main( int argc, char** argv)
                 result[3] = diff / (N*maxw);
                 
                 okay = okay && (result[3] < tolulp);
-                printf("%5d   %9.4f        %9.4f         %8.2e  ",
-                       (int) N, cpu_time, gpu_time, result[3] );
+                printf("%5ld   %9.4f        %9.4f         %8.2e  ",
+                       long(N), cpu_time, gpu_time, result[3] );
             }
             else {
-                printf("%5d      ---           %9.4f           ---     ",
-                       (int) N, gpu_time);
+                printf("%5ld      ---           %9.4f           ---     ",
+                       long(N), gpu_time);
             }
             
             // print error checks

@@ -38,7 +38,7 @@ int main( int argc, char** argv)
     magma_int_t M, N, lda, ldda, size;
     magma_int_t *ii, *jj;
     magma_int_t i, j, cnt, tmp;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -225,11 +225,11 @@ int main( int argc, char** argv)
                      && ( c_gpu_nan == cnt_nan )
                      && ( c_gpu_inf == cnt_inf );
             
-            printf( "%4c %5d %5d   %10d + %-10d   %10d + %-10d   %10d + %-10d  %s\n",
-                    lapacke_uplo_const( uplo[iuplo] ), (int) M, (int) N,
-                    (int) c_cpu_nan, (int) c_cpu_inf,
-                    (int) c_gpu_nan, (int) c_gpu_inf,
-                    (int) cnt_nan,   (int) cnt_inf,
+            printf( "%4c %5ld %5ld   %10ld + %-10ld   %10ld + %-10ld   %10ld + %-10ld  %s\n",
+                    lapacke_uplo_const( uplo[iuplo] ), long(M), long(N),
+                    long(c_cpu_nan), long(c_cpu_inf),
+                    long(c_gpu_nan), long(c_gpu_inf),
+                    long(cnt_nan),   long(cnt_inf),
                     (okay ? "ok" : "failed"));
             status += ! okay;
             

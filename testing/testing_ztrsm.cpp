@@ -56,9 +56,9 @@ int main( int argc, char** argv)
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = abs( opts.ngpu );
     
-    printf("%% side = %s, uplo = %s, transA = %s, diag = %s, ngpu = %d\n",
+    printf("%% side = %s, uplo = %s, transA = %s, diag = %s, ngpu = %ld\n",
            lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), int(abs_ngpu) );
+           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), long(abs_ngpu) );
     
     printf("%%   M     N  MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)      MAGMA     CUBLAS   LAPACK error\n");
     printf("%%============================================================================================================\n");
@@ -229,8 +229,8 @@ int main( int argc, char** argv)
                 normX = lapackf77_zlange( "M", &M, &N, h_Blapack, &ldb, work );
                 lapack_error = normR/(normX*normA);
                 
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
-                        (int) M, (int) N,
+                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
+                        long(M), long(N),
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         cpu_perf,    1000.*cpu_time,
@@ -239,8 +239,8 @@ int main( int argc, char** argv)
                 status += ! (magma_error < tol && cublas_error < tol);
             }
             else {
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
-                        (int) M, (int) N,
+                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
+                        long(M), long(N),
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         magma_error, cublas_error,

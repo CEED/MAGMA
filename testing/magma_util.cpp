@@ -14,6 +14,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <algorithm>
+
 // flock exists only on Unix
 #ifdef USE_FLOCK
 #include <sys/file.h>  // flock
@@ -414,10 +416,10 @@ void magma_opts::parse_opts( int argc, char** argv )
             // save in environment variable, so magma_num_gpus() picks it up
             char env_num_gpus[20];  // space for "MAGMA_NUM_GPUS=", 4 digits, and nil
             #if defined( _WIN32 ) || defined( _WIN64 )
-                snprintf( env_num_gpus, sizeof(env_num_gpus), "MAGMA_NUM_GPUS=%d", abs(this->ngpu) );
+                snprintf( env_num_gpus, sizeof(env_num_gpus), "MAGMA_NUM_GPUS=%ld", long(std::abs(this->ngpu)) );
                 putenv( env_num_gpus );
             #else
-                snprintf( env_num_gpus, sizeof(env_num_gpus), "%d", abs(this->ngpu) );
+                snprintf( env_num_gpus, sizeof(env_num_gpus), "%ld", long(std::abs(this->ngpu)) );
                 setenv( "MAGMA_NUM_GPUS", env_num_gpus, true );
             #endif
         }

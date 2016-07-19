@@ -397,7 +397,7 @@ int main( int argc, char** argv)
     magma_int_t *iwork;
     magma_int_t M, N, N_U, M_VT, lda, ldu, ldv, n2, min_mn, info;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );

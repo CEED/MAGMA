@@ -42,7 +42,7 @@ int main( int argc, char** argv )
     magmaDoubleComplex tmp;
     double error, rwork[1];
     magma_int_t *ipiv;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -64,8 +64,8 @@ int main( int argc, char** argv )
             lwork = -1;
             lapackf77_zgetri( &N, NULL, &lda, NULL, &tmp, &lwork, &info );
             if (info != 0) {
-                printf("lapackf77_zgetri returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("lapackf77_zgetri returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             lwork = magma_int_t( MAGMA_Z_REAL( tmp ));
             
@@ -86,8 +86,8 @@ int main( int argc, char** argv )
             magma_zgetrf_gpu( N, N, d_A, ldda, ipiv, &info );
             magma_zgetmatrix( N, N, d_A, ldda, h_Ainv, lda, opts.queue );
             if (info != 0) {
-                printf("magma_zgetrf_gpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgetrf_gpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             // check for exact singularity
@@ -102,8 +102,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgetri_gpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgetri_gpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -115,15 +115,15 @@ int main( int argc, char** argv )
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgetri returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zgetri returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
-                printf( "%5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                        (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf( "%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                        long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf( "%5d     ---   (  ---  )   %7.2f (%7.2f)",
-                        (int) N, gpu_perf, gpu_time );
+                printf( "%5ld     ---   (  ---  )   %7.2f (%7.2f)",
+                        long(N), gpu_perf, gpu_time );
             }
             
             /* =====================================================================

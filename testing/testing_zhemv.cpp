@@ -177,8 +177,8 @@ int main(int argc, char **argv)
             
             bool okay = (magma_error < tol && cublas_error < tol && atomics_error < tol);
             status += ! okay;
-            printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
-                   (int) N,
+            printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
+                   long(N),
                    magma_perf,   1000.*magma_time,
                    atomics_perf, 1000.*atomics_time,
                    cublas_perf,  1000.*cublas_time,

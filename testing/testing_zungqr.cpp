@@ -19,6 +19,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include <algorithm>
+
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -43,7 +45,7 @@ int main( int argc, char** argv )
     magma_int_t n2, lda, ldda, lwork, min_mn, nb, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -52,9 +54,9 @@ int main( int argc, char** argv )
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = abs( opts.ngpu );
+    magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% version %d, ngpu %d\n", int(opts.version), int(abs_ngpu) );
+    printf("%% version %ld, ngpu %ld\n", long(opts.version), long(abs_ngpu));
     printf("%% Available versions:\n");
     printf("%%   1 - uses precomputed zlarft matrices (default)\n");
     printf("%%   2 - recomputes the zlarft matrices on the fly\n\n");
@@ -67,7 +69,7 @@ int main( int argc, char** argv )
             n = opts.nsize[itest];
             k = opts.ksize[itest];
             if ( m < n || n < k ) {
-                printf( "%5d %5d %5d   skipping because m < n or n < k\n", (int) m, (int) n, (int) k );
+                printf( "%5ld %5ld %5ld   skipping because m < n or n < k\n", long(m), long(n), long(k) );
                 continue;
             }
             
@@ -102,8 +104,8 @@ int main( int argc, char** argv )
             magma_zsetmatrix( m, n, hA, lda, dA, ldda, opts.queue );
             magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, &info );
             if (info != 0) {
-                printf("magma_zgeqrf_gpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgeqrf_gpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             magma_zgetmatrix( m, n, dA, ldda, hA, lda, opts.queue );
             lapackf77_zlacpy( MagmaFullStr, &m, &n, hA, &lda, hR, &lda );
@@ -124,8 +126,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zungqr returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zungqr returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -137,8 +139,8 @@ int main( int argc, char** argv )
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zungqr returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zungqr returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
                 
                 // compute relative error |R|/|A| := |Q_magma - Q_lapack|/|A|
@@ -147,14 +149,14 @@ int main( int argc, char** argv )
                 
                 bool okay = (error < tol);
                 status += ! okay;
-                printf("%5d %5d %5d   %7.1f (%7.2f)   %7.1f (%7.2f)   %8.2e   %s\n",
-                       (int) m, (int) n, (int) k,
+                printf("%5ld %5ld %5ld   %7.1f (%7.2f)   %7.1f (%7.2f)   %8.2e   %s\n",
+                       long(m), long(n), long(k),
                        cpu_perf, cpu_time, gpu_perf, gpu_time,
                        error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5d %5d %5d     ---   (  ---  )   %7.1f (%7.2f)     ---  \n",
-                       (int) m, (int) n, (int) k,
+                printf("%5ld %5ld %5ld     ---   (  ---  )   %7.1f (%7.2f)     ---  \n",
+                       long(m), long(n), long(k),
                        gpu_perf, gpu_time );
             }
             

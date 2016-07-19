@@ -131,8 +131,8 @@ int main(int argc, char **argv)
             blasf77_zaxpy( &N, &c_neg_one, Y, &incy, Ymagma, &incy );
             magma_error = lapackf77_zlange( "M", &N, &ione, Ymagma, &N, work ) / N;
             
-            printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                   (int) N,
+            printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                   long(N),
                    magma_perf,  1000.*magma_time,
                    cpu_perf,    1000.*cpu_time,
                    magma_error, (magma_error < tol ? "ok" : "failed"));

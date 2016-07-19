@@ -150,8 +150,8 @@ int main(int argc, char **argv)
                 
                 bool okay = (magma_error < tol) && (dev_error < tol);
                 status += ! okay;
-                printf("%5d %5d   %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e     %8.2e   %s\n",
-                       (int) M, (int) N,
+                printf("%5ld %5ld   %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e     %8.2e   %s\n",
+                       long(M), long(N),
                        magma_perf,  1000.*magma_time,
                        dev_perf,    1000.*dev_time,
                        cpu_perf,    1000.*cpu_time,
@@ -160,8 +160,8 @@ int main(int argc, char **argv)
             #else
                 bool okay = (dev_error < tol);
                 status += ! okay;
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
-                       (int) M, (int) N,
+                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
+                       long(M), long(N),
                        dev_perf,    1000.*dev_time,
                        cpu_perf,    1000.*cpu_time,
                        dev_error,

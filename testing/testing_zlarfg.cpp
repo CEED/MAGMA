@@ -32,7 +32,7 @@ int main( int argc, char** argv)
     double      error, error2, work[1];
     magma_int_t N, nb, lda, ldda, size;
     magma_int_t ione     = 1;
-    magma_int_t ISEED[4] = {0,0,0,1};    magma_int_t status = 0;
+    magma_int_t ISEED[4] = {0,0,0,1};    int status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -102,8 +102,8 @@ int main( int argc, char** argv)
                 error2 = lapackf77_zlange( "F", &nb, &ione, h_tau2, &nb, work ) / error2;
             }
 
-            printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
-                   (int) N, (int) nb, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
+            printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
+                   long(N), long(nb), cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
                    error, error2,
                    (error < tol && error2 < tol ? "ok" : "failed") );
             status += ! (error < tol && error2 < tol);

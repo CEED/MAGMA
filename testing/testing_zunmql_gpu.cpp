@@ -39,7 +39,7 @@ int main( int argc, char** argv )
     magma_int_t nb, ldc, lda, /*lwork,*/ lwork_max;
     magmaDoubleComplex *C, *R, *A, *hwork, *tau;
     magmaDoubleComplex_ptr dC, dA;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -69,15 +69,15 @@ int main( int argc, char** argv )
             gflops = FLOPS_ZUNMQL( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
-                printf( "%5d %5d %5d   %4c   %5c   skipping because side=left  and m < k\n",
-                        (int) m, (int) n, (int) k,
+                printf( "%5ld %5ld %5ld   %4c   %5c   skipping because side=left  and m < k\n",
+                        long(m), long(n), long(k),
                         lapacke_side_const( side[iside] ),
                         lapacke_trans_const( trans[itran] ) );
                 continue;
             }
             if ( side[iside] == MagmaRight && n < k ) {
-                printf( "%5d %5d %5d  %4c   %5c    skipping because side=right and n < k\n",
-                        (int) m, (int) n, (int) k,
+                printf( "%5ld %5ld %5ld  %4c   %5c    skipping because side=right and n < k\n",
+                        long(m), long(n), long(k),
                         lapacke_side_const( side[iside] ),
                         lapacke_trans_const( trans[itran] ) );
                 continue;
@@ -110,8 +110,8 @@ int main( int argc, char** argv )
             magma_zgeqlf( mm, k, A, lda, tau, hwork, lwork_max, &info );
             magma_zsetmatrix( mm, k, A, lda, dA, lda, opts.queue );
             if (info != 0)
-                printf("magma_zgeqlf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgeqlf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -123,8 +123,8 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0)
-                printf("lapackf77_zunmql returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("lapackf77_zunmql returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -136,11 +136,11 @@ int main( int argc, char** argv )
             //                   m, n, k,
             //                   A, lda, tau, R, ldc, hwork, lwork, &info );
             //if (info != 0)
-            //    printf("magma_zunmql (lwork query) returned error %d: %s.\n",
-            //           (int) info, magma_strerror( info ));
+            //    printf("magma_zunmql (lwork query) returned error %ld: %s.\n",
+            //           long(info), magma_strerror( info ));
             //lwork = (magma_int_t) MAGMA_Z_REAL( hwork[0] );
             //if ( lwork < 0 || lwork > lwork_max ) {
-            //    printf("optimal lwork %d > lwork_max %d\n", (int) lwork, (int) lwork_max );
+            //    printf("optimal lwork %ld > lwork_max %ld\n", long(lwork), long(lwork_max) );
             //    lwork = lwork_max;
             //}
             
@@ -163,8 +163,8 @@ int main( int argc, char** argv )
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zunmql returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zunmql returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             
             magma_zgetmatrix( m, n, dC, ldc, R, ldc, opts.queue );
             
@@ -176,8 +176,8 @@ int main( int argc, char** argv )
             Cnorm = lapackf77_zlange( "Fro", &m, &n, C, &ldc, work );
             error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / (magma_dsqrt(m*n) * Cnorm);
             
-            printf( "%5d %5d %5d   %4c   %5c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                    (int) m, (int) n, (int) k,
+            printf( "%5ld %5ld %5ld   %4c   %5c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                    long(m), long(n), long(k),
                     lapacke_side_const( side[iside] ),
                     lapacke_trans_const( trans[itran] ),
                     cpu_perf, cpu_time, gpu_perf, gpu_time,

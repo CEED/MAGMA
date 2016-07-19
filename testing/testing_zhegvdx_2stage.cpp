@@ -19,6 +19,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+
 // includes, project
 #include "magma_v2.h"
 #include "magma_lapack.h"
@@ -56,7 +58,7 @@ int main( int argc, char** argv)
     magma_int_t *iwork;
     magma_int_t N, n2, info, lda, lwork, liwork;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -69,11 +71,11 @@ int main( int argc, char** argv)
         range = MagmaRangeI;
 
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = abs( opts.ngpu );
+    magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% itype = %d, jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %d\n",
-           int(opts.itype), lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           opts.fraction, int(abs_ngpu) );
+    printf("%% itype = %ld, jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %ld\n",
+           long(opts.itype), lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
+           opts.fraction, long(abs_ngpu));
 
     if (opts.itype == 1) {
         printf("%%   N     M   GPU Time (sec)   |AZ-BZD|   |D - D_magma|\n");
@@ -162,8 +164,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zhegvdx_2stage returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zhegvdx_2stage returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             if ( opts.check ) {
@@ -220,8 +222,8 @@ int main( int argc, char** argv)
                                   iwork, &liwork,
                                   &info );
                 if (info != 0) {
-                    printf("lapackf77_zhegvd returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zhegvd returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
                 
                 double maxw=0, diff=0;
@@ -236,8 +238,8 @@ int main( int argc, char** argv)
             /* =====================================================================
                Print execution time
                =================================================================== */
-            printf("%5d %5d   %9.4f     ",
-                   (int) N, (int) m1, gpu_time);
+            printf("%5ld %5ld   %9.4f     ",
+                   long(N), long(m1), gpu_time);
             if ( opts.check ) {
                 bool okay = (result[1] < tolulp);
                 if ( opts.jobz != MagmaNoVec ) {

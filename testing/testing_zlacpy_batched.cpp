@@ -39,7 +39,7 @@ int main( int argc, char** argv)
     magma_int_t M, N, mb, nb, size, lda, ldda, mstride, nstride, ntile;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts( MagmaOptsBatched );
     opts.parse_opts( argc, argv );
@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     mstride = 2*mb;
     nstride = 3*nb;
     
-    printf("%% mb=%d, nb=%d, mstride=%d, nstride=%d\n", (int) mb, (int) nb, (int) mstride, (int) nstride );
+    printf("%% mb=%ld, nb=%ld, mstride=%ld, nstride=%ld\n", long(mb), long(nb), long(mstride), long(nstride) );
     printf("%%   M     N ntile    CPU Gflop/s (ms)    GPU Gflop/s (ms)   check\n");
     printf("%%================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -124,8 +124,8 @@ int main( int argc, char** argv)
             bool okay = (error == 0);
             status += ! okay;
 
-            printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
-                   (int) M, (int) N, (int) ntile,
+            printf("%5ld %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   long(M), long(N), long(ntile),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    (okay ? "ok" : "failed") );
             

@@ -18,6 +18,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include <algorithm>
+
 #include <cuda_runtime.h>  // for cudaEventCreateWithFlags; TODO replace
 
 // includes, project
@@ -49,11 +51,11 @@ int main( int argc, char** argv)
     magma_int_t i, j, dev, M, N, size, lda, ldb, ldc, ldda, lddb, lddc, msize, nb;
     magma_int_t ione     = 1;
     magma_int_t iseed[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
@@ -64,12 +66,12 @@ int main( int argc, char** argv)
     magma_int_t ncmplx = 0;
     magma_buildconnection_mgpu( gnode, &ncmplx, opts.ngpu );
     
-    printf("%% Initializing communication pattern... GPU-ncmplx %d\n", (int) ncmplx);
+    printf("%% Initializing communication pattern... GPU-ncmplx %ld\n", long(ncmplx));
     for (i=0; i < ncmplx; ++i) {
         magma_int_t myngpu = gnode[i][MagmaMaxGPUs];
-        printf("%% cmplx %d has %d GPUs:", i, myngpu);
+        printf("%% cmplx %ld has %ld GPUs:", long(i), long(myngpu) );
         for (j=0; j < myngpu; ++j) {
-            printf(" %d", (int) gnode[i][j]);
+            printf(" %ld", long(gnode[i][j]) );
             if (j < myngpu-1) {
                 printf(",");
             }
@@ -94,7 +96,7 @@ int main( int argc, char** argv)
         }
     }
 
-    printf("%% nb %d, ngpu %d, version %d\n", (int) nb, (int) opts.ngpu, (int) opts.version );
+    printf("%% nb %ld, ngpu %ld, version %ld\n", long(nb), long(opts.ngpu), long(opts.version) );
     printf("%%   M     N    nb offset  CPU Gflop/s (sec)   GPU Gflop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||B||\n");
     printf("%%========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -171,8 +173,8 @@ int main( int argc, char** argv)
             
             #ifdef TRACING
             char buf[80];
-            snprintf( buf, sizeof(buf), "zhemm-m%d-n%d-nb%d-ngpu%d-run%d.svg",
-                      (int) M, (int) N, (int) nb, (int) opts.ngpu, (int) iter );
+            snprintf( buf, sizeof(buf), "zhemm-m%ld-n%ld-nb%ld-ngpu%ld-run%ld.svg",
+                      long(M), long(N), long(nb), long(opts.ngpu), long(iter) );
             trace_finalize( buf, "trace.css" );
             #endif
             
@@ -228,21 +230,22 @@ int main( int argc, char** argv)
                     bool okay = (error < tol);
                     status += ! okay;
                     if (dev == 0) {
-                        printf( "%5d %5d %5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %s\n",
-                                (int) M, (int) N, (int) nb, (int) offset,
+                        printf( "%5ld %5ld %5ld %5ld   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %s\n",
+                                long(M), long(N), long(nb), long(offset),
                                 cpu_perf, cpu_time,
                                 gpu_perf, gpu_time,
                                 gpu_perf2, gpu_time2,
                                 error, (okay ? "ok" : "failed") );
                     }
                     else {
-                        printf( "    dev %d %74s  %8.2e   %s\n", dev, "",
+                        printf( "    dev %ld %74s  %8.2e   %s\n",
+                                long(dev), "",
                                 error, (okay ? "ok" : "failed") );
                     }
                 }
             } else {
-                printf( "%5d %5d %5d %5d     ---   (  ---  )   %7.1f (%7.4f)     ---   (  ---  )   ---\n",
-                        (int) M, (int) N, (int) nb, (int) offset,
+                printf( "%5ld %5ld %5ld %5ld     ---   (  ---  )   %7.1f (%7.4f)     ---   (  ---  )   ---\n",
+                        long(M), long(N), long(nb), long(offset),
                         gpu_perf, gpu_time );
             }
             

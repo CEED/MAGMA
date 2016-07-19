@@ -70,7 +70,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t batchCount;
 
     magma_opts opts( MagmaOptsBatched );
@@ -211,9 +211,9 @@ int main( int argc, char** argv)
                 cublasZtrsmBatched(
                     opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
                     cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
-                    M, N, &alpha,
-                    (const magmaDoubleComplex**) d_A_array, ldda,
-                    d_B_array, lddb, batchCount);
+                    int(M), int(N), &alpha,
+                    (const magmaDoubleComplex**) d_A_array, int(ldda),
+                    d_B_array, int(lddb), int(batchCount) );
                 cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
                 cublas_perf = gflops / cublas_time;
             #endif
@@ -274,8 +274,8 @@ int main( int argc, char** argv)
                 double err = normR/(normX*normA);
 
                 if ( isnan(err) || isinf(err) ) {
-                    printf("error for matrix %d magma_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
-                           s, err, normR, normX, normA);
+                    printf("error for matrix %ld magma_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
+                           long(s), err, normR, normX, normA);
                     magma_error = err;
                     break;
                 }
@@ -300,8 +300,8 @@ int main( int argc, char** argv)
                 double err = normR/(normX*normA);
 
                 if ( isnan(err) || isinf(err) ) {
-                    printf("error for matrix %d cublas_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
-                           s, err, normR, normX, normA);
+                    printf("error for matrix %ld cublas_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
+                           long(s), err, normR, normX, normA);
                     cublas_error = err;
                     break;
                 }
@@ -331,8 +331,8 @@ int main( int argc, char** argv)
                     lapack_error = max( err, lapack_error );
                 }
 
-                printf("%10d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
-                        (int)batchCount, (int) M, (int) N,
+                printf("%10ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
+                        long(batchCount), long(M), long(N),
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         cpu_perf,    1000.*cpu_time,
@@ -340,8 +340,8 @@ int main( int argc, char** argv)
                         (okay ? "ok" : "failed"));
             }
             else {
-                printf("%10d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
-                        (int)batchCount, (int) M, (int) N,
+                printf("%10ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
+                        long(batchCount), long(M), long(N),
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         magma_error, cublas_error,

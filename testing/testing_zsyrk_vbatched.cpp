@@ -26,8 +26,8 @@
 
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
 #endif
+#include "magma_threadsetting.h"
 
 #define PRECISION_z
 /* ////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(0.29, -0.48);
     magmaDoubleComplex beta  = MAGMA_Z_MAKE(-0.48, 0.29);
-    magma_int_t status = 0;
+    int status = 0;
 
     magma_opts opts ( MagmaOptsBatched );
     opts.parse_opts( argc, argv );
@@ -279,15 +279,15 @@ int main( int argc, char** argv)
                 magma_set_lapack_numthreads( threads );
                 #endif
                 
-                printf("  %-10d  %-5d  %-5d  %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
-                       (int) batchCount, (int) max_N, (int) max_K,
+                printf("  %-10ld  %-5ld  %-5ld  %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
+                       long(batchCount), long(max_N), long(max_K),
                        magma_perf,  1000.*magma_time,
                        cpu_perf,    1000.*cpu_time,
                        magma_error);
             }
             else {
-                printf("  %-10d  %-5d  %-5d  %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
-                       (int) batchCount, (int) max_N, (int) max_K,
+                printf("  %-10ld  %-5ld  %-5ld  %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
+                       long(batchCount), long(max_N), long(max_K),
                        magma_perf,  1000.*magma_time);
             }
             

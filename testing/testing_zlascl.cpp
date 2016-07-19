@@ -37,7 +37,7 @@ int main( int argc, char** argv)
     double cto, cfrom;
     magma_int_t M, N, size, lda, ldda, info;
     magma_int_t ione     = 1;
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t ISEED[4] = {0,0,0,1};
     
     magma_opts opts;
@@ -118,8 +118,8 @@ int main( int argc, char** argv)
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (info != 0) {
-                printf("magmablas_zlascl returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magmablas_zlascl returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -133,8 +133,8 @@ int main( int argc, char** argv)
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gbytes / cpu_time;
             if (info != 0) {
-                printf("lapackf77_zlascl returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("lapackf77_zlascl returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -146,8 +146,8 @@ int main( int argc, char** argv)
             blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_R, &ione);
             error = lapackf77_zlange("f", &M, &N, h_R, &lda, work);
 
-            printf("%5s %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                   lapack_uplo_const( uplo[iuplo] ), (int) M, (int) N,
+            printf("%5s %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                   lapack_uplo_const( uplo[iuplo] ), long(M), long(N),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error, (error == 0. ? "ok" : "failed") );
             status += ! (error == 0.);

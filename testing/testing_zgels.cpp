@@ -43,7 +43,7 @@ int main( int argc, char** argv )
     magma_opts opts;
     opts.parse_opts( argc, argv );
  
-    magma_int_t status = 0;
+    int status = 0;
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
     nrhs = opts.nrhs;
@@ -56,7 +56,7 @@ int main( int argc, char** argv )
             M = opts.msize[itest];
             N = opts.nsize[itest];
             if ( M < N ) {
-                printf( "%5d %5d %5d   skipping because M < N is not yet supported.\n", (int) M, (int) N, (int) nrhs );
+                printf( "%5ld %5ld %5ld   skipping because M < N is not yet supported.\n", long(M), long(N), long(nrhs) );
                 continue;
             }
             min_mn = min(M, N);
@@ -102,8 +102,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgels_gpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgels_gpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             // compute the residual
@@ -125,8 +125,8 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0) {
-                printf("lapackf77_zgels returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("lapackf77_zgels returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N,
@@ -142,8 +142,8 @@ int main( int argc, char** argv )
             blasf77_zaxpy( &size, &c_neg_one, h_B, &ione, h_R, &ione );
             error = lapackf77_zlange("f", &M, &nrhs, h_R, &ldb, work) / (min_mn*Anorm);
             
-            printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e",
-                   (int) M, (int) N, (int) nrhs,
+            printf("%5ld %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e",
+                   long(M), long(N), long(nrhs),
                    cpu_perf, cpu_time, gpu_perf, gpu_time, cpu_error, gpu_error, error );
             
             if ( M == N ) {

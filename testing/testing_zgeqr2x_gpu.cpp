@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     magma_int_t M, N, lda, ldda, lwork, size, info, min_mn;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
 
     #define BLOCK_SIZE 64
 
@@ -58,7 +58,7 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("%% version %d\n", (int) opts.version );
+    printf("%% version %ld\n", long(opts.version) );
     printf("%% It's okay if |Q - Q_lapack| is large; MAGMA and LAPACK\n"
            "%% just chose different Householder reflectors, both valid.\n\n");
     
@@ -70,13 +70,13 @@ int main( int argc, char** argv)
             N     = opts.nsize[itest];
 
             if (N > 128) {
-                printf("%5d %5d   skipping because zgeqr2x requires N <= 128\n",
-                        (int) M, (int) N);
+                printf("%5ld %5ld   skipping because zgeqr2x requires N <= 128\n",
+                        long(M), long(N));
                 continue;
             }
             if (M < N) {
-                printf("%5d %5d   skipping because zgeqr2x requires M >= N\n",
-                        (int) M, (int) N);
+                printf("%5ld %5ld   skipping because zgeqr2x requires M >= N\n",
+                        long(M), long(N));
                 continue;
             }
 
@@ -142,8 +142,8 @@ int main( int argc, char** argv)
             gpu_perf = gflops / gpu_time;
 
             if (info != 0) {
-                printf("magma_zgeqr2x_gpu version %d returned error %d: %s.\n",
-                       (int) opts.version, (int) info, magma_strerror( info ));
+                printf("magma_zgeqr2x_gpu version %ld returned error %ld: %s.\n",
+                       long(opts.version), long(info), magma_strerror( info ));
             }
             else if ( opts.check ) {
                 /* =====================================================================
@@ -203,8 +203,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgeqrf returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zgeqrf returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
 
                 /* =====================================================================
@@ -239,14 +239,14 @@ int main( int argc, char** argv)
                 
                 bool okay = (error < tol) && (error2 < tol) && (terr < tol);
                 status += ! okay;
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e      %8.2e      %8.2e        %8.2e   %s\n",
-                       (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
+                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e      %8.2e      %8.2e        %8.2e   %s\n",
+                       long(M), long(N), cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
                        error, error2, terr, diff,
                        (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
-                       (int) M, (int) N, gpu_perf, 1000.*gpu_time);
+                printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
+                       long(M), long(N), gpu_perf, 1000.*gpu_time);
             }
             
             magma_free_cpu( tau    );

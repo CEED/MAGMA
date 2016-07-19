@@ -25,8 +25,8 @@
 
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
 #endif
+#include "magma_threadsetting.h"
 
 #define PRECISION_z
 
@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     magma_int_t lda, ldb, ldc, ldda, lddb, lddc;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t batchCount;
 
     magmaDoubleComplex *h_A, *h_B, *h_C, *h_Cmagma;
@@ -185,12 +185,6 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                #ifdef MAGMA_WITH_MKL
-                // work around MKL bug in multi-threaded zlanhe
-                magma_int_t la_threads = magma_get_lapack_numthreads();
-                magma_set_lapack_numthreads( 1 );
-                #endif
-                
                 // compute relative error of magma relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
                 magma_error  = 0;
@@ -198,11 +192,11 @@ int main( int argc, char** argv)
                 {
                     magma_int_t C_batchSize = ldc * N;
                     
-                    Cnorm = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_C + s*C_batchSize, &ldc, work );
+                    Cnorm = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_C + s*C_batchSize, &ldc, work );
 
                     // ----- magma error
                     blasf77_zaxpy( &C_batchSize, &c_neg_one, h_C + s*C_batchSize, &ione, h_Cmagma + s*C_batchSize, &ione );
-                    double err = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Cmagma + s*C_batchSize, &ldc, work ) / Cnorm;
+                    double err = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Cmagma + s*C_batchSize, &ldc, work ) / Cnorm;
 
                     if ( isnan(err) || isinf(err) ) {
                         magma_error = err;
@@ -210,11 +204,6 @@ int main( int argc, char** argv)
                     }
                     magma_error = max( err, magma_error );
                 }
-
-                #ifdef MAGMA_WITH_MKL
-                // end single thread to work around MKL bug
-                magma_set_lapack_numthreads( la_threads );
-                #endif
                 
                 bool okay = (magma_error < tol);
                 status += ! okay;

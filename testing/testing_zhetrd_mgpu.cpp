@@ -18,6 +18,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -48,12 +50,12 @@ int main( int argc, char** argv)
     magma_int_t itwo     = 2;
     magma_int_t ithree   = 3;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t k = 1;  // TODO: UNKNOWN, UNDOCUMENTED VARIABLE (number of streams?)
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     double eps = lapackf77_dlamch( "E" );
@@ -62,7 +64,7 @@ int main( int argc, char** argv)
     h_Q   = NULL;
     work  = NULL;
 
-    printf("%% uplo = %s, ngpu %d\n", lapack_uplo_const(opts.uplo), (int) opts.ngpu );
+    printf("%% uplo = %s, ngpu %ld\n", lapack_uplo_const(opts.uplo), long(opts.ngpu) );
     printf("%% N     CPU Gflop/s (sec)   GPU Gflop/s (sec)   |A-QHQ^H|/N|A|   |I-QQ^H|/N\n");
     printf("%%==========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -105,8 +107,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zhetrd_mgpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zhetrd_mgpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             gpu_perf = gflops / gpu_time;
@@ -161,8 +163,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhetrd returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zhetrd returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
             }
             
@@ -170,10 +172,10 @@ int main( int argc, char** argv)
                Print performance and error.
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5d   %7.2f (%7.2f)", (int) N, cpu_perf, cpu_time );
+                printf("%5ld   %7.2f (%7.2f)", long(N), cpu_perf, cpu_time );
             }
             else {
-                printf("%5d     ---   (  ---  )", (int) N );
+                printf("%5ld     ---   (  ---  )", long(N) );
             }
             printf("   %7.2f (%7.2f)", gpu_perf, gpu_time );
             if ( opts.check ) {

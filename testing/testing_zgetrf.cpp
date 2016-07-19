@@ -76,8 +76,8 @@ double get_residual(
     // solve Ax = b
     lapackf77_zgetrs( "Notrans", &n, &ione, A, &lda, ipiv, x, &n, &info );
     if (info != 0) {
-        printf("lapackf77_zgetrs returned error %d: %s.\n",
-               (int) info, magma_strerror( info ));
+        printf("lapackf77_zgetrs returned error %ld: %s.\n",
+               long(info), magma_strerror( info ));
     }
     
     // reset to original A
@@ -97,7 +97,7 @@ double get_residual(
     magma_free_cpu( x );
     magma_free_cpu( b );
     
-    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%d\n", norm_r, norm_A, norm_x, n );
+    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%ld\n", norm_r, norm_A, norm_x, long(n) );
     return norm_r / (n * norm_A * norm_x);
 }
 
@@ -170,14 +170,14 @@ int main( int argc, char** argv)
     magmaDoubleComplex *h_A;
     magma_int_t     *ipiv;
     magma_int_t     M, N, n2, lda, info, min_mn;
-    magma_int_t     status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("%% ngpu %d, version %d\n", (int) opts.ngpu, (int) opts.version );
+    printf("%% ngpu %ld, version %ld\n", long(opts.ngpu), long(opts.version) );
     if ( opts.check == 2 ) {
         printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     }
@@ -208,8 +208,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgetrf returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zgetrf returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
             }
             
@@ -237,20 +237,20 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgetrf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgetrf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)",
-                       (int) M, (int) N, gpu_perf, gpu_time );
+                printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
+                       long(M), long(N), gpu_perf, gpu_time );
             }
             if ( opts.check == 2 ) {
                 error = get_residual( opts, M, N, h_A, lda, ipiv );

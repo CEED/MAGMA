@@ -127,16 +127,16 @@ int main( int argc, char** argv)
                 blasf77_zaxpy( &N, &c_neg_one, h_x, &ione, h_xcublas, &ione );
                 cublas_error = lapackf77_zlange( "M", &N, &ione, h_xcublas, &N, work ) / Cnorm;
                 
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
-                       (int) N,
+                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
+                       long(N),
                        cublas_perf, 1000.*cublas_time,
                        cpu_perf,    1000.*cpu_time,
                        cublas_error, (cublas_error < tol ? "ok" : "failed"));
                 status += ! (cublas_error < tol);
             }
             else {
-                printf("%5d   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
-                       (int) N,
+                printf("%5ld   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
+                       long(N),
                        cublas_perf, 1000.*cublas_time);
             }
             

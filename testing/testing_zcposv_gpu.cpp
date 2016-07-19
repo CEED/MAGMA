@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     printf("%% Epsilon(double): %8.6e\n"
            "%% Epsilon(single): %8.6e\n\n",
            lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -93,8 +93,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflopsS / gpu_time;
             if (info != 0) {
-                printf("magma_zcposv returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zcposv returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             //=====================================================================
@@ -120,8 +120,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfdf = gflopsF / gpu_time;
             if (info != 0) {
-                printf("magma_zpotrf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zpotrf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             //=====================================================================
@@ -136,8 +136,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfds = gflopsS / gpu_time;
             if (info != 0) {
-                printf("magma_zpotrs returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zpotrs returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             //=====================================================================
@@ -155,8 +155,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfsf = gflopsF / gpu_time;
             if (info != 0) {
-                printf("magma_cpotrf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_cpotrf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             //=====================================================================
@@ -171,14 +171,14 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfss = gflopsS / gpu_time;
             if (info != 0) {
-                printf("magma_cpotrs returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_cpotrs returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
-            printf("%5d %5d   %7.2f   %7.2f   %7.2f   %7.2f   %7.2f    %4d   %8.2e   %s\n",
-                   (int) N, (int) nrhs,
+            printf("%5ld %5ld   %7.2f   %7.2f   %7.2f   %7.2f   %7.2f    %4ld   %8.2e   %s\n",
+                   long(N), long(nrhs),
                    gpu_perfdf, gpu_perfds, gpu_perfsf, gpu_perfss, gpu_perf,
-                   (int) posv_iter, error, (error < tol ? "ok" : "failed"));
+                   long(posv_iter), error, (error < tol ? "ok" : "failed"));
             status += ! (error < tol);
             
             magma_free_cpu( h_A );

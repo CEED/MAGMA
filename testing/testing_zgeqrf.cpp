@@ -43,10 +43,10 @@ int main( int argc, char** argv)
     magma_opts opts;
     opts.parse_opts( argc, argv );
 
-    magma_int_t status = 0;
+    int status = 0;
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("%% ngpu %d\n", (int) opts.ngpu );
+    printf("%% ngpu %ld\n", long(opts.ngpu) );
     printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
     printf("%%==============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -88,8 +88,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgeqrf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgeqrf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -144,15 +144,15 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgeqrf returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zgeqrf returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
             }
             
             /* =====================================================================
                Print performance and error.
                =================================================================== */
-            printf("%5d %5d   ", (int) M, (int) N );
+            printf("%5ld %5ld   ", long(M), long(N) );
             if ( opts.lapack ) {
                 printf( "%7.2f (%7.2f)", cpu_perf, cpu_time );
             }

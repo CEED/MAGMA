@@ -43,7 +43,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
     magma_int_t M, N, n2, lda, lwork, info, min_mn, nb;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -86,8 +86,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgelqf returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgelqf returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
 
             /* =====================================================================
@@ -142,15 +142,15 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapack_zgelqf returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapack_zgelqf returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
             }
             
             /* =====================================================================
                Print performance and error.
                =================================================================== */
-            printf("%5d %5d   ", (int) M, (int) N );
+            printf("%5ld %5ld   ", long(M), long(N) );
             if ( opts.lapack ) {
                 printf( "%7.2f (%7.2f)", cpu_perf, cpu_time );
             }

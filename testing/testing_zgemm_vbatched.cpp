@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     magma_int_t total_size_A_dev = 0, total_size_B_dev = 0, total_size_C_dev = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t batchCount;
     magma_int_t max_M, max_N, max_K;
 
@@ -303,15 +303,15 @@ int main( int argc, char** argv)
                     h_Cmagma_tmp += h_N[s] * h_ldc[s];
                 }
 
-                    printf("  %-10d  %-5d %-5d %-5d %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
-                       (int) batchCount, (int) max_M, (int) max_N, (int) max_K,
+                printf("  %-10ld  %-5ld %-5ld %-5ld %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
+                       long(batchCount), long(max_M), long(max_N), long(max_K),
                        magma_perf,  1000.*magma_time,
                        cpu_perf,    1000.*cpu_time,
                        magma_error);
             }
             else {
-                    printf("  %-10d  %-5d %-5d %-5d %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
-                       (int) batchCount, (int) max_M, (int) max_N, (int) max_K,
+                printf("  %-10ld  %-5ld %-5ld %-5ld %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
+                       long(batchCount), long(max_M), long(max_N), long(max_K),
                        magma_perf,  1000.*magma_time);
             }
             

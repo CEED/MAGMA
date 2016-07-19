@@ -63,7 +63,7 @@ int main( int argc, char** argv)
 
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex alpha = MAGMA_Z_ONE;
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t batchCount;
 
     magma_opts opts( MagmaOptsBatched );
@@ -168,9 +168,9 @@ int main( int argc, char** argv)
                 cublasZtrsmBatched(
                     opts.handle, cublas_side_const(MagmaLeft), cublas_uplo_const(opts.uplo),
                     cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
-                    N, 1, &alpha,
-                    (const magmaDoubleComplex**) d_A_array, ldda,
-                    d_b_array, N, batchCount);
+                    int(N), 1, &alpha,
+                    (const magmaDoubleComplex**) d_A_array, int(ldda),
+                    d_b_array, int(N), int(batchCount) );
                 cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
                 cublas_perf = gflops / cublas_time;
             #else
@@ -228,8 +228,8 @@ int main( int argc, char** argv)
                 err = normr / (normA*normx);
                 
                 if ( isnan(err) || isinf(err) ) {
-                    printf("error for matrix %d cublas_error = %7.2f where normr=%7.2f normx=%7.2f and normA=%7.2f\n", 
-                            s, err, normr, normx, normA);
+                    printf("error for matrix %ld cublas_error = %7.2f where normr=%7.2f normx=%7.2f and normA=%7.2f\n", 
+                            long(s), err, normr, normx, normA);
                     cublas_error = err;
                     break;
                 }
@@ -248,8 +248,8 @@ int main( int argc, char** argv)
                 err = normr / (normA*normx);
 
                 if ( isnan(err) || isinf(err) ) {
-                    printf("error for matrix %d magma_error = %7.2f where normr=%7.2f normx=%7.2f and normA=%7.2f\n", 
-                            s, err, normr, normx, normA);
+                    printf("error for matrix %ld magma_error = %7.2f where normr=%7.2f normx=%7.2f and normA=%7.2f\n", 
+                            long(s), err, normr, normx, normA);
                     magma_error = err;
                     break;
                 }
@@ -259,8 +259,8 @@ int main( int argc, char** argv)
             status += ! okay;
 
             if ( opts.lapack ) {
-                printf("%10d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
-                        (int)batchCount, (int) N,
+                printf("%10ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
+                        long(batchCount), long(N),
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         cpu_perf,    1000.*cpu_time,
@@ -268,8 +268,8 @@ int main( int argc, char** argv)
                         (okay ? "ok" : "failed"));
             }
             else {
-                printf("%10d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e   %s\n",
-                        (int)batchCount, (int) N,
+                printf("%10ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e   %s\n",
+                        long(batchCount), long(N),
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         magma_error, cublas_error,

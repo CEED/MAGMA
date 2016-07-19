@@ -15,6 +15,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+
 #ifdef HAVE_CBLAS
 #include <cblas.h>
 #endif
@@ -84,8 +86,8 @@ void output(
                 (error_inline < gTol);
     gStatus += ! okay;
     
-    printf( "%5d %5d %5d %5d %5d   %-8s",
-            int(m), int(n), int(k), int(incx), int(incy), routine );
+    printf( "%5ld %5ld %5ld %5ld %5ld   %-8s",
+            long(m), long(n), long(k), long(incx), long(incy), routine );
     
     if ( error_cblas == SKIPPED_FLAG )
         printf( "   %8s", "n/a" );
@@ -138,7 +140,7 @@ int main( int argc, char** argv )
     magma_int_t ninc = sizeof(inc)/sizeof(*inc);
     magma_int_t maxinc = 0;
     for( i=0; i < ninc; ++i ) {
-        maxinc = max( maxinc, abs(inc[i]) );
+        maxinc = max( maxinc, std::abs(inc[i]) );
     }
     
     printf( "!! Calling these CBLAS and Fortran BLAS sometimes crashes (segfaults), which !!\n"

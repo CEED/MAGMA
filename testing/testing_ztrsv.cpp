@@ -139,16 +139,16 @@ int main( int argc, char** argv)
             cublas_error = normr / (normA*normx);
 
             if ( opts.lapack ) {
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                        (int) N,
+                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                        long(N),
                         cublas_perf, 1000.*cublas_time,
                         cpu_perf,    1000.*cpu_time,
                         cublas_error, (cublas_error < tol ? "ok" : "failed"));
                 status += ! (cublas_error < tol);
             }
             else {
-                printf("%5d   %7.2f (%7.2f)     ---  (  ---  )   %8.2e   %s\n",
-                        (int) N,
+                printf("%5ld   %7.2f (%7.2f)     ---  (  ---  )   %8.2e   %s\n",
+                        long(N),
                         cublas_perf, 1000.*cublas_time,
                         cublas_error, (cublas_error < tol ? "ok" : "failed"));
                 status += ! (cublas_error < tol);

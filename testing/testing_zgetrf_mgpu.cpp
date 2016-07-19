@@ -14,6 +14,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -24,7 +26,7 @@
 // Initialize matrix to random.
 // Having this in separate function ensures the same ISEED is always used,
 // so we can re-generate the identical matrix.
-void init_matrix( int m, int n, magmaDoubleComplex *h_A, magma_int_t lda )
+void init_matrix( magma_int_t m, magma_int_t n, magmaDoubleComplex *h_A, magma_int_t lda )
 {
     magma_int_t ione = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -67,8 +69,8 @@ double get_residual(
     // solve Ax = b
     lapackf77_zgetrs( "Notrans", &n, &ione, A, &lda, ipiv, x, &n, &info );
     if (info != 0) {
-        printf("lapackf77_zgetrs returned error %d: %s.\n",
-               (int) info, magma_strerror( info ));
+        printf("lapackf77_zgetrs returned error %ld: %s.\n",
+               long(info), magma_strerror( info ));
     }
     
     // reset to original A
@@ -88,7 +90,7 @@ double get_residual(
     magma_free_cpu( x );
     magma_free_cpu( b );
     
-    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%d\n", norm_r, norm_A, norm_x, n );
+    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%ld\n", norm_r, norm_A, norm_x, long(n) );
     return norm_r / (n * norm_A * norm_x);
 }
 
@@ -161,11 +163,11 @@ int main( int argc, char** argv )
     magma_int_t *ipiv;
     magma_int_t M, N, n2, lda, ldda, n_local, ngpu;
     magma_int_t info, min_mn, nb, ldn_local;
-    magma_int_t status = 0;
+    int status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
@@ -174,7 +176,7 @@ int main( int argc, char** argv )
         magma_queue_create( dev, &queues[dev] );
     }
     
-    printf("%% ngpu %d\n", (int) opts.ngpu );
+    printf("%% ngpu %ld\n", long(opts.ngpu) );
     if ( opts.check == 2 ) {
         printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     }
@@ -196,7 +198,7 @@ int main( int argc, char** argv )
             // ngpu must be at least the number of blocks
             ngpu = min( opts.ngpu, magma_ceildiv(N,nb) );
             if ( ngpu < opts.ngpu ) {
-                printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) ngpu );
+                printf( " * too many GPUs for the matrix size, using %ld GPUs\n", long(ngpu) );
             }
             
             // Allocate host memory for the matrix
@@ -226,8 +228,8 @@ int main( int argc, char** argv )
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgetrf returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zgetrf returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
             }
             
@@ -242,8 +244,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgetrf_mgpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgetrf_mgpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
                        
             magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_A, lda, ngpu, nb, queues );
@@ -252,12 +254,12 @@ int main( int argc, char** argv )
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5d %5d  %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5ld %5ld  %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5d %5d    ---   (  ---  )   %7.2f (%7.2f)",
-                       (int) M, (int) N, gpu_perf, gpu_time );
+                printf("%5ld %5ld    ---   (  ---  )   %7.2f (%7.2f)",
+                       long(M), long(N), gpu_perf, gpu_time );
             }
             if ( opts.check == 2 ) {
                 error = get_residual( M, N, h_A, lda, ipiv );

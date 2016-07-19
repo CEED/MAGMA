@@ -24,7 +24,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#include "magma_threadsetting.h"  // to work around MKL bug
+#include "magma_threadsetting.h"
 
 #if defined(_OPENMP)
 #include <omp.h>
@@ -47,7 +47,7 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     double      work[1], error;
-    magma_int_t status = 0;
+    int status = 0;
     magmaDoubleComplex **d_A_array = NULL;
     magma_int_t *dinfo_magma;
     magma_int_t *cpu_info;
@@ -107,12 +107,13 @@ int main( int argc, char** argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zpotrf_batched matrix %d returned diag error %d\n", i, (int)cpu_info[i] );
+                    printf("magma_zpotrf_batched matrix %ld returned diag error %ld\n",
+                            long(i), long(cpu_info[i]) );
                     status = -1;
                 }
             }
             if (info != 0) {
-                //printf("magma_zpotrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
+                //printf("magma_zpotrf_batched returned argument error %ld: %s.\n", long(info), magma_strerror( info ));
                 status = -1;
             }                
             if (status == -1)
@@ -136,8 +137,8 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + s * lda * N, &lda, &locinfo );
                     if (locinfo != 0) {
-                        printf("lapackf77_zpotrf matrix %d returned error %d: %s.\n",
-                               (int) s, (int) locinfo, magma_strerror( locinfo ));
+                        printf("lapackf77_zpotrf matrix %ld returned error %ld: %s.\n",
+                               long(s), long(locinfo), magma_strerror( locinfo ));
                     }
                 }
 
@@ -151,12 +152,6 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
-                #ifdef MAGMA_WITH_MKL
-                // work around MKL bug in multi-threaded zlanhe
-                magma_int_t la_threads = magma_get_lapack_numthreads();
-                magma_set_lapack_numthreads( 1 );
-                #endif
-                
                 magma_zgetmatrix( N, columns, d_A, ldda, h_R, lda, opts.queue );
                 magma_int_t NN = lda*N;
                 const char* uplo = lapack_uplo_const(opts.uplo);
@@ -165,8 +160,8 @@ int main( int argc, char** argv)
                 {
                     double Anorm, err;
                     blasf77_zaxpy(&NN, &c_neg_one, h_A + i * lda*N, &ione, h_R + i * lda*N, &ione);
-                    Anorm = lapackf77_zlanhe("f", uplo, &N, h_A + i * lda*N, &lda, work);
-                    err   = lapackf77_zlanhe("f", uplo, &N, h_R + i * lda*N, &lda, work)
+                    Anorm = safe_lapackf77_zlanhe("f", uplo, &N, h_A + i * lda*N, &lda, work);
+                    err   = safe_lapackf77_zlanhe("f", uplo, &N, h_R + i * lda*N, &lda, work)
                           / Anorm;
                     if ( isnan(err) || isinf(err) ) {
                         error = err;
@@ -177,18 +172,13 @@ int main( int argc, char** argv)
                 bool okay = (error < tol);
                 status += ! okay;
                 
-                #ifdef MAGMA_WITH_MKL
-                // end single thread to work around MKL bug
-                magma_set_lapack_numthreads( la_threads );
-                #endif
-                
-                printf("%10d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                       (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
+                printf("%10ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                       long(batchCount), long(N), cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                        error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%10d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
-                       (int)batchCount, (int) N, gpu_perf, gpu_time*1000. );
+                printf("%10ld %5ld     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
+                       long(batchCount), long(N), gpu_perf, gpu_time*1000. );
             }
 cleanup:
             magma_free_cpu( cpu_info );

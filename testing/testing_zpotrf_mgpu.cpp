@@ -13,6 +13,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -36,11 +38,11 @@ int main( int argc, char** argv )
     magma_int_t info, nb;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
@@ -50,7 +52,7 @@ int main( int argc, char** argv )
         magma_queue_create( dev, &queues[dev] );
     }
     
-    printf("%% ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
+    printf("%% ngpu = %ld, uplo = %s\n", long(opts.ngpu), lapack_uplo_const(opts.uplo) );
     printf("%%   N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||R||_F / ||A||_F\n");
     printf("%%================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -64,7 +66,7 @@ int main( int argc, char** argv )
             // ngpu must be at least the number of blocks
             ngpu = min( opts.ngpu, magma_ceildiv(N,nb) );
             if ( ngpu < opts.ngpu ) {
-                printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) ngpu );
+                printf( " * too many GPUs for the matrix size, using %ld GPUs\n", long(ngpu) );
             }
             
             // Allocate host memory for the matrix
@@ -95,8 +97,8 @@ int main( int argc, char** argv )
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zpotrf returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zpotrf returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
             }
             
@@ -117,8 +119,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zpotrf_mgpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zpotrf_mgpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             if ( opts.uplo == MagmaUpper ) {
@@ -136,14 +138,14 @@ int main( int argc, char** argv )
                 Anorm = lapackf77_zlange("f", &N, &N, h_A, &lda, work );
                 error = lapackf77_zlange("f", &N, &N, h_R, &lda, work ) / Anorm;
                 
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                       (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
+                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                       long(N), cpu_perf, cpu_time, gpu_perf, gpu_time,
                        error, (error < tol ? "ok" : "failed") );
                 status += ! (error < tol);
             }
             else {
-                printf("%5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
-                       (int) N, gpu_perf, gpu_time );
+                printf("%5ld     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
+                       long(N), gpu_perf, gpu_time );
             }
             
             magma_free_cpu( h_A );

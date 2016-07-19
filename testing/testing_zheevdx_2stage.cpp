@@ -19,6 +19,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+
 // includes, project
 #include "magma_v2.h"
 #include "magma_lapack.h"
@@ -56,7 +58,7 @@ int main( int argc, char** argv)
     magma_int_t info_ortho     = 0;
     magma_int_t info_solution  = 0;
     magma_int_t info_reduction = 0;
-    magma_int_t status = 0;
+    int status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -66,11 +68,11 @@ int main( int argc, char** argv)
         range = MagmaRangeI;
 
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = abs( opts.ngpu );
+    magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu %d\n",
+    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu %ld\n",
            lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           opts.fraction, int(abs_ngpu) );
+           opts.fraction, long(abs_ngpu));
 
     printf("%%   N     M  GPU Time (sec)   ||I-Q^H Q||/N   ||A-QDQ^H||/(||A||N)   |D-D_magma|/(|D| * N)\n");
     printf("%%=========================================================================================\n");
@@ -137,7 +139,7 @@ int main( int argc, char** argv)
                                           iwork, liwork, 
                                           &info );
                 } else {
-                    //printf("calling zheevdx_2stage_m %d GPU\n", (int) opts.ngpu);
+                    //printf("calling zheevdx_2stage_m %ld GPU\n", long(opts.ngpu));
                     magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
                                             h_R, lda, 
                                             vl, vu, il, iu, 
@@ -169,7 +171,7 @@ int main( int argc, char** argv)
                                       iwork, liwork, 
                                       &info );
             } else {
-                //printf("calling zheevdx_2stage_m %d GPU\n", (int) opts.ngpu);
+                //printf("calling zheevdx_2stage_m %ld GPU\n", long(opts.ngpu));
                 magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
                                         h_R, lda, 
                                         vl, vu, il, iu, 
@@ -183,12 +185,12 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zheevdx_2stage returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zheevdx_2stage returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
-            printf("%5d %5d  %7.2f      ",
-                   (int) N, (int) m1, gpu_time );
+            printf("%5ld %5ld  %7.2f      ",
+                   long(N), long(m1), gpu_time );
 
             if ( opts.check ) {
                 info_solution  = 0;
@@ -276,7 +278,7 @@ static magma_int_t check_orthogonality(magma_int_t M, magma_int_t N, magmaDouble
     printf( "      %8.2e", normQ / minMN );
 
     // TODO: use opts.tolerance instead of hard coding 60
-    if ( isnan(result) || isinf(result) || (result > 60.0) ) {
+    if ( std::isnan(result) || std::isinf(result) || (result > 60.0) ) {
         info_ortho = 1;
     }
     else {
@@ -331,7 +333,7 @@ static magma_int_t check_reduction(magma_uplo_t uplo, magma_int_t N, magma_int_t
     printf("           %8.2e",  Rnorm / ( Anorm * N));
 
     // TODO: use opts.tolerance instead of hard coding 60
-    if ( isnan(result) || isinf(result) || (result > 60.0) ) {
+    if ( std::isnan(result) || std::isinf(result) || (result > 60.0) ) {
         info_reduction = 1;
     }
     else {
@@ -370,7 +372,7 @@ static magma_int_t check_solution(magma_int_t N, double *E1, double *E2, double 
     printf("              %8.2e", maxdif / (max(maxeig, maxdif)) );
 
     // TODO: use opts.tolerance instead of hard coding 100
-    if ( isnan(maxtmp) || isinf(maxtmp) || (maxtmp > 100) ) {
+    if ( std::isnan(maxtmp) || std::isinf(maxtmp) || (maxtmp > 100) ) {
         info_solution = 1;
     }
     else {

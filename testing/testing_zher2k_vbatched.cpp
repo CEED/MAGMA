@@ -27,8 +27,8 @@
 
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
 #endif
+#include "magma_threadsetting.h"
 
 #define PRECISION_z 
 
@@ -47,7 +47,7 @@ int main( int argc, char** argv)
     magma_int_t total_size_A_dev = 0, total_size_B_dev = 0, total_size_C_dev = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t batchCount;
     magma_int_t max_N, max_K;
 
@@ -279,12 +279,6 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 // compute relative error for magma, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
-                #ifdef MAGMA_WITH_MKL
-                // work around MKL bug in multi-threaded zlanhe
-                magma_int_t la_threads = magma_get_lapack_numthreads();
-                magma_set_lapack_numthreads( 1 );
-                #endif
-                
                 magma_error = 0.0;
                 h_C_tmp = h_C;
                 magmaDoubleComplex* h_Cmagma_tmp = h_Cmagma;
@@ -292,10 +286,10 @@ int main( int argc, char** argv)
                 {
                     magma_int_t C_batchSize = h_ldc[s] * h_N[s];
  
-                    Cnorm = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &h_N[s], h_C_tmp, &h_ldc[s], work );
+                    Cnorm = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &h_N[s], h_C_tmp, &h_ldc[s], work );
 
                     blasf77_zaxpy( &C_batchSize, &c_neg_one, h_C_tmp, &ione, h_Cmagma_tmp, &ione );
-                    magma_err = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &h_N[s], h_Cmagma_tmp, &h_ldc[s], work ) / Cnorm;
+                    magma_err = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &h_N[s], h_Cmagma_tmp, &h_ldc[s], work ) / Cnorm;
 
                     if ( isnan(magma_err) || isinf(magma_err) ) {
                       magma_error = magma_err;
@@ -306,21 +300,16 @@ int main( int argc, char** argv)
                     h_C_tmp += h_N[s] * h_ldc[s];
                     h_Cmagma_tmp += h_N[s] * h_ldc[s];
                 }
-                #ifdef MAGMA_WITH_MKL
-                // end single thread to work around MKL bug
-                magma_set_lapack_numthreads( la_threads );
-                #endif
                 
-
-                    printf("  %-10d  %-5d  %-5d  %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
-                       (int) batchCount, (int) max_N, (int) max_K,
+                printf("  %-10ld  %-5ld  %-5ld  %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
+                       long(batchCount), long(max_N), long(max_K),
                        magma_perf,  1000.*magma_time,
                        cpu_perf,    1000.*cpu_time,
                        magma_error);
             }
             else {
-                    printf("  %-10d  %-5d  %-5d  %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
-                       (int) batchCount, (int) max_N, (int) max_K,
+                printf("  %-10ld  %-5ld  %-5ld  %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
+                       long(batchCount), long(max_N), long(max_K),
                        magma_perf,  1000.*magma_time);
             }
             

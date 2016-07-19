@@ -43,7 +43,7 @@ int main( int argc, char** argv )
     magma_int_t n2, lda, lwork, min_mn, nb, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     magma_vect_t vect;
     
     magma_opts opts;
@@ -67,8 +67,8 @@ int main( int argc, char** argv )
             if ( (vect == MagmaQ && (m < n || n < min(m,k))) ||
                  (vect == MagmaP && (n < m || m < min(n,k))) )
             {
-                printf( "%3c %5d %5d %5d   skipping invalid dimensions\n",
-                        lapacke_vect_const(vect), (int) m, (int) n, (int) k );
+                printf( "%3c %5ld %5ld %5ld   skipping invalid dimensions\n",
+                        lapacke_vect_const(vect), long(m), long(n), long(k) );
                 continue;
             }
             
@@ -114,8 +114,8 @@ int main( int argc, char** argv )
             // first, get GEBRD factors in both hA and hR
             magma_zgebrd( m, n, hA, lda, d, e, tauq, taup, h_work, lwork, &info );
             if (info != 0) {
-                printf("magma_zgelqf_gpu returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zgelqf_gpu returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             lapackf77_zlacpy( MagmaFullStr, &m, &n, hA, &lda, hR, &lda );
             
@@ -129,8 +129,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zungbr returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                printf("magma_zungbr returned error %ld: %s.\n",
+                       long(info), magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -149,8 +149,8 @@ int main( int argc, char** argv )
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zungbr returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
+                    printf("lapackf77_zungbr returned error %ld: %s.\n",
+                           long(info), magma_strerror( info ));
                 }
                 
                 if ( opts.verbose ) {
@@ -168,14 +168,14 @@ int main( int argc, char** argv )
                 
                 bool okay = (error < tol);
                 status += ! okay;
-                printf("%3c %5d %5d %5d   %7.1f (%7.2f)   %7.1f (%7.2f)   %8.2e   %s\n",
-                       lapacke_vect_const(vect), (int) m, (int) n, (int) k,
+                printf("%3c %5ld %5ld %5ld   %7.1f (%7.2f)   %7.1f (%7.2f)   %8.2e   %s\n",
+                       lapacke_vect_const(vect), long(m), long(n), long(k),
                        cpu_perf, cpu_time, gpu_perf, gpu_time,
                        error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%3c %5d %5d %5d     ---   (  ---  )   %7.1f (%7.2f)     ---  \n",
-                       lapacke_vect_const(vect), (int) m, (int) n, (int) k,
+                printf("%3c %5ld %5ld %5ld     ---   (  ---  )   %7.1f (%7.2f)     ---  \n",
+                       lapacke_vect_const(vect), long(m), long(n), long(k),
                        gpu_perf, gpu_time );
             }
             

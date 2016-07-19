@@ -44,7 +44,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex offdiag = MAGMA_Z_MAKE( 1.2000, 6.7000 );
     magmaDoubleComplex diag    = MAGMA_Z_MAKE( 3.1415, 2.7183 );
     magma_int_t i, j, k, M, N, nb, cnt, size, lda, ldda;
-    magma_int_t status = 0;
+    int status = 0;
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -53,7 +53,7 @@ int main( int argc, char** argv)
 
     magma_uplo_t uplo[] = { MagmaLower, MagmaUpper, MagmaFull };
     
-    printf("%% K = nb = %d\n", (int) nb );
+    printf("%% K = nb = %ld\n", long(nb) );
     printf("%% uplo      M     N   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");
     printf("%%=================================================================\n");
     for( int iuplo = 0; iuplo < 2; ++iuplo ) {
@@ -131,8 +131,8 @@ int main( int argc, char** argv)
             blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_R, &ione);
             error = lapackf77_zlange("f", &M, &N, h_R, &lda, work);
             
-            printf("%4c   %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
-                   lapacke_uplo_const( uplo[iuplo] ), (int) M, (int) N,
+            printf("%4c   %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   lapacke_uplo_const( uplo[iuplo] ), long(M), long(N),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    (error == 0. ? "ok" : "failed") );
             status += ! (error == 0.);

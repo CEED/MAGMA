@@ -44,7 +44,7 @@ int main( int argc, char** argv)
     magma_int_t lda, ldb, ldc, ldda, lddb, lddc;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t NN;
     magma_int_t batchCount;
 
@@ -152,10 +152,11 @@ int main( int argc, char** argv)
 
             cublas_time = magma_sync_wtime( opts.queue );
 
-            cublasZgemmBatched(opts.handle, cublas_trans_const(opts.transA), cublas_trans_const(opts.transB), M, N, K,
-                               &alpha, (const magmaDoubleComplex**) A_array, ldda,
-                               (const magmaDoubleComplex**) B_array, lddb,
-                               &beta,  C_array, lddc, batchCount );
+            cublasZgemmBatched(opts.handle, cublas_trans_const(opts.transA), cublas_trans_const(opts.transB),
+                               int(M), int(N), int(K),
+                               &alpha, (const magmaDoubleComplex**) A_array, int(ldda),
+                                       (const magmaDoubleComplex**) B_array, int(lddb),
+                               &beta,  C_array, int(lddc), int(batchCount) );
 
             cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
             cublas_perf = gflops / cublas_time;
@@ -226,8 +227,8 @@ int main( int argc, char** argv)
 
                 bool okay = (magma_error < tol);
                 status += ! okay;
-                printf("%10d %5d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  %s\n",
-                   (int) batchCount, (int) M, (int) N, (int) K,
+                printf("%10ld %5ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  %s\n",
+                   long(batchCount), long(M), long(N), long(K),
                    magma_perf,  1000.*magma_time,
                    cublas_perf, 1000.*cublas_time,
                    cpu_perf,    1000.*cpu_time,
@@ -241,8 +242,8 @@ int main( int argc, char** argv)
 
                 bool okay = (magma_error < tol);
                 status += ! okay;
-                printf("%10d %5d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )    %8.2e     ---  %s\n",
-                   (int) batchCount, (int) M, (int) N, (int) K,
+                printf("%10ld %5ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )    %8.2e     ---  %s\n",
+                   long(batchCount), long(M), long(N), long(K),
                    magma_perf,  1000.*magma_time,
                    cublas_perf, 1000.*cublas_time,
                    magma_error, (okay ? "ok" : "failed") );

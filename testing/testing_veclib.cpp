@@ -129,7 +129,7 @@ float test( magma_int_t m, magma_int_t n )
     }
     
     double error;
-    magma_int_t status;
+    int status = 0;
     
     // can repeat multiple times, but shows same results every time
     status = 0;
@@ -138,8 +138,8 @@ float test( magma_int_t m, magma_int_t n )
         dnorm_one = blasf77_ddot(  &m, dA, &ione, dA, &ione );
         snorm_fro = blasf77_snrm2( &m, sA, &ione );
         dnorm_fro = blasf77_dnrm2( &m, dA, &ione );
-        printf( "m %d, sdot %12.8f, snrm2 %12.8f\n", (int) m, snorm_one, snorm_fro );
-        printf( "m %d, ddot %12.8f, dnrm2 %12.8f\n", (int) m, dnorm_one, dnorm_fro );
+        printf( "m %ld, sdot %12.8f, snrm2 %12.8f\n", long(m), snorm_one, snorm_fro );
+        printf( "m %ld, ddot %12.8f, dnrm2 %12.8f\n", long(m), dnorm_one, dnorm_fro );
         error = fabs(snorm_one - dnorm_one) / dnorm_one;
         status |= ! (error < 1e-6);
     }
@@ -163,11 +163,11 @@ float test( magma_int_t m, magma_int_t n )
         dnorm_max = lapackf77_dlange( "max", &m, &n, dA, &lda, dwork );
         dnorm_fro = lapackf77_dlange( "fro", &m, &n, dA, &lda, dwork );
         
-        printf( "m %d, n %d, slange norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
-                (int) m, (int) n, snorm_one, snorm_inf, snorm_max, snorm_fro );
+        printf( "m %ld, n %ld, slange norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
+                long(m), long(n), snorm_one, snorm_inf, snorm_max, snorm_fro );
         
-        printf( "m %d, n %d, dlange norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
-                (int) m, (int) n, dnorm_one, dnorm_inf, dnorm_max, dnorm_fro );
+        printf( "m %ld, n %ld, dlange norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
+                long(m), long(n), dnorm_one, dnorm_inf, dnorm_max, dnorm_fro );
         error = fabs(snorm_one - dnorm_one) / dnorm_one;
         status |= ! (error < 1e-6);
     }
@@ -191,11 +191,11 @@ float test( magma_int_t m, magma_int_t n )
         dnorm_max = lapackf77_dlansy( "max", "up", &n, dA, &lda, dwork );
         dnorm_fro = lapackf77_dlansy( "fro", "up", &n, dA, &lda, dwork );
         
-        printf( "m %d, n %d, slansy norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
-                (int) m, (int) n, snorm_one, snorm_inf, snorm_max, snorm_fro );
+        printf( "m %ld, n %ld, slansy norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
+                long(m), long(n), snorm_one, snorm_inf, snorm_max, snorm_fro );
         
-        printf( "m %d, n %d, dlansy norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
-                (int) m, (int) n, dnorm_one, dnorm_inf, dnorm_max, dnorm_fro );
+        printf( "m %ld, n %ld, dlansy norm one %12.8f,  inf %12.8f,  max %12.8f,  fro %12.8f\n",
+                long(m), long(n), dnorm_one, dnorm_inf, dnorm_max, dnorm_fro );
         error = fabs(snorm_one - dnorm_one) / dnorm_one;
         status |= ! (error < 1e-6);
     }

@@ -189,8 +189,8 @@ int main( int argc, char** argv)
                     blasf77_zaxpy( &sizeC, &c_neg_one, h_C, &ione, h_Cmagma, &ione );
                     magma_error = lapackf77_zlange( "F", &M, &N, h_Cmagma, &ldc, work ) / Cnorm;
                     
-                    printf("%5d %5d %5d   %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e     %8.2e   %s\n",
-                           (int) M, (int) N, (int) K,
+                    printf("%5ld %5ld %5ld   %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e     %8.2e   %s\n",
+                           long(M), long(N), long(K),
                            magma_perf,  1000.*magma_time,
                            dev_perf,    1000.*dev_time,
                            cpu_perf,    1000.*cpu_time,
@@ -198,8 +198,8 @@ int main( int argc, char** argv)
                            (magma_error < tol && dev_error < tol ? "ok" : "failed"));
                     status += ! (magma_error < tol && dev_error < tol);
                 #else
-                    printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
-                           (int) M, (int) N, (int) K,
+                    printf("%5ld %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
+                           long(M), long(N), long(K),
                            dev_perf,    1000.*dev_time,
                            cpu_perf,    1000.*cpu_time,
                            dev_error,
@@ -215,16 +215,16 @@ int main( int argc, char** argv)
                     blasf77_zaxpy( &sizeC, &c_neg_one, h_Cdev, &ione, h_Cmagma, &ione );
                     magma_error = lapackf77_zlange( "F", &M, &N, h_Cmagma, &ldc, work ) / Cnorm;
                     
-                    printf("%5d %5d %5d   %7.2f (%7.2f)    %7.2f (%7.2f)     ---   (  ---  )    %8.2e        ---    %s\n",
-                           (int) M, (int) N, (int) K,
+                    printf("%5ld %5ld %5ld   %7.2f (%7.2f)    %7.2f (%7.2f)     ---   (  ---  )    %8.2e        ---    %s\n",
+                           long(M), long(N), long(K),
                            magma_perf,  1000.*magma_time,
                            dev_perf,    1000.*dev_time,
                            magma_error,
                            (magma_error < tol ? "ok" : "failed"));
                     status += ! (magma_error < tol);
                 #else
-                    printf("%5d %5d %5d   %7.2f (%7.2f)     ---   (  ---  )       ---\n",
-                           (int) M, (int) N, (int) K,
+                    printf("%5ld %5ld %5ld   %7.2f (%7.2f)     ---   (  ---  )       ---\n",
+                           long(M), long(N), long(K),
                            dev_perf,    1000.*dev_time );
                 #endif
             }

@@ -42,7 +42,7 @@ int main( int argc, char** argv)
     magma_int_t M, N, size, lda, ldda;
     magma_int_t ione = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
@@ -121,8 +121,8 @@ int main( int argc, char** argv)
             Bnorm = lapackf77_zlange( "F", &M, &N, h_B, &lda, work );
             error = lapackf77_zlange( "F", &M, &N, h_A, &lda, work ) / Bnorm;
             
-            printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                   (int) M, (int) N,
+            printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                   long(M), long(N),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error, (error < tol ? "ok" : "failed"));
             status += ! (error < tol);

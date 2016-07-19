@@ -25,8 +25,8 @@
 
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
 #endif
+#include "magma_threadsetting.h"
 
 #define PRECISION_z
 
@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     magma_int_t lda, ldb, ldc, ldda, lddb, lddc;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t status = 0;
+    int status = 0;
     magma_int_t batchCount;
 
     magmaDoubleComplex *h_A, *h_B, *h_C, *h_Cmagma;
