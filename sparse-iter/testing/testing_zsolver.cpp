@@ -94,11 +94,11 @@ int main(  int argc, char** argv )
             printf("%%error: solver returned: %s (%d).\n",
                 magma_strerror( info ), int(info) );
         }
-        printf("data = [\n");
+        printf("solverinfo = [\n");
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
         printf("];\n\n");
         
-        printf("precond_info = [\n");
+        printf("precondinfo = [\n");
         printf("%%   setup  runtime\n");        
         printf("  %.6f  %.6f\n",
            zopts.precond_par.setuptime, zopts.precond_par.runtime );
