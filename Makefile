@@ -668,7 +668,7 @@ install: lib sparse-lib install_dirs
 files.txt: force
 	svn st -vq \
 		| egrep -v '^D|> moved' \
-		| perl -pi -e 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
+		| perl -pe 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
 		| egrep -v '^\.$$|obsolete|deprecated|contrib\b|^exp' \
 		| egrep '\w\.\w|Makefile|docs|run' \
 		> files.txt
@@ -682,7 +682,7 @@ subdir_files = $(addsuffix /files.txt,$(subdirs) $(sparse_subdirs))
 $(subdir_files): force
 	svn st -N -vq $(dir $@) \
 		| egrep -v '^D|> moved' \
-		| perl -pi -e 's%^.{13} +\S+ +\S+ +\S+ +$(dir $@)%%' | sort \
+		| perl -pe 's%^.{13} +\S+ +\S+ +\S+ +$(dir $@)%%' | sort \
 		| egrep -v '^\.$$|obsolete|deprecated|contrib\b|^exp' \
 		| egrep '\w\.\w|Makefile|docs|run' \
 		> $@

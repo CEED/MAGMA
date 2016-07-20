@@ -207,8 +207,8 @@ int main( int argc, char** argv)
                 
                 bool okay = (magma_error < tol);
                 status += ! okay;
-                printf("%10d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     %8.2e  %s\n",
-                   (int) batchCount, (int) N, (int) K,
+                printf("%10ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)     %8.2e  %s\n",
+                   long(batchCount), long(N), long(K),
                    magma_perf,  1000.*magma_time,
                    cpu_perf,    1000.*cpu_time,
                    magma_error, (okay ? "ok" : "failed"));
