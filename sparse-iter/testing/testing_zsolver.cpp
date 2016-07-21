@@ -94,6 +94,11 @@ int main(  int argc, char** argv )
             printf("%%error: solver returned: %s (%d).\n",
                 magma_strerror( info ), int(info) );
         }
+        printf("convergence = [\n");
+        magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
+        printf("];\n\n");
+        
+        zopts.solver_par.verbose = 0;
         printf("solverinfo = [\n");
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
         printf("];\n\n");
