@@ -21,7 +21,7 @@
 #include <cuda.h>  // for CUDA_VERSION
 
 #if (CUDA_VERSION > 6000)
-         
+#if (CUDA_ARCH >= 300)
 
 __device__
 void ztrsv_lower_16kernel_general(magmaDoubleComplex *dA, magmaDoubleComplex *dB, int *sizes)
@@ -1465,7 +1465,7 @@ magma_zbackinsert_16kernel(
 
 
 #endif
-
+#endif
 
 /**
     Purpose
@@ -1567,6 +1567,7 @@ magma_zisaigenerator_16_gpu(
     int recursive = magma_ceildiv( M->num_rows, 32000 );
     
 #if (CUDA_VERSION > 6000)
+#if (CUDA_ARCH >= 300)
 
     magma_zgpumemzero_16kernel<<< r1grid, r1block, 0, queue->cuda_stream() >>>(  
             rhs, L.num_rows, WARP_SIZE, 1);
@@ -1638,6 +1639,7 @@ magma_zisaigenerator_16_gpu(
             M->dval,
             sizes,
             rhs );
+#endif
 #else
    printf( "%% error: ISAI preconditioner requires CUDA > 6.0.\n" );
    info = MAGMA_ERR_NOT_SUPPORTED; 

@@ -21,7 +21,7 @@
 #include <cuda.h>  // for CUDA_VERSION
 
 #if (CUDA_VERSION > 6000) // only for cuda>6000
-
+#if (CUDA_ARCH >= 300)
          
 
 
@@ -10759,7 +10759,7 @@ magmaDoubleComplex *Mval )
 }                                                                                                       
                                                                                                         
 #endif
-
+#endif
 
 /**
     Purpose
@@ -10851,6 +10851,7 @@ magma_zisai_generator_regs(
     dim3 r2grid( r2dg1, r2dg2, r2dg3 );
     
 #if (CUDA_VERSION > 6000)
+#if (CUDA_ARCH >= 300)
 
     if( uplotype == MagmaLower ){//printf("in here lower new kernel\n");
         //cudaProfilerStart();
@@ -10874,6 +10875,7 @@ magma_zisai_generator_regs(
             M->col,
             M->val );
     }
+#endif
 #else
    printf( "%% error: ISAI preconditioner requires CUDA > 6.0.\n" );
    info = MAGMA_ERR_NOT_SUPPORTED; 

@@ -464,8 +464,8 @@ typedef struct magma_z_preconditioner
     magma_int_t             spmv_count;  
     double                  init_res;
     double                  final_res;
-    real_Double_t      runtime;                // feedback: preconditioner runtime needed
-    real_Double_t      setuptime;           // feedback: preconditioner setup time needed
+    real_Double_t      runtime;                 // feedback: preconditioner runtime needed
+    real_Double_t      setuptime;               // feedback: preconditioner setup time needed
     magma_z_matrix   M;
     magma_z_matrix   L;
     magma_z_matrix   LT;
