@@ -60,8 +60,8 @@ int main(  int argc, char** argv )
             TESTING_CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
 
-        printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
-                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
+        printf( "\n%% matrix info: %lld-by-%lld with %lld nonzeros\n\n",
+                (long long) A.num_rows, (long long) A.num_cols, (long long) A.nnz );
 
 
         // for the eigensolver case
@@ -94,8 +94,8 @@ int main(  int argc, char** argv )
         info = magma_z_applyprecond_left( MagmaNoTrans, B_d, b, &x1, &zopts.precond_par, queue ); 
         tempo2 = magma_sync_wtime( queue );
         if( info != 0 ){
-            printf("error: preconditioner returned: %s (%d).\n",
-                magma_strerror( info ), int(info) );
+            printf("error: preconditioner returned: %s (%lld).\n",
+                    magma_strerror( info ), (long long) info );
         }
         TESTING_CHECK( magma_zresidual( B_d, b, x1, &residual, queue ));
         printf("%.8e  %.8e\n", tempo2-tempo1, residual );
@@ -105,8 +105,8 @@ int main(  int argc, char** argv )
         info = magma_z_applyprecond_right( MagmaNoTrans, B_d, b, &x2, &zopts.precond_par, queue ); 
         tempo2 = magma_sync_wtime( queue );
         if( info != 0 ){
-            printf("error: preconditioner returned: %s (%d).\n",
-                magma_strerror( info ), int(info) );
+            printf("error: preconditioner returned: %s (%lld).\n",
+                    magma_strerror( info ), (long long) info );
         }
         TESTING_CHECK( magma_zresidual( B_d, b, x2, &residual, queue ));
         printf("%.8e  %.8e\n", tempo2-tempo1, residual );

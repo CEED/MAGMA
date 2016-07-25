@@ -54,8 +54,8 @@ int main(  int argc, char** argv )
             TESTING_CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
 
-        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
-                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
+        printf( "\n# matrix info: %lld-by-%lld with %lld nonzeros\n\n",
+                (long long) A.num_rows, (long long) A.num_cols, (long long) A.nnz );
 
         // scale matrix
         TESTING_CHECK( magma_zmscale( &A, zopts.scaling, queue ));

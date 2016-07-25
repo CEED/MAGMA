@@ -57,8 +57,8 @@ int main(  int argc, char** argv )
             TESTING_CHECK( magma_z_csr_mtx( &Z,  argv[i], queue ));
         }
 
-        printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                            int(Z.num_rows), int(Z.num_cols), int(Z.nnz) );
+        printf("%% matrix info: %lld-by-%lld with %lld nonzeros\n",
+                (long long) Z.num_rows, (long long) Z.num_cols, (long long) Z.nnz );
         
         // slice matrix
         TESTING_CHECK( magma_index_malloc_cpu( &comm_i, Z.num_rows ) );

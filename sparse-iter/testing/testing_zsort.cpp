@@ -98,8 +98,8 @@ int main(  int argc, char** argv )
             TESTING_CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
 
-        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
-                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
+        printf( "\n# matrix info: %lld-by-%lld with %lld nonzeros\n\n",
+                (long long) A.num_rows, (long long) A.num_cols, (long long) A.nnz);
     
         TESTING_CHECK( magma_index_malloc_cpu( &x, A.num_rows*10 ));
         magma_int_t num_ind = 0;
@@ -107,7 +107,7 @@ int main(  int argc, char** argv )
         TESTING_CHECK( magma_zdomainoverlap( A.num_rows, &num_ind, A.row, A.col, x, queue ));
                 printf("domain overlap indices:\n");
         for(magma_int_t j = 0; j < num_ind; j++ ){
-            printf("%d  ", int(x[j]) );
+            printf("%d  ", x[j] );
         }
         printf("\n\n");
         magma_free_cpu( x );

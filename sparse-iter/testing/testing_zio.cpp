@@ -51,8 +51,8 @@ int main(  int argc, char** argv )
             TESTING_CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
 
-        printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
+        printf("%% matrix info: %lld-by-%lld with %lld nonzeros\n",
+                (long long) A.num_rows, (long long) A.num_cols, (long long) A.nnz );
 
         // filename for temporary matrix storage
         const char *filename = "testmatrix.mtx";

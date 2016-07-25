@@ -84,8 +84,8 @@ int main(  int argc, char** argv )
             break;
     }
     printf("\n#    usage: ./run_zspmm"
-           " [ --blocksize %d --alignment %d (for SELLP) ]"
-           " matrices \n\n", int(hA_SELLP.blocksize), int(hA_SELLP.alignment) );
+           " [ --blocksize %lld --alignment %lld (for SELLP) ] matrices\n\n",
+           (long long) hA_SELLP.blocksize, (long long) hA_SELLP.alignment );
 
     while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
@@ -96,8 +96,8 @@ int main(  int argc, char** argv )
             TESTING_CHECK( magma_z_csr_mtx( &hA,  argv[i], queue ));
         }
 
-        printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                            int(hA.num_rows), int(hA.num_cols), int(hA.nnz) );
+        printf("%% matrix info: %lld-by-%lld with %lld nonzeros\n",
+                (long long) hA.num_rows, (long long) hA.num_cols, (long long) hA.nnz );
 
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 

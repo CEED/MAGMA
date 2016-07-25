@@ -69,14 +69,15 @@ int main(  int argc, char** argv )
 
         TESTING_CHECK( magma_zmconvert( A, &B, Magma_CSR, zopts.output_format, queue ));
         
-        printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
-                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
+        printf( "\n%% matrix info: %lld-by-%lld with %lld nonzeros\n\n",
+                            (long long) A.num_rows, (long long) A.num_cols, (long long) A.nnz );
         
-        printf("matrixinfo = [ \n");
+        printf("matrixinfo = [\n");
         printf("%%   size   (m x n)     ||   nonzeros (nnz)   ||   nnz/m   ||   stored nnz\n");
         printf("%%============================================================================%%\n");
-        printf("  %8d  %8d      %10d             %4d        %10d\n",
-               int(B.num_rows), int(B.num_cols), int(B.true_nnz), int(B.true_nnz/B.num_rows), int(B.nnz) );
+        printf("  %8lld  %8lld      %10lld             %4lld        %10lld\n",
+               (long long) B.num_rows, (long long) B.num_cols, (long long) B.true_nnz,
+               (long long) (B.true_nnz/B.num_rows), (long long) B.nnz );
         printf("%%============================================================================%%\n");
         printf("];\n");
 
@@ -91,8 +92,8 @@ int main(  int argc, char** argv )
         
         info = magma_z_solver( B_d, b, &x, &zopts, queue );
         if( info != 0 ) {
-            printf("%%error: solver returned: %s (%d).\n",
-                magma_strerror( info ), int(info) );
+            printf("%%error: solver returned: %s (%lld).\n",
+                    magma_strerror( info ), (long long) info );
         }
         printf("convergence = [\n");
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );

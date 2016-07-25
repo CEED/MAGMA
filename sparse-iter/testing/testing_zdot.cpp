@@ -52,7 +52,10 @@ int main(  int argc, char** argv )
             int iters = 10;
             double computations = (2.* n * iters * num_vecs);
 
+            #ifndef ENABLE_TIMER
             #define ENABLE_TIMER
+            #endif
+            
             #ifdef ENABLE_TIMER
             real_Double_t mdot1, mdot2, mdgm1, mdgm2, magmagemv1, magmagemv2, cugemv1, cugemv2, cudot1, cudot2;
             real_Double_t mdot_time, mdgm_time, mdgmshf_time, magmagemv_time, cugemv_time, cudot_time;
@@ -148,8 +151,8 @@ int main(  int argc, char** argv )
 
             //Chronometry
             #ifdef ENABLE_TIMER
-            printf("%d  %d  %e  %e  %e  %e  %e  %e  || %e  %e  %e  %e  %e  %e\n",
-                    int(n), int(num_vecs),
+            printf("%lld  %lld  %e  %e  %e  %e  %e  %e  || %e  %e  %e  %e  %e  %e\n",
+                    (long long) n, (long long) num_vecs,
                     cudot_time/iters,
                     (cugemv_time)/iters,
                     (magmagemv_time)/iters,

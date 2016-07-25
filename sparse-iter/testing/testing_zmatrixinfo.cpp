@@ -38,8 +38,8 @@ int main(  int argc, char** argv )
     
     int i=1;
     TESTING_CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
-    printf("matrixinfo = [ \n");
-    printf("%%   size (n)   ||   nonzeros (nnz)   ||   nnz/n \n");
+    printf("matrixinfo = [\n");
+    printf("%%   size (n)   ||   nonzeros (nnz)   ||   nnz/n\n");
     printf("%%=============================================================%%\n");
     while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
@@ -50,8 +50,8 @@ int main(  int argc, char** argv )
             TESTING_CHECK( magma_z_csr_mtx( &Z,  argv[i], queue ));
         }
 
-        printf("   %10d          %10d          %10d\n",
-               int(Z.num_rows),  int(Z.nnz), int(Z.nnz/Z.num_rows) );
+        printf("   %10lld          %10lld          %10lld\n",
+               (long long) Z.num_rows, (long long) Z.nnz, (long long) (Z.nnz/Z.num_rows) );
 
         magma_zmfree(&Z, queue );
 

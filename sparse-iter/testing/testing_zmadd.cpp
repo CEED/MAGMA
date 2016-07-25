@@ -49,8 +49,8 @@ int main(  int argc, char** argv )
     } else {                        // file-matrix test
         TESTING_CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
     }
-    printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                        int(A.num_rows), int(A.num_cols), int(A.nnz) );
+    printf("%% matrix info: %lld-by-%lld with %lld nonzeros\n",
+            (long long) A.num_rows, (long long) A.num_cols, (long long) A.nnz );
     i++;
 
     if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
@@ -60,8 +60,8 @@ int main(  int argc, char** argv )
     } else {                        // file-matrix test
         TESTING_CHECK( magma_z_csr_mtx( &B,  argv[i], queue ));
     }
-    printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                        int(B.num_rows), int(B.num_cols), int(B.nnz) );
+    printf("%% matrix info: %lld-by-%lld with %lld nonzeros\n",
+            (long long) B.num_rows, (long long) B.num_cols, (long long) B.nnz );
 
 
     TESTING_CHECK( magma_zmtransfer( A, &A_d, Magma_CPU, Magma_DEV, queue ));
