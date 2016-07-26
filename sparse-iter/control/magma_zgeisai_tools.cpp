@@ -268,7 +268,7 @@ magma_zmtrisolve_batched(
         blasf77_ztrsv( lapack_uplo_const(uplotype), 
                         lapack_trans_const(transtype), 
                         lapack_diag_const(diagtype),
-                           &sizes[i],
+                           (magma_int_t*)&sizes[i],
                            &trisystems[i*warpsize*warpsize], &warpsize,
                            &rhs[i*warpsize], &ione );
     }
