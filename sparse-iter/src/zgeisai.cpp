@@ -108,10 +108,10 @@ magma_ziluisaisetup(
         magma_zmfree( &QT, queue );
     } else {
         if( precond->pattern == 100 ){
+            CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
             CHECK( magma_zgeisai_maxblock( LT, &MT, queue ) );
         } else {
             // pattern L^x
-            // CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
             if( precond->pattern > 1 ){
                 CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
                 z = 1;
@@ -146,18 +146,19 @@ magma_ziluisaisetup(
        goto cleanup;
     }
     // via main memory
-    //  if( maxsize <= 8 ){
-    //      CHECK( magma_zisaigenerator_8_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-    //                  LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    //  } else if( maxsize <= 16 ){
-    //      CHECK( magma_zisaigenerator_16_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-    //                  LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    //  } else {
-    //      CHECK( magma_zisaigenerator_32_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-    //                  LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    //  }
+    //  CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
+    // if( maxsize <= 8 ){
+    //     CHECK( magma_zisaigenerator_8_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+    //                 LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // } else if( maxsize <= 16 ){
+    //     CHECK( magma_zisaigenerator_16_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+    //                 LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // } else {
+    //     CHECK( magma_zisaigenerator_32_gpu( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+    //                 LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // }
     // via registers
-    CHECK( magma_zisai_generator_regs( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+     CHECK( magma_zisai_generator_regs( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
                     precond->L, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
       
     
@@ -184,10 +185,10 @@ magma_ziluisaisetup(
         
     } else {
         if( precond->pattern == 100 ){
+            CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
             CHECK( magma_zgeisai_maxblock( LT, &MT, queue ) );
         } else {
         // pattern U^x
-            // CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
             if( precond->pattern > 1 ){
                 CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
                 z = 1;
@@ -222,18 +223,19 @@ magma_ziluisaisetup(
        goto cleanup;
     }
     // via main memory
-    //   if( maxsize <= 8 ){
-    //       CHECK( magma_zisaigenerator_8_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-    //                   LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    //   } else if( maxsize <= 16 ){
-    //       CHECK( magma_zisaigenerator_16_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-    //                   LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    //   } else {
-    //       CHECK( magma_zisaigenerator_32_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-    //                   LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-    //   }
+    // CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
+    // if( maxsize <= 8 ){
+    //     CHECK( magma_zisaigenerator_8_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+    //                 LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // } else if( maxsize <= 16 ){
+    //     CHECK( magma_zisaigenerator_16_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+    //                 LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // } else {
+    //     CHECK( magma_zisaigenerator_32_gpu( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+    //                 LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+    // }
     // via registers
-    CHECK( magma_zisai_generator_regs( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+     CHECK( magma_zisai_generator_regs( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
                     precond->U, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
 
     CHECK( magma_zmtranspose( MT, &precond->UD, queue ) );
