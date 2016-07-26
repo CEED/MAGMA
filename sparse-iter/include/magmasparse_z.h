@@ -940,7 +940,7 @@ magma_zmpilut_rm_thrsrc(
 magma_int_t
 magma_zmpilut_count(
     magma_z_matrix L,
-    magma_index_t *num,
+    magma_int_t *num,
     magma_queue_t queue );
 
 magma_int_t
