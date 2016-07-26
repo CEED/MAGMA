@@ -235,6 +235,11 @@ magma_z_precondsetup(
             precond->solver == Magma_ICC    || 
             precond->solver == Magma_PARIC ) ) {  // also prepare the transpose
         info = magma_zcumilusetup_transpose( A, precond, queue );
+        if( info == 0 && 
+            ( precond->trisolver == Magma_ISAI 
+                || precond->trisolver == Magma_JACOBI ) ){
+                info = magma_ziluisaisetup_t( A, b, precond, queue );
+        }
     }
     
     tempo2 = magma_sync_wtime( queue );
@@ -443,7 +448,7 @@ magma_z_applyprecond_left(
                     precond->solver == Magma_PARILU ) && 
                   ( precond->trisolver == Magma_ISAI ||
                     precond->trisolver == Magma_JACOBI ) ){
-            CHECK( magma_zisai_l( b, x, precond, queue ) );
+            CHECK( magma_zisai_l_t( b, x, precond, queue ) );
         }
         else if ( ( precond->solver == Magma_ILU ||
                     precond->solver == Magma_PARILU ) ){
@@ -600,7 +605,7 @@ magma_z_applyprecond_right(
                     precond->solver == Magma_PARILU ) && 
                   ( precond->trisolver == Magma_ISAI ||
                     precond->trisolver == Magma_JACOBI ) ){
-            CHECK( magma_zisai_r( b, x, precond, queue ) );
+            CHECK( magma_zisai_r_t( b, x, precond, queue ) );
             // magma_z_spmv( MAGMA_Z_ONE, precond->U, b,MAGMA_Z_ZERO, *x, queue ); // SPAI
         }
         else if ( ( precond->solver == Magma_ILU ||

@@ -595,6 +595,56 @@ magma_zsolverinfo_free(
         magma_free_cpu( precond_par->UD.blockinfo );
         precond_par->UD.blockinfo = NULL;
     }
+    if ( precond_par->LDT.val != NULL ) {
+        if ( precond_par->LDT.memory_location == Magma_DEV )
+            magma_free( precond_par->LDT.dval );
+        else
+            magma_free_cpu( precond_par->LDT.val );
+        precond_par->LDT.val = NULL;
+    }
+    if ( precond_par->LDT.col != NULL ) {
+        if ( precond_par->LDT.memory_location == Magma_DEV )
+            magma_free( precond_par->LDT.dcol );
+        else
+            magma_free_cpu( precond_par->LDT.col );
+        precond_par->LDT.col = NULL;
+    }
+    if ( precond_par->LDT.row != NULL ) {
+        if ( precond_par->LDT.memory_location == Magma_DEV )
+            magma_free( precond_par->LDT.drow );
+        else
+            magma_free_cpu( precond_par->LDT.row );
+        precond_par->LDT.row = NULL;
+    }
+    if ( precond_par->LDT.blockinfo != NULL ) {
+        magma_free_cpu( precond_par->LDT.blockinfo );
+        precond_par->LDT.blockinfo = NULL;
+    }
+    if ( precond_par->UDT.val != NULL ) {
+        if ( precond_par->UDT.memory_location == Magma_DEV )
+            magma_free( precond_par->UDT.dval );
+        else
+            magma_free_cpu( precond_par->UDT.val );
+        precond_par->UDT.val = NULL;
+    }
+    if ( precond_par->UDT.col != NULL ) {
+        if ( precond_par->UDT.memory_location == Magma_DEV )
+            magma_free( precond_par->UDT.dcol );
+        else
+            magma_free_cpu( precond_par->UDT.col );
+        precond_par->UDT.col = NULL;
+    }
+    if ( precond_par->UDT.row != NULL ) {
+        if ( precond_par->UDT.memory_location == Magma_DEV )
+            magma_free( precond_par->UDT.drow );
+        else
+            magma_free_cpu( precond_par->UDT.row );
+        precond_par->UDT.row = NULL;
+    }
+    if ( precond_par->UDT.blockinfo != NULL ) {
+        magma_free_cpu( precond_par->UDT.blockinfo );
+        precond_par->UDT.blockinfo = NULL;
+    }
 
     precond_par->solver = Magma_NONE;
     return MAGMA_SUCCESS;
@@ -700,6 +750,16 @@ magma_zsolverinfo_init(
     precond_par->UD.col = NULL;
     precond_par->UD.row = NULL;
     precond_par->UD.blockinfo = NULL;
+    
+    precond_par->LDT.val = NULL;
+    precond_par->LDT.col = NULL;
+    precond_par->LDT.row = NULL;
+    precond_par->LDT.blockinfo = NULL;
+
+    precond_par->UDT.val = NULL;
+    precond_par->UDT.col = NULL;
+    precond_par->UDT.row = NULL;
+    precond_par->UDT.blockinfo = NULL;
     
     precond_par->cuinfoL = NULL;
     precond_par->cuinfoU = NULL;

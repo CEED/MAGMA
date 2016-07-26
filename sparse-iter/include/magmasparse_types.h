@@ -473,6 +473,8 @@ typedef struct magma_z_preconditioner
     magma_z_matrix   UT;
     magma_z_matrix   LD;
     magma_z_matrix   UD;
+    magma_z_matrix   LDT;
+    magma_z_matrix   UDT;
     magma_z_matrix          d;
     magma_z_matrix          d2;
     magma_z_matrix          work1;
@@ -518,6 +520,8 @@ typedef struct magma_c_preconditioner
     magma_c_matrix   UT;
     magma_c_matrix   LD;
     magma_c_matrix   UD;
+    magma_c_matrix   LDT;
+    magma_c_matrix   UDT;
     magma_c_matrix          d;
     magma_c_matrix          d2;
     magma_c_matrix          work1;
@@ -564,6 +568,8 @@ typedef struct magma_d_preconditioner
     magma_d_matrix   UT;
     magma_d_matrix   LD;
     magma_d_matrix   UD;
+    magma_d_matrix   LDT;
+    magma_d_matrix   UDT;
     magma_d_matrix          d;
     magma_d_matrix          d2;
     magma_d_matrix          work1;
@@ -610,6 +616,8 @@ typedef struct magma_s_preconditioner
     magma_s_matrix   UT;
     magma_s_matrix   LD;
     magma_s_matrix   UD;
+    magma_s_matrix   LDT;
+    magma_s_matrix   UDT;
     magma_s_matrix          d;
     magma_s_matrix          d2;
     magma_s_matrix          work1;
