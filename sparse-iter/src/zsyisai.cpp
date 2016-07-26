@@ -93,7 +93,7 @@ magma_zicisaisetup(
     CHECK( magma_zcumiccsetup( A, precond, queue ) );
     
     // we need this in any case
-    CHECK( magma_zmtranspose( precond->L, &LT, queue ) );
+    CHECK( magma_zmtranspose( precond->L, &MT, queue ) );
     
     // SPAI for L 
     if( precond->pattern <= 0 ){ // block diagonal structure
@@ -113,8 +113,9 @@ magma_zicisaisetup(
             CHECK( magma_zgeisai_maxblock( LT, &MT, queue ) );
         } else {
             // pattern L^x
-            CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
-            if( precond->pattern > 0 ){
+            // CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
+            if( precond->pattern > 1 ){
+                CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
                 z = 1;
                 while( z<precond->pattern ){
                     CHECK( magma_z_spmm( MAGMA_Z_ONE, LT, MT, &QT, queue ) );
@@ -170,7 +171,7 @@ magma_zicisaisetup(
    //  magma_z_mvisu(precond->LD, queue);
    
    // we need this in any case
-   CHECK( magma_zmtranspose( precond->U, &LT, queue ) );
+   CHECK( magma_zmtranspose( precond->U, &MT, queue ) );
     
     // SPAI for U
     if( precond->pattern <= 0 ){ // block diagonal structure
@@ -189,8 +190,9 @@ magma_zicisaisetup(
             CHECK( magma_zgeisai_maxblock( LT, &MT, queue ) );
         } else {
         // pattern U^x
-            CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
-            if( precond->pattern > 0 ){
+            // CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
+            if( precond->pattern > 1 ){
+                CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
                 z = 1;
                 while( z<precond->pattern ){
                     CHECK( magma_z_spmm( MAGMA_Z_ONE, LT, MT, &QT, queue ) );

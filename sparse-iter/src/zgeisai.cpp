@@ -91,7 +91,7 @@ magma_ziluisaisetup(
     // CHECK( magma_zcumilusetup( A, precond, queue ) );
     
     // we need this in any case
-    CHECK( magma_zmtranspose( precond->L, &LT, queue ) );
+    CHECK( magma_zmtranspose( precond->L, &MT, queue ) );
     
     // SPAI for L 
     if( precond->pattern <= 0 ){ // block diagonal structure
@@ -111,8 +111,9 @@ magma_ziluisaisetup(
             CHECK( magma_zgeisai_maxblock( LT, &MT, queue ) );
         } else {
             // pattern L^x
-            CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
-            if( precond->pattern > 0 ){
+            // CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
+            if( precond->pattern > 1 ){
+                CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
                 z = 1;
                 while( z<precond->pattern ){
                     CHECK( magma_z_spmm( MAGMA_Z_ONE, LT, MT, &QT, queue ) );
@@ -137,7 +138,8 @@ magma_ziluisaisetup(
             break;
         }
     }
-    printf("%% nnz in L-ISAI: %d\t", nnzL); 
+    printf("%% nnz in L-ISAI: %d\n", nnzL); 
+    printf("maxnnz_ISAI_L = %d;\n", maxsize); 
     // this can be modified to the thread-block-size
     if( maxsize > warpsize ){
        info = -(maxsize - warpsize);     
@@ -166,7 +168,7 @@ magma_ziluisaisetup(
    //  magma_z_mvisu(precond->LD, queue);
    
    // we need this in any case
-   CHECK( magma_zmtranspose( precond->U, &LT, queue ) );
+   CHECK( magma_zmtranspose( precond->U, &MT, queue ) );
     
     // SPAI for U
     if( precond->pattern <= 0 ){ // block diagonal structure
@@ -185,8 +187,9 @@ magma_ziluisaisetup(
             CHECK( magma_zgeisai_maxblock( LT, &MT, queue ) );
         } else {
         // pattern U^x
-            CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
-            if( precond->pattern > 0 ){
+            // CHECK( magma_z_mtransfer( LT, &MT, Magma_DEV, Magma_DEV, queue ) );
+            if( precond->pattern > 1 ){
+                CHECK( magma_z_mtransfer( MT, &LT, Magma_DEV, Magma_DEV, queue ) );
                 z = 1;
                 while( z<precond->pattern ){
                     CHECK( magma_z_spmm( MAGMA_Z_ONE, LT, MT, &QT, queue ) );
@@ -211,7 +214,8 @@ magma_ziluisaisetup(
             break;
         }
     }
-    printf("%% nnz in U-ISAI: %d\t", nnzU); 
+    printf("%% nnz in U-ISAI: %d\n", nnzU); 
+    printf("maxnnz_ISAI_U = %d;\n", maxsize); 
     // this can be modified to the thread-block-size
     if( maxsize > warpsize ){
        info = -(maxsize - warpsize);     
