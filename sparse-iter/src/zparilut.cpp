@@ -75,8 +75,8 @@ magma_zparilutsetup(
     cusparseHandle_t cusparseHandle=NULL;
     cusparseMatDescr_t descrL=NULL;
     cusparseMatDescr_t descrU=NULL;
-    magma_index_t *rm_locL = NULL; 
-    magma_index_t *rm_locU = NULL; 
+    magma_int_t *rm_locL = NULL; 
+    magma_int_t *rm_locU = NULL; 
     magma_int_t num_rmLt, num_rmUt;
     magma_z_matrix hA={Magma_CSR}, hAT={Magma_CSR}, hL={Magma_CSR}, hU={Magma_CSR}, 
                     L={Magma_CSR}, U={Magma_CSR}, L_new={Magma_CSR}, U_new={Magma_CSR}, 
@@ -94,8 +94,8 @@ magma_zparilutsetup(
     // reorder = 1 reorder only once per loop (default)
     // reorder = 2 reorder twice per loop
     
-    CHECK( magma_index_malloc_cpu( &rm_locL, A.nnz ) ); 
-    CHECK( magma_index_malloc_cpu( &rm_locU, A.nnz ) ); 
+    CHECK( magma_imalloc_cpu( &rm_locL, A.nnz ) ); 
+    CHECK( magma_imalloc_cpu( &rm_locU, A.nnz ) ); 
     num_rm_glL = A.nnz*precond->rtol;
     num_rm_glU = A.nnz*precond->rtol;
     num_rmL = num_rm_glL;

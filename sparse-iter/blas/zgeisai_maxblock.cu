@@ -34,12 +34,12 @@ magma_zselect_insert_kernel(
     int i = threadIdx.x;
     int j = blockIdx.y * gridDim.x + blockIdx.x;
     
-    magma_int_t select = selection[j];
+    magma_index_t select = selection[j];
     // return if no match for this thread block
     if( select != p ){
         return;    
     }
-    magma_int_t count = sizes[j];
+    magma_index_t count = sizes[j];
     
     if( i<count ){
         colMT[ rowMT[j]+i ] = col[ row[j]+i ];
@@ -62,7 +62,7 @@ magma_zselect_rowptr_kernel(
     if( i == 0 ){
         magma_index_t count = 0;
         rowMT[0] = 0;
-        magma_int_t j=0;
+        magma_index_t j=0;
         for( j=0; j<n; j++ ){
                 count = count+sizes[j];
                 rowMT[j+1] = count;
@@ -84,7 +84,7 @@ magma_zselect_pattern_kernel(
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if( i < n ){
-        magma_int_t diff = row[i+1] - row[i];
+        magma_index_t diff = row[i+1] - row[i];
         if( diff <= WRP ){
              selection[ i ] = p;
              sizes[i] = diff;
@@ -181,7 +181,7 @@ magma_zgeisai_maxblock(
     magma_z_matrix L2={Magma_CSR}, L3={Magma_CSR}, 
                    L4={Magma_CSR}, L5={Magma_CSR}, T={Magma_CSR};
                    
-    magma_int_t *selections_d = NULL, *sizes_d = NULL;
+    magma_index_t *selections_d = NULL, *sizes_d = NULL;
     
     CHECK( magma_index_malloc( &selections_d, L.num_rows ) );
     CHECK( magma_index_malloc( &sizes_d, L.num_rows ) );

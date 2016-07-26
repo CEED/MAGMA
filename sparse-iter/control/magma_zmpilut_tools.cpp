@@ -5723,9 +5723,9 @@ magma_zmpilut_select_candidates_L(
     #pragma omp parallel
     {
         magma_int_t id = omp_get_thread_num();
-        magma_int_t* first_loc;
-        magma_int_t* last_loc;
-        magma_int_t* count_loc;
+        magma_index_t* first_loc;
+        magma_index_t* last_loc;
+        magma_index_t* count_loc;
         magma_index_malloc_cpu( &first_loc, (num_threads) );
         magma_index_malloc_cpu( &last_loc, (num_threads) );
         magma_index_malloc_cpu( &count_loc, (num_threads) );
@@ -6035,9 +6035,9 @@ magma_zmpilut_select_candidates_U(
     #pragma omp parallel
     {
         magma_int_t id = omp_get_thread_num();
-        magma_int_t* first_loc;
-        magma_int_t* last_loc;
-        magma_int_t* count_loc;
+        magma_index_t* first_loc;
+        magma_index_t* last_loc;
+        magma_index_t* count_loc;
         magma_index_malloc_cpu( &first_loc, (num_threads) );
         magma_index_malloc_cpu( &last_loc, (num_threads) );
         magma_index_malloc_cpu( &count_loc, (num_threads) );
