@@ -5659,7 +5659,7 @@ cleanup:
 extern "C" magma_int_t
 magma_zmpilut_select_candidates_L(
     magma_int_t *num_rm,
-    magma_int_t *rm_loc,
+    magma_index_t *rm_loc,
     magma_z_matrix *L_new,
     magma_queue_t queue )
 {
@@ -5969,7 +5969,7 @@ cleanup:
 extern "C" magma_int_t
 magma_zmpilut_select_candidates_U(
     magma_int_t *num_rm,
-    magma_int_t *rm_loc,
+    magma_index_t *rm_loc,
     magma_z_matrix *L_new,
     magma_queue_t queue )
 {
