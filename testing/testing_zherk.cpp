@@ -18,6 +18,7 @@
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
 
 #define COMPLEX
@@ -40,7 +41,7 @@ int main( int argc, char** argv)
     magma_print_environment();
 
     real_Double_t   gflops, dev_perf, dev_time, cpu_perf, cpu_time;
-    double          dev_error, Cnorm, work[1];
+    double          dev_error, work[1];
     magma_int_t N, K;
     magma_int_t Ak, An;
     magma_int_t sizeA, sizeC;
@@ -59,7 +60,9 @@ int main( int argc, char** argv)
     opts.parse_opts( argc, argv );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    // See testing_zgemm about tolerance.
+    double eps = lapackf77_dlamch("E");
+    double tol = 3*eps;
     
     #ifdef COMPLEX
     if (opts.transA == MagmaTrans) {
@@ -107,6 +110,10 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeA, hA );
             lapackf77_zlarnv( &ione, ISEED, &sizeC, hC );
             
+            // for error checks
+            double Anorm = lapackf77_zlange( "F", &An, &Ak, hA, &lda, work );
+            double Cnorm = safe_lapackf77_zlanhe( "F", lapack_uplo_const(opts.uplo), &N, hC, &ldc, work );
+            
             /* =====================================================================
                Performs operation using cuBLAS / clBLAS
                =================================================================== */
@@ -138,12 +145,10 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                // compute relative error for both magma & cuBLAS/clBLAS, relative to lapack,
-                // |C_magma - C_lapack| / |C_lapack|
+                // See testing_zgemm for formula.
                 blasf77_zaxpy( &sizeC, &c_neg_one, hC, &ione, hCdev, &ione );
-                Cnorm     = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, hC,    &ldc, work );
-                dev_error = safe_lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, hCdev, &ldc, work )
-                             / Cnorm;
+                dev_error = safe_lapackf77_zlanhe( "F", lapack_uplo_const(opts.uplo), &N, hCdev, &ldc, work )
+                            / (sqrt(double(K+2))*fabs(alpha)*Anorm*Anorm + 2*fabs(beta)*Cnorm);
                 
                 bool okay = (dev_error < tol);
                 status += ! okay;

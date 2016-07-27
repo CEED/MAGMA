@@ -18,6 +18,7 @@
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
 
 
@@ -40,7 +41,7 @@ int main( int argc, char** argv)
     magma_print_environment();
 
     real_Double_t   gflops, dev_perf, dev_time, oop_perf=0, oop_time=0, cpu_perf, cpu_time;
-    double          dev_error, oop_error=0, Cnorm, work[1];
+    double          dev_error, oop_error=0, work[1];
     magma_int_t M, N;
     magma_int_t Ak;
     magma_int_t sizeA, sizeB;
@@ -58,7 +59,9 @@ int main( int argc, char** argv)
     opts.parse_opts( argc, argv );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    // See testing_zgemm about tolerance.
+    double eps = lapackf77_dlamch("E");
+    double tol = 3*eps;
     
     printf("%% If running lapack (option --lapack), %s error is computed\n"
            "%% relative to CPU BLAS result.\n\n", g_platform_str );
@@ -103,6 +106,12 @@ int main( int argc, char** argv)
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, hA );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, hB );
+            
+            // for error checks
+            double Anorm = lapackf77_zlantr( "F", lapack_uplo_const(opts.uplo),
+                                                  lapack_diag_const(opts.diag),
+                                                  &Ak, &Ak, hA, &lda, work );
+            double Bnorm = lapackf77_zlange( "F", &M,  &N,  hB, &ldb, work );
             
             /* =====================================================================
                Performs operation using cuBLAS / clBLAS
@@ -162,16 +171,15 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                // compute relative error for both magma & cuBLAS/clBLAS, relative to lapack,
-                // |C_magma - C_lapack| / |C_lapack|
-                Cnorm = lapackf77_zlange( "M", &M, &N, hB, &ldb, work );
-                
+                // See testing_zgemm for formula. Here K = Ak.
                 blasf77_zaxpy( &sizeB, &c_neg_one, hB, &ione, hBdev, &ione );
-                dev_error = lapackf77_zlange( "M", &M, &N, hBdev, &ldb, work ) / Cnorm;
+                dev_error = lapackf77_zlange( "M", &M, &N, hBdev, &ldb, work )
+                            / (sqrt(double(Ak+2))*fabs(alpha)*Anorm*Bnorm);
                 
                 #ifdef HAVE_CUBLAS
                 blasf77_zaxpy( &sizeB, &c_neg_one, hB, &ione, hBoop, &ione );
-                oop_error = lapackf77_zlange( "M", &M, &N, hBoop, &ldb, work ) / Cnorm;
+                oop_error = lapackf77_zlange( "M", &M, &N, hBoop, &ldb, work )
+                            / (sqrt(double(Ak+2))*fabs(alpha)*Anorm*Bnorm);
                 #endif
                 
                 bool okay = (dev_error < tol && oop_error < tol);

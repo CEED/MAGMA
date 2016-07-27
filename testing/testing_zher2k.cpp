@@ -18,6 +18,7 @@
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
 
 #define COMPLEX
@@ -42,7 +43,7 @@ int main( int argc, char** argv)
     magma_print_environment();
 
     real_Double_t   gflops, dev_perf, dev_time, cpu_perf, cpu_time;
-    double          dev_error, Cnorm, work[1];
+    double          dev_error, work[1];
     magma_int_t N, K;
     magma_int_t Ak, An, Bk, Bn;
     magma_int_t sizeA, sizeB, sizeC;
@@ -61,7 +62,9 @@ int main( int argc, char** argv)
     opts.parse_opts( argc, argv );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    // See testing_zgemm about tolerance.
+    double eps = lapackf77_dlamch("E");
+    double tol = 3*eps;
     
     #ifdef COMPLEX
     if (opts.transA == MagmaTrans) {
@@ -118,6 +121,11 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeB, hB );
             lapackf77_zlarnv( &ione, ISEED, &sizeC, hC );
             
+            // for error checks
+            double Anorm = lapackf77_zlange( "F", &An, &Ak, hA, &lda, work );
+            double Bnorm = lapackf77_zlange( "F", &Bn, &Bk, hB, &ldb, work );
+            double Cnorm = safe_lapackf77_zlanhe( "F", lapack_uplo_const(opts.uplo), &N, hC, &ldc, work );
+            
             /* =====================================================================
                Performs operation using cuBLAS / clBLAS
                =================================================================== */
@@ -152,12 +160,11 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                // compute relative error for both magma & cuBLAS/clBLAS, relative to lapack,
-                // |C_magma - C_lapack| / |C_lapack|
-                Cnorm = lapackf77_zlange( "M", &N, &N, hC, &ldc, work );
-                
+                // See testing_zgemm for formula.
+                // There are two multiplies, A*B^H + B*A^H, so double it.
                 blasf77_zaxpy( &sizeC, &c_neg_one, hC, &ione, hCdev, &ione );
-                dev_error = lapackf77_zlange( "M", &N, &N, hCdev, &ldc, work ) / Cnorm;
+                dev_error = safe_lapackf77_zlanhe( "F", lapack_uplo_const(opts.uplo), &N, hCdev, &ldc, work )
+                            / (2*sqrt(double(K+2))*fabs(alpha)*Anorm*Bnorm + 2*fabs(beta)*Cnorm);
                 
                 bool okay = (dev_error < tol);
                 status += ! okay;

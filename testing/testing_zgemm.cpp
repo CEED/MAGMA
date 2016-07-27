@@ -18,8 +18,8 @@
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
-
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgemm
@@ -40,7 +40,7 @@ int main( int argc, char** argv)
     magma_print_environment();
 
     real_Double_t   gflops, magma_perf, magma_time, dev_perf, dev_time, cpu_perf, cpu_time;
-    double          magma_error, dev_error, Cnorm, work[1];
+    double          magma_error, dev_error, work[1];
     magma_int_t M, N, K;
     magma_int_t Am, An, Bm, Bn;
     magma_int_t sizeA, sizeB, sizeC;
@@ -63,7 +63,9 @@ int main( int argc, char** argv)
     magma_opts opts;
     opts.parse_opts( argc, argv );
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    // Allow 3*eps; complex needs 2*sqrt(2) factor; see Higham, 2002, sec. 3.6.
+    double eps = lapackf77_dlamch("E");
+    double tol = 3*eps;
 
     #ifdef HAVE_CUBLAS
         // for CUDA, we can check MAGMA vs. CUBLAS, without running LAPACK
@@ -135,6 +137,11 @@ int main( int argc, char** argv)
             magma_zsetmatrix( Am, An, hA, lda, dA(0,0), ldda, opts.queue );
             magma_zsetmatrix( Bm, Bn, hB, ldb, dB(0,0), lddb, opts.queue );
             
+            // for error checks
+            double Anorm = lapackf77_zlange( "F", &Am, &An, hA, &lda, work );
+            double Bnorm = lapackf77_zlange( "F", &Bm, &Bn, hB, &ldb, work );
+            double Cnorm = lapackf77_zlange( "F", &M,  &N,  hC, &ldc, work );
+            
             /* =====================================================================
                Performs operation using MAGMABLAS (currently only with CUDA)
                =================================================================== */
@@ -185,16 +192,24 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                // compute relative error for both magma & dev, relative to lapack,
-                // |C_magma - C_lapack| / |C_lapack|
-                Cnorm = lapackf77_zlange( "F", &M, &N, hC, &ldc, work );
+                // Compute forward error bound (see Higham, 2002, sec. 3.5),
+                // modified to include alpha, beta, and input C.
+                // ||R_magma - R_ref||_p / (gamma_{K+2} |alpha| ||A||_p ||B||_p + 2 |beta| ||C||_p ) < eps/2.
+                // This should work with p = 1, inf, fro, but numerical tests
+                // show p = 1, inf are very spiky and sometimes exceed eps.
+                // We use gamma_n = sqrt(n)*u instead of n*u/(1-n*u), since the
+                // former accurately represents statistical average rounding.
+                // We allow a slightly looser tolerance.
                 
+                // use LAPACK for R_ref
                 blasf77_zaxpy( &sizeC, &c_neg_one, hC, &ione, hCdev, &ione );
-                dev_error = lapackf77_zlange( "F", &M, &N, hCdev, &ldc, work ) / Cnorm;
+                dev_error = lapackf77_zlange( "F", &M, &N, hCdev, &ldc, work )
+                            / (sqrt(double(K+2))*fabs(alpha)*Anorm*Bnorm + 2*fabs(beta)*Cnorm);
                 
                 #ifdef HAVE_CUBLAS
                     blasf77_zaxpy( &sizeC, &c_neg_one, hC, &ione, hCmagma, &ione );
-                    magma_error = lapackf77_zlange( "F", &M, &N, hCmagma, &ldc, work ) / Cnorm;
+                    magma_error = lapackf77_zlange( "F", &M, &N, hCmagma, &ldc, work )
+                            / (sqrt(double(K+2))*fabs(alpha)*Anorm*Bnorm + 2*fabs(beta)*Cnorm);
                     
                     bool okay = (magma_error < tol && dev_error < tol);
                     status += ! okay;
@@ -218,11 +233,10 @@ int main( int argc, char** argv)
             }
             else {
                 #ifdef HAVE_CUBLAS
-                    // compute relative error for magma, relative to dev (currently only with CUDA)
-                    Cnorm = lapackf77_zlange( "F", &M, &N, hCdev, &ldc, work );
-                    
+                    // use cuBLAS for R_ref (currently only with CUDA)
                     blasf77_zaxpy( &sizeC, &c_neg_one, hCdev, &ione, hCmagma, &ione );
-                    magma_error = lapackf77_zlange( "F", &M, &N, hCmagma, &ldc, work ) / Cnorm;
+                    magma_error = lapackf77_zlange( "F", &M, &N, hCmagma, &ldc, work )
+                            / (sqrt(double(K+2))*fabs(alpha)*Anorm*Bnorm + 2*fabs(beta)*Cnorm);
                     
                     bool okay = (magma_error < tol);
                     status += ! okay;

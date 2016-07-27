@@ -19,6 +19,7 @@
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
 
 
@@ -61,7 +62,9 @@ int main(int argc, char **argv)
     magma_opts opts;
     opts.parse_opts( argc, argv );
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    // See testing_zgemm about tolerance.
+    double eps = lapackf77_dlamch("E");
+    double tol = 3*eps;
 
     printf("%% uplo = %s\n", lapack_uplo_const(opts.uplo) );
     printf("%%   N   MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error\n");
@@ -108,6 +111,12 @@ int main(int argc, char **argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeX, X );
             lapackf77_zlarnv( &ione, ISEED, &sizeY, Y );
             
+            // for error checks
+            // lanhe and lansy should be same
+            double Anorm = safe_lapackf77_zlanhe( "F", lapack_uplo_const(opts.uplo), &N, A, &lda, work );
+            double Xnorm = lapackf77_zlange( "F", &N, &ione, X, &N, work );
+            double Ynorm = lapackf77_zlange( "F", &N, &ione, Y, &N, work );
+            
             /* Note: CUBLAS does not implement zsymv */
             
             /* =====================================================================
@@ -150,8 +159,10 @@ int main(int argc, char **argv)
             /* =====================================================================
                Check the result
                =================================================================== */
+            // See testing_zgemm for formula. Here K = N.
             blasf77_zaxpy( &N, &c_neg_one, Y, &incy, Ymagma, &incy );
-            magma_error = lapackf77_zlange( "M", &N, &ione, Ymagma, &N, work ) / N;
+            magma_error = lapackf77_zlange( "M", &N, &ione, Ymagma, &N, work )
+                            / (sqrt(double(N+2))*fabs(alpha)*Anorm*Xnorm + 2*fabs(beta)*Ynorm);
             
             bool okay = (magma_error < tol);
             status += ! okay;

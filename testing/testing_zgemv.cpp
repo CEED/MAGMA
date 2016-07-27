@@ -17,6 +17,7 @@
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
 
 
@@ -60,7 +61,9 @@ int main(int argc, char **argv)
     magma_opts opts;
     opts.parse_opts( argc, argv );
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    // Allow 3*eps; complex needs 2*sqrt(2) factor; see Higham, 2002, sec. 3.6.
+    double eps = lapackf77_dlamch("E");
+    double tol = 3*eps;
 
     printf("%% trans = %s\n", lapack_trans_const(opts.transA) );
     #ifdef HAVE_CUBLAS
@@ -105,6 +108,11 @@ int main(int argc, char **argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeA, A );
             lapackf77_zlarnv( &ione, ISEED, &sizeX, X );
             lapackf77_zlarnv( &ione, ISEED, &sizeY, Y );
+            
+            // for error checks
+            double Anorm = lapackf77_zlange( "F", &M, &N, A, &lda, work );
+            double Xnorm = lapackf77_zlange( "F", &Xm, &ione, X, &Xm, work );
+            double Ynorm = lapackf77_zlange( "F", &Ym, &ione, Y, &Ym, work );
             
             /* =====================================================================
                Performs operation using cuBLAS / clBLAS
@@ -154,15 +162,19 @@ int main(int argc, char **argv)
             /* =====================================================================
                Check the result
                =================================================================== */
-            double Anorm = lapackf77_zlange( "F", &M, &N, A, &lda, work );
-            double Xnorm = lapackf77_zlange( "F", &Xm, &ione, X, &Xm, work );
-            
+            // See testing_zgemm for formula. Here K = N.
             blasf77_zaxpy( &Ym, &c_neg_one, Y, &incy, Ydev, &incy );
-            dev_error = lapackf77_zlange( "F", &Ym, &ione, Ydev, &Ym, work ) / (Anorm * Xnorm);
+            dev_error = lapackf77_zlange( "F", &Ym, &ione, Ydev, &Ym, work )
+                            / (sqrt(double(N+2))*fabs(alpha)*Anorm*Xnorm + 2*fabs(beta)*Ynorm);
+            
+            // Really tall or wide (e.g., 200000 x 10) matrices need looser bound.
+            // TODO: investigate why.
+            tol = (M < 20000 && N < 20000 ? 3*eps : opts.tolerance*eps);
             
             #ifdef HAVE_CUBLAS
                 blasf77_zaxpy( &Ym, &c_neg_one, Y, &incy, Ymagma, &incy );
-                magma_error = lapackf77_zlange( "F", &Ym, &ione, Ymagma, &Ym, work ) / (Anorm * Xnorm);
+                magma_error = lapackf77_zlange( "F", &Ym, &ione, Ymagma, &Ym, work )
+                            / (sqrt(double(N+2))*fabs(alpha)*Anorm*Xnorm + 2*fabs(beta)*Ynorm);
                 
                 bool okay = (magma_error < tol) && (dev_error < tol);
                 status += ! okay;
