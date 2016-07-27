@@ -183,7 +183,7 @@ magma_zgetrf_recpanel_batched(
                            info_array, gbstep, batchCount, queue);
 
         // update A2
-        //if (DEBUG > 0)printf("calling TRSM  with             m=%d n=%d \n",m1,n2);
+        //if (DEBUG > 0)printf("calling TRSM  with             m=%d n=%d\n",m1,n2);
         
         // setup pivinfo 
         setup_pivinfo_batched(dpivinfo_array, dipiv_displ, m1, n1, batchCount, queue);

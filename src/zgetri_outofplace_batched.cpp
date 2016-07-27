@@ -168,7 +168,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
 
 
         //magma_queue_sync(NULL);
-        //printf(" @ step %d calling solve 1 \n",j);
+        //printf(" @ step %d calling solve 1\n",j);
         // solve dwork = L^-1 * I
         magmablas_zlaset_batched( MagmaFull, j, ib, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork_array, n, batchCount, queue );
         magma_zdisplace_pointers(dW5_displ, dwork_array, n, j, 0, batchCount, queue);
@@ -186,7 +186,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                 dW3_displ,   dW4_displ,
                 1, batchCount, queue );
         
-        //printf(" @ step %d calling solve 2 \n",j);
+        //printf(" @ step %d calling solve 2\n",j);
         // solve dinvdiagA = U^-1 * dwork
         magma_zdisplace_pointers(dW5_displ, dwork_array, n, 0, 0, batchCount, queue);
         magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, 0, j, batchCount, queue);

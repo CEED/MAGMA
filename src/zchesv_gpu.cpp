@@ -195,7 +195,7 @@ magma_zchesv_gpu(
 
     eps  = lapackf77_dlamch("Epsilon");
     Anrm = magmablas_zlanhe(MagmaInfNorm, uplo, n, dA, ldda, (double*)dworkd, n*nrhs, queue );
-    cte  = Anrm * eps * pow((double)n, 0.5) * BWDMAX;
+    cte  = Anrm * eps * magma_dsqrt( (double) n ) * BWDMAX;
 
     //#define TIMER_ZCHESV
     #ifdef TIMER_ZCHESV

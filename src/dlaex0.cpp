@@ -176,9 +176,9 @@ magma_dlaex0(
         lapackf77_dsteqr("I", &matsiz, &d[submat], &e[submat],
                          Q(submat, submat), &ldq, work, info);  // change to edc?
         if (*info != 0) {
-            printf("info: %ld\n, submat: %ld\n", long(*info), long(submat) );
+            printf("info: %lld\n, submat: %lld\n", (long long) *info, (long long) submat );
             *info = (submat+1)*(n+1) + submat + matsiz;
-            printf("info: %ld\n", long(*info) );
+            printf("info: %lld\n", (long long) *info );
             return *info;
         }
         k = 1;
@@ -233,7 +233,7 @@ magma_dlaex0(
         ++curlvl;
         
         //timer_stop( time );
-        //timer_printf("%ld: time: %6.2f\n", long(curlvl), time );
+        //timer_printf("%lld: time: %6.2f\n", (long long) curlvl, time );
     }
 
     // Re-merge the eigenvalues/vectors which were deflated at the final

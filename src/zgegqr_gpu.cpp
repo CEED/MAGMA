@@ -195,7 +195,7 @@ magma_zgegqr_gpu(
             if (mins > 0.00001f)
                 cn = maxs/mins;
             
-            //fprintf( stderr, "Iteration %ld, cond num = %f\n", long(i), cn );
+            //fprintf( stderr, "Iteration %lld, cond num = %f\n", (long long) i, cn );
         } while (cn > 10.f);
         
         magma_free_cpu( hwork );

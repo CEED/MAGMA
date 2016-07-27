@@ -162,7 +162,7 @@ magma_zgesv_rbt(
     if (refine == MagmaTrue) {
         magma_zgerfs_nopiv_gpu( MagmaNoTrans, nn, nrhs, dAo, nn, dBo, nn, dB, nn, dwork, dA, &iter, info );
     }
-    //printf("iter = %ld\n", long(iter) );
+    //printf("iter = %lld\n", (long long) iter );
 
     /* The solution of A.x = b is Vy computed on the GPU */
     if (MAGMA_SUCCESS != magma_zmalloc( &dv, 2*nn )) {

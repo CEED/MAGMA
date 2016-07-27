@@ -154,7 +154,7 @@ n_gpu=ne;
         // define the size of Q to be done on CPU's and the size on GPU's
         // note that GPU use Q(1:N_GPU) and CPU use Q(N_GPU+1:N)
         #ifdef ENABLE_DEBUG
-        printf("---> calling GPU + CPU(if N_CPU > 0) to apply V2 to Z with NE %ld     N_GPU %ld   N_CPU %ld\n",ne, n_gpu, ne-n_gpu);
+        printf("---> calling GPU + CPU(if N_CPU > 0) to apply V2 to Z with NE %lld     N_GPU %lld   N_CPU %lld\n",ne, n_gpu, ne-n_gpu);
         #endif
         magma_zapplyQ_data data_applyQ;
         magma_zapplyQ_data_init(&data_applyQ, threads, n, ne, n_gpu, nb, Vblksiz, Z, ldz, V, ldv, TAU, T, ldt, dZ, lddz);
@@ -390,7 +390,7 @@ static void magma_ztile_bulge_applyQ(
      *            IN parallel E is splitten in horizontal block over the threads  */
     #ifdef ENABLE_DEBUG
     if ((core_id == 0) || (core_id == 1))
-        printf("  APPLY Q2_cpu zbulge_back   N %ld  N_loc %ld  nbchunk %ld  NB %ld  Vblksiz %ld  SIDE %c\n", n, n_loc, nbchunk, nb, Vblksiz, side);
+        printf("  APPLY Q2_cpu zbulge_back   N %lld  N_loc %lld  nbchunk %lld  NB %lld  Vblksiz %lld  SIDE %c\n", n, n_loc, nbchunk, nb, Vblksiz, side);
     #endif
     for (magma_int_t i = 0; i < nbchunk; i++) {
         magma_int_t ib_loc = min(nb_loc, (n_loc - i*nb_loc));
@@ -423,7 +423,7 @@ static void magma_ztile_bulge_applyQ(
                         lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &ib_loc, &vnb, V(vpos), &ldv, T(tpos), &ldt, E(fst,i*nb_loc), &lde, work, &ib_loc);
                     }
                     if (INFO != 0)
-                        printf("ERROR ZUNMQR INFO %ld\n", long(INFO) );
+                        printf("ERROR ZUNMQR INFO %lld\n", (long long) INFO );
                 }
             }
         } else if (side == MagmaRight) {

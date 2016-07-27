@@ -172,8 +172,9 @@ magma_zbulge_applyQ_v2_m(
      *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
 
     #ifdef ENABLE_DEBUG
-    printf("  APPLY Q_v22_m GPU with NGPU %ld  N %ld, NE %ld,  NB %ld, Vblksiz %ld, versionL %ld versionR %ld  SIDE %d\n",
-           long(ngpu), long(N), long(NE), long(NB), long(Vblksiz), long(versionL), long(versionR), side);
+    printf("  APPLY Q_v22_m GPU with NGPU %lld  N %lld, NE %lld,  NB %lld, Vblksiz %lld, versionL %lld versionR %lld  SIDE %d\n",
+           (long long) ngpu, (long long) N, (long long) NE, (long long) NB,
+           (long long) Vblksiz, (long long) versionL, (long long) versionR, side);
     #endif
 
 
@@ -212,7 +213,7 @@ magma_zbulge_applyQ_v2_m(
                     /* calculate the pointer to the Vs and the Ts.
                      * Note that Vs and Ts have special storage done
                      * by the bulgechasing function */
-                    //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d vpos %d \n",blkj,blki,Vm, Vn,mycol,vpos);
+                    //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d vpos %d\n",blkj,blki,Vm, Vn,mycol,vpos);
                     magma_bulge_findpos113(N, NB, Vblksiz, mycol, myrow, &blkid);
                
                     // COPY Vchunksiz Vs and Vchunksiz Ts to GPU and store it in dV0/dV1 and dT0/dT1
@@ -271,7 +272,7 @@ magma_zbulge_applyQ_v2_m(
                         locpos = blkid%Vchunksiz;
                         magma_int_t lcvpos   = locpos*Vblksiz*lddv;
                         magma_int_t lctpos   = locpos*Vblksiz*lddt;
-                        //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d locvpos %5d loctpos %5d  blkid %2d  using data in dV%1d dT%1d \n",blkj,blki,Vm, Vn,mycol,lcvpos,lctpos, blkid,flip,flip);
+                        //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d locvpos %5d loctpos %5d  blkid %2d  using data in dV%1d dT%1d\n",blkj,blki,Vm, Vn,mycol,lcvpos,lctpos, blkid,flip,flip);
                         if (flip == 0) {
                             for( dev = 0; dev < ngpu; ++dev ) {
                                 magma_int_t ie_loc   = min(ne_loc, NE - ne_loc*dev);

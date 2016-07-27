@@ -138,7 +138,7 @@ magma_zgeqrf_ooc(
     cudaMemGetInfo( &freeMem, &totalMem );
     freeMem /= sizeof(magmaDoubleComplex);
     
-    magma_int_t NB = magma_int_t(0.8*freeMem/m);
+    magma_int_t NB = (magma_int_t)(0.8*freeMem/m);
     NB = (NB / nb) * nb;
 
     if (NB >= n)
@@ -170,7 +170,7 @@ magma_zgeqrf_ooc(
     /* start the main loop over the blocks that fit in the GPU memory */
     for (i=0; i < n; i += NB) {
         IB = min( n-i, NB );
-        //printf("Processing %5ld columns -- %5ld to %5ld ...\n", long(IB), long(i), long(i+IB) );
+        //printf("Processing %5lld columns -- %5lld to %5lld ...\n", (long long) IB, (long long) i, (long long)(i+IB) );
 
         /* 1. Copy the next part of the matrix to the GPU */
         magma_zsetmatrix_async( m, IB,

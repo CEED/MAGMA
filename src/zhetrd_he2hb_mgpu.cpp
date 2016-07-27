@@ -254,7 +254,7 @@ magma_zhetrd_he2hb_mgpu(
     magma_int_t ncmplx=0;
     magma_buildconnection_mgpu(gnode, &ncmplx,  ngpu);
     #ifdef ENABLE_DEBUG
-    printf(" Initializing communication pattern.... GPU-ncmplx %ld\n\n", long(ncmplx) );
+    printf(" Initializing communication pattern.... GPU-ncmplx %lld\n\n", (long long) ncmplx );
     #endif
 
     magmaDoubleComplex *dspace[MagmaMaxGPUs];
@@ -316,7 +316,7 @@ magma_zhetrd_he2hb_mgpu(
                 idev   = ((i-1) / distblk) % ngpu;          // device with this block
 
 
-                //printf("Receiving panel ofsize %d %d from idev %d A(%d,%d) \n",(pm+pn), pn,idev,i-1,di);
+                //printf("Receiving panel ofsize %d %d from idev %d A(%d,%d)\n",(pm+pn), pn,idev,i-1,di);
                 magma_setdevice( idev );
 
                 //magma_device_sync();
@@ -325,7 +325,7 @@ magma_zhetrd_he2hb_mgpu(
                                         A( i, i), lda, queues[ idev ][ nqueue-1 ] );
               
                 //magma_setdevice( 0 );
-                //printf("updating zher2k on A(%d,%d) of size %d %d \n",indi_old+pn_old-1,indi_old+pn_old-1,pm_old-pn_old,pn_old);
+                //printf("updating zher2k on A(%d,%d) of size %d %d\n",indi_old+pn_old-1,indi_old+pn_old-1,pm_old-pn_old,pn_old);
                 // compute ZHER2K_MGPU
                 magmablas_zher2k_mgpu2( 
                     MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old,
@@ -490,7 +490,7 @@ magma_zhetrd_he2hb_mgpu(
                             dw[idev], pm,
                             dv[idev], pm, c_one,
                             dA(idev, indi, di+1), ldda, queues[ idev ][ nqueue-1 ] );
-                //printf("updating next panel distblk %d  idev %d  on A(%d,%d) of size %d %d %d \n",distblk,idev,indi-1,di,pm,pn,pn);
+                //printf("updating next panel distblk %d  idev %d  on A(%d,%d) of size %d %d %d\n",distblk,idev,indi-1,di,pm,pn,pn);
             }
             else {
                 /* no look-ahead as this is last iteration */
@@ -499,7 +499,7 @@ magma_zhetrd_he2hb_mgpu(
                 di     = iblock*distblk + (indi-1)%distblk;     // local index in parent matrix
                 idev   = ((indi-1) / distblk) % ngpu;          // device with this block
                 magma_setdevice( idev );
-                //printf("LAST ZHER2K idev %d on A(%d,%d) of size %d \n",idev, indi-1,di,pk);
+                //printf("LAST ZHER2K idev %d on A(%d,%d) of size %d\n",idev, indi-1,di,pk);
                 magma_zher2k( MagmaLower, MagmaNoTrans, pk, pk, c_neg_one,
                              dv[idev], pm,
                              dw[idev], pm, d_one,

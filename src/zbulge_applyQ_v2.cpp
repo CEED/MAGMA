@@ -155,8 +155,9 @@ magma_zbulge_applyQ_v2(
      *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
 
     #ifdef ENABLE_DEBUG
-    printf("  APPLY Q_v22 GPU with  N %5ld, NE %5ld,  NB %5ld, Vblksiz %5ld, versionL %5ld versionR %5ld  SIDE %5d\n",
-           long(N), long(NE), long(NB), long(Vblksiz), long(versionL), long(versionR), side );
+    printf("  APPLY Q_v22 GPU with  N %5lld, NE %5lld,  NB %5lld, Vblksiz %5lld, versionL %5lld versionR %5lld  SIDE %5d\n",
+           (long long) N, (long long) NE, (long long) NB, (long long) Vblksiz,
+           (long long) versionL, (long long) versionR, side );
     #endif
 
     /*
@@ -194,7 +195,7 @@ magma_zbulge_applyQ_v2(
                     /*calculate the pointer to the Vs and the Ts.
                      * Note that Vs and Ts have special storage done
                      * by the bulgechasing function*/
-                    //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d vpos %d \n",blkj,blki,Vm, Vn,mycol,vpos);
+                    //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d vpos %d\n",blkj,blki,Vm, Vn,mycol,vpos);
                     magma_bulge_findpos113(N, NB, Vblksiz, mycol, myrow, &blkid);
                
                     // COPY Vchunksiz Vs and Vchunksiz Ts to GPU and store it in dV0/dV1 and dT0/dT1
@@ -244,7 +245,7 @@ magma_zbulge_applyQ_v2(
                         locpos = blkid%Vchunksiz;
                         magma_int_t lcvpos   = locpos*Vblksiz*lddv;
                         magma_int_t lctpos   = locpos*Vblksiz*lddt;
-                        //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d locvpos %5d loctpos %5d  blkid %2d  using data in dV%1d dT%1d \n",blkj,blki,Vm, Vn,mycol,lcvpos,lctpos, blkid,flip,flip);
+                        //printf("voici blkj %d blki %d  Vm %d  Vn %d mycol %d locvpos %5d loctpos %5d  blkid %2d  using data in dV%1d dT%1d\n",blkj,blki,Vm, Vn,mycol,lcvpos,lctpos, blkid,flip,flip);
                         if (flip == 0) {
                             magma_queue_wait_event( queues[0], myevent[1] );
                             for (magma_int_t i=0; i < NE; i += sz_bl) {

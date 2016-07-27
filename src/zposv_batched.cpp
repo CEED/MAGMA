@@ -130,8 +130,8 @@ magma_zposv_batched(
     for (magma_int_t i=0; i < batchCount; i++)
     {
         if (cpu_info[i] != 0 ) {
-            printf("magma_zpotrf_batched matrix %ld returned error %ld\n",
-                    long(i), long(cpu_info[i]) );
+            printf("magma_zpotrf_batched matrix %lld returned error %lld\n",
+                    (long long) i, (long long) cpu_info[i] );
             info = cpu_info[i];
             magma_free_cpu (cpu_info);
             return info;

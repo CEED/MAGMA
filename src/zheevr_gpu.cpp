@@ -369,7 +369,7 @@ magma_zheevr_gpu(
     if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
-        printf("  warning matrix too small N=%ld NB=%ld, calling lapack on CPU\n", long(n), long(nb) );
+        printf("  warning matrix too small N=%lld NB=%lld, calling lapack on CPU\n", (long long) n, (long long) nb );
         printf("--------------------------------------------------------------\n");
         #endif
         magmaDoubleComplex *A;

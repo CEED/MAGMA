@@ -631,7 +631,7 @@ magma_dlaex3_m(
                         magma_dgemm( MagmaNoTrans, MagmaNoTrans, ni_loc[dev+1], ib, n23, d_one, dQ2(dev+1), n2_loc,
                                      dS(dev+1, ind), n23, d_zero, dQ(dev+1, ind), n2_loc, queues[dev+1][ind] );
                         #ifdef CHECK_CPU
-                        printf( "norm Q %ld: %f\n", long(dev+1), cpu_gpu_ddiff(ni_loc[dev+1], ib, hQ(dev+1, ind), n2_loc, dQ(dev+1, ind), n2_loc) );
+                        printf( "norm Q %lld: %f\n", (long long) dev+1, cpu_gpu_ddiff(ni_loc[dev+1], ib, hQ(dev+1, ind), n2_loc, dQ(dev+1, ind), n2_loc) );
                         #endif
                     }
                     if (n12 != 0) {
@@ -643,7 +643,7 @@ magma_dlaex3_m(
                         magma_dgemm( MagmaNoTrans, MagmaNoTrans, ni_loc[dev], ib, n12, d_one, dQ2(dev), n1_loc,
                                      dS(dev, ind), n12, d_zero, dQ(dev, ind), n1_loc, queues[dev][ind] );
                         #ifdef CHECK_CPU
-                        printf( "norm Q %ld: %f\n", long(dev), cpu_gpu_ddiff(ni_loc[dev], ib, hQ(dev, ind), n1_loc, dQ(dev, ind), n1_loc) );
+                        printf( "norm Q %lld: %f\n", (long long) dev, cpu_gpu_ddiff(ni_loc[dev], ib, hQ(dev, ind), n1_loc, dQ(dev, ind), n1_loc) );
                         #endif
                     }
                 }

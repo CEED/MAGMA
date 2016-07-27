@@ -42,7 +42,7 @@ public:
         magma_int_t info = 0;
         magma_dlaqtrsd( trans, n, T, ldt, x, incx, cnorm, &info );
         if ( info != 0 ) {
-            fprintf( stderr, "dlaqtrsd info %ld\n", long(info) );
+            fprintf( stderr, "dlaqtrsd info %lld\n", (long long) info );
         }
     }
     
@@ -403,11 +403,11 @@ magma_int_t magma_dtrevc3_mt(
     magma_set_lapack_numthreads( 1 );
     magma_thread_queue queue;
     queue.launch( nthread );
-    //printf( "nthread %ld, %ld\n", long(nthread), long(lapack_nthread) );
+    //printf( "nthread %lld, %lld\n", (long long) nthread, (long long) lapack_nthread );
     
     // gemm_nb = N/thread, rounded up to multiple of 16,
     // but avoid multiples of page size, e.g., 512*8 bytes = 4096.
-    magma_int_t gemm_nb = magma_int_t( ceil( ceil( ((double)n) / nthread ) / 16. ) * 16. );
+    magma_int_t gemm_nb = magma_roundup( magma_ceildiv( n, nthread ), 16 );
     if ( gemm_nb % 512 == 0 ) {
         gemm_nb += 32;
     }

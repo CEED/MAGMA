@@ -257,8 +257,8 @@ magma_zpotrf_lg_batched(
             //gpu_time = magma_sync_wtime(NULL) - gpu_time;
             //real_Double_t flops = (n-j-ib) * (n-j-ib) * ib / 1e9 * batchCount;
             //real_Double_t gpu_perf = flops / gpu_time;
-            //printf("Rows= %ld, Colum=%ld, herk time = %7.2fms, Gflops= %7.2f\n",
-            //       long(n-j-ib), long(ib), gpu_time*1000, gpu_perf);
+            //printf("Rows= %lld, Colum=%lld, herk time = %7.2fms, Gflops= %7.2f\n",
+            //       (long long)(n-j-ib), (long long) ib, gpu_time*1000, gpu_perf);
 #endif
         }
     }

@@ -245,7 +245,7 @@ magma_zgetrf_nopiv_batched(
 
                 if (use_stream)
                 { 
-                    //printf("caling streamed dgemm %ld %ld %ld\n", long(m-i-ib), long(n-i-ib), long(ib) );
+                    //printf("caling streamed dgemm %lld %lld %lld\n", (long long)(m-i-ib), (long long)(n-i-ib), (long long) ib );
 
                     // since it use different queue I need to wait the TRSM and swap.
                     magma_queue_sync(queue); 
@@ -274,7 +274,7 @@ magma_zgetrf_nopiv_batched(
                     magma_zdisplace_pointers(dA_displ, dA_array,  ldda, i+ib,    i, batchCount, queue);
                     magma_zdisplace_pointers(dW1_displ, dA_array, ldda,    i, i+ib, batchCount, queue);
                     magma_zdisplace_pointers(dW2_displ, dA_array, ldda, i+ib, i+ib, batchCount, queue);
-                    //printf("caling batched dgemm %ld %ld %ld\n", long(m-i-ib), long(n-i-ib), long(ib) );
+                    //printf("caling batched dgemm %lld %lld %lld\n", (long long)(m-i-ib), (long long)(n-i-ib), (long long) ib );
                     magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib, 
                                          c_neg_one, dA_displ,  ldda, 
                                                     dW1_displ, ldda, 

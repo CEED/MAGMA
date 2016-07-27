@@ -160,9 +160,9 @@ magma_zgetrf_m(
         NB = max( nb, (NB / nb) * nb); /* making sure it's devisable by nb (x64) */
     }
 
-    #ifdef CHECK_ZGETRF_OOC
-    if ( NB != n ) printf( "      * running in out-core mode (n=%ld, NB=%ld, nb=%ld, freeMem=%.2e).\n", long(n), long(NB), long(nb), double(freeMem) );
-    else           printf( "      * running in in-core mode  (n=%ld, NB=%ld, nb=%ld, freeMem=%.2e).\n", long(n), long(NB), long(nb), double(freeMem) );
+    #ifdef CHECK_ZGETRF_OO
+    if ( NB != n ) printf( "      * running in out-core mode (n=%lld, NB=%lld, nb=%lld, freeMem=%.2e).\n", (long long) n, (long long) NB, (long long) nb, (double) freeMem );
+    else           printf( "      * running in in-core mode  (n=%lld, NB=%lld, nb=%lld, freeMem=%.2e).\n", (long long) n, (long long) NB, (long long) nb, (double) freeMem );
     #endif
 
     if ( (nb <= 1) || (nb >= min(m,n)) ) {
@@ -334,7 +334,7 @@ magma_zgetrf_m(
         //timer_stop( time_total );
         //flops = FLOPS_ZGETRF( m, n ) / 1e9;
         //timer_printf(" memory-allocation time: %e\n", time_alloc );
-        //timer_printf(" NB=%ld nb=%ld\n", long(NB), long(nb) );
+        //timer_printf(" NB=%lld nb=%lld\n", (long long) NB, (long long) nb );
         //timer_printf(" memcopy and transpose %e seconds\n", time_set );
         //timer_printf(" total time %e seconds\n", time_total );
         //timer_printf(" Performance %f GFlop/s, %f seconds without htod and dtoh\n",     flops / (time_comp),               time_comp               );

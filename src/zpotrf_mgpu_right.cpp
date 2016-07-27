@@ -414,8 +414,8 @@ magma_zpotrf_mgpu_right(
 
                     #if defined (ENABLE_TIMER)
                     ttot += (tcnp + tcchol + tctrsm + therk[0] + therk[1] + therk[2] + tctm + tmnp);
-                    printf("%10ld %10ld %10ld %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf(%ld) %10.3lf\n",
-                            long(j), long(nb), long(rows), tmtc,
+                    printf("%10lld %10lld %10lld %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf(%lld) %10.3lf\n",
+                            (long long) j, (long long) nb, (long long) rows, tmtc,
                             tcnp,     // gemm
                             tcchol,   // potrf
                             tctrsm,   // trsm
@@ -424,7 +424,7 @@ magma_zpotrf_mgpu_right(
                             therk[0], therk[1], therk[2], therk[3], // syrk
                             tctm, // copy panel to GPU
                             tmnp, // lookahead on GPU
-                            long((id + 1) % ngpu),
+                            (long long)((id + 1) % ngpu),
                             (tcnp + tcchol + tctrsm + therk[0] + therk[1] + therk[2] + tctm + tmnp));
                     fflush(0);
                     #endif
@@ -437,8 +437,8 @@ magma_zpotrf_mgpu_right(
                 }
             }
             #if defined (ENABLE_TIMER)
-            printf("\n%10ld %10ld %10ld %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf(-) %10.3lf\n",
-                    long(n), long(n), long(0), ttot_mtc,
+            printf("\n%10lld %10lld %10lld %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf(-) %10.3lf\n",
+                    (long long) n, (long long) n, (long long) 0, ttot_mtc,
                     ttot_cnp,     // gemm
                     ttot_cchol,   // potrf
                     ttot_ctrsm,   // trsm
@@ -448,8 +448,8 @@ magma_zpotrf_mgpu_right(
                     ttot_ctm, // copy panel to GPU
                     ttot_mnp, // lookahead on GPU
                     (ttot_cnp + ttot_cchol + ttot_ctrsm + ttot_herk[0] + ttot_herk[1] + ttot_herk[2] + ttot_ctm + ttot_mnp));
-            printf("%10ld %10ld %10ld %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf(-) %10.3lf (ratio)\n",
-                    long(n), long(n), long(0), ttot_mtc/ttot,
+            printf("%10lld %10lld %10lld %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf %10.3lf(-) %10.3lf (ratio)\n",
+                    (long long) n, (long long) n, (long long) 0, ttot_mtc/ttot,
                     ttot_cnp/ttot,     // gemm
                     ttot_cchol/ttot,   // potrf
                     ttot_ctrsm/ttot,   // trsm

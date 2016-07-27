@@ -210,7 +210,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 trace_gpu_start( 0, 1, "gemm", "compH" );
                 for (magma_int_t i=1; i < j; i++)
                 {
-                    //printf( " > compute H(%ld,%ld)\n", long(i), long(j) );
+                    //printf( " > compute H(%lld,%lld)\n", (long long) i, (long long) j );
                     // > H(i,j) = T(i,i) * L(j,i)', Y
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                                  nb, jb, nb,
@@ -361,7 +361,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                         trace_cpu_start( 0, "getrf", "getrf" );
                         lapackf77_zgetrf( &ib, &jb, A(j+1,j), &lda, &ipiv[(1+j)*nb], &iinfo);
                         if (iinfo != 0) {
-                            printf( " zgetrf failed with %ld\n", long(iinfo) );
+                            printf( " zgetrf failed with %lld\n", (long long) iinfo );
                             // TODO handle error
                         }
                         trace_cpu_end( 0 );
@@ -424,7 +424,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                             perm[rows[2*ii+1]] = rows[2*ii+1];
                         }
                         //for (magma_int_t k=0; k < n; k++) {
-                        //    printf( "%ld ", long(perm[k]) );
+                        //    printf( "%lld ", (long long) perm[k] );
                         //}
                         //printf( "\n" );
                     }

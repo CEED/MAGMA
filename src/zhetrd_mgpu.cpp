@@ -464,7 +464,7 @@ magma_zhetrd_mgpu(
     trace_finalize( "zhetrd.svg", "trace.css" );
     
     #ifdef PROFILE_SY2RK
-    printf( " n=%ld nb=%ld\n", long(n), long(nb) );
+    printf( " n=%lld nb=%lld\n", (long long) n, (long long) nb );
     printf( " Time in ZLARFG: %.2e seconds\n", times[0] );
     //printf( " Time in ZHEMV : %.2e seconds\n", mv_time );
     printf( " Time in ZHER2K: %.2e seconds\n", up_time );

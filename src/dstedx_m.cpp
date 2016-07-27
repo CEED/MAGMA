@@ -225,7 +225,7 @@ magma_dstedx_m(
     //magma_set_lapack_numthreads(mklth);
 
 #ifdef ENABLE_DEBUG
-    //printf("  D&C_m is using %ld threads\n", long(threads) );
+    //printf("  D&C_m is using %lld threads\n", (long long) threads );
 #endif
 
     // If N is smaller than the minimum divide size (SMLSIZ+1), then

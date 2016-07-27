@@ -543,7 +543,7 @@ static void magma_ztile_bulge_parallel(
     if (grsiz <= 0)
         return;
 
-    //printf("=================> my core id %ld of %ld\n", long(my_core_id), long(cores_num) );
+    //printf("=================> my core id %lld of %lld\n", (long long) my_core_id, (long long) cores_num );
 
     /* As I store V in the V vector there are overlap between
      * tasks so shift is now 4 where group need to be always
@@ -579,11 +579,12 @@ static void magma_ztile_bulge_parallel(
         if (cores_num > maxrequiredcores)
         {
             printf("==================================================================================\n");
-            printf("  WARNING only %3ld threads are required to run this test optimizing cache reuse\n", long(maxrequiredcores) );
+            printf("  WARNING only %3lld threads are required to run this test optimizing cache reuse\n", (long long) maxrequiredcores );
             printf("==================================================================================\n");
         }
-        printf("  SS_COND Static bulgechasing version v9_9col threads  %4ld   threads_used  %4ld   n %5ld      nb %5ld    grs %4ld thgrsiz %4ld  wantz %4ld\n",
-               long(cores_num), long(allcoresnb), long(n), long(nb), long(grsiz), long(thgrsiz), long(wantz) );
+        printf("  SS_COND Static bulgechasing version v9_9col threads  %4lld   threads_used  %4lld   n %5lld      nb %5lld    grs %4lld thgrsiz %4lld  wantz %4lld\n",
+               (long long) cores_num, (long long) allcoresnb, (long long) n,
+               (long long) nb, (long long) grsiz, (long long) thgrsiz, (long long) wantz );
     }
     #endif
 
@@ -693,7 +694,7 @@ static void magma_ztile_bulge_computeT_parallel(
 
     #ifdef ENABLE_DEBUG
     if (my_core_id == 0)
-        printf("  COMPUTE T parallel threads %ld with  n %ld   nb %ld   Vblksiz %ld\n", long(cores_num), long(n), long(nb), long(Vblksiz) );
+        printf("  COMPUTE T parallel threads %lld with  n %lld   nb %lld   Vblksiz %lld\n", (long long) cores_num, (long long) n, (long long) nb, (long long) Vblksiz );
     #endif
 
 

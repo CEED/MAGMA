@@ -35,7 +35,7 @@ magma_zpotf2_ztrsm_batched(
     magma_int_t arginfo = 0;
     if ( m > MAX_NTHREADS )
     {
-        printf("magma_zpotf2_ztrsm_batched m=%ld > %ld not supported today\n", long(m), long(MAX_NTHREADS) );
+        printf("magma_zpotf2_ztrsm_batched m=%lld > %lld not supported today\n", (long long) m, (long long) MAX_NTHREADS );
         arginfo = -13;
         return arginfo;
     }

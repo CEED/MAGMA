@@ -19,8 +19,8 @@ init_butterfly(
     magma_int_t i;
     double u1, v1;
     for (i=0; i < n; ++i) {
-        u1 = exp( (rand()/double(RAND_MAX) - 0.5)/10 );
-        v1 = exp( (rand()/double(RAND_MAX) - 0.5)/10 );
+        u1 = exp( (rand()/(double)RAND_MAX - 0.5)/10 );
+        v1 = exp( (rand()/(double)RAND_MAX - 0.5)/10 );
         u[i] = MAGMA_Z_MAKE( u1, u1 );
         v[i] = MAGMA_Z_MAKE( v1, v1 );
     }

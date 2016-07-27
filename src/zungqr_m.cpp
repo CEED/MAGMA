@@ -291,7 +291,7 @@ magma_zungqr_m(
     
     #ifdef TRACING
     char name[80];
-    snprintf( name, sizeof(name), "zungqr-n%ld-ngpu%ld.svg", long(m), long(ngpu) );
+    snprintf( name, sizeof(name), "zungqr-n%lld-ngpu%lld.svg", (long long) m, (long long) ngpu );
     trace_finalize( name, "trace.css" );
     #endif
     
