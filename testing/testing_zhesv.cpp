@@ -64,7 +64,7 @@ double get_residual(
     norm_x = lapackf77_zlange( MagmaFullStr, &n, &ione, x, &n, work );
     
     //printf( "r=\n" ); magma_zprint( 1, n, b, 1 );
-    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%ld\n", norm_r, norm_A, norm_x, long(n) );
+    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%lld\n", norm_r, norm_A, norm_x, (long long) n );
     return norm_r / (n * norm_A * norm_x);
 }
 
@@ -127,8 +127,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhesv returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zhesv returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 error_lapack = get_residual( opts.uplo, N, opts.nrhs, h_A, lda, ipiv, h_X, ldb, h_B, ldb );
 
@@ -148,20 +148,20 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zhesv returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zhesv returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(N), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) N, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(N), long(N), gpu_perf, gpu_time );
+                printf("%5lld %5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) N, (long long) N, gpu_perf, gpu_time );
             }
             if ( opts.check == 0 ) {
                 printf("     ---   \n");

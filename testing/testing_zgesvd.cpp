@@ -260,7 +260,7 @@ void choose_lwork(
     #endif
     
     char tmp[80];
-    snprintf( tmp, sizeof(tmp), "%ld%s%c%c", long(path),
+    snprintf( tmp, sizeof(tmp), "%lld%s%c%c", (long long) path,
               (M >= N ? "" : "t"),
               tolower( lapacke_vec_const(jobu) ),
               tolower( lapacke_vec_const(jobv) ) );
@@ -507,12 +507,12 @@ int main( int argc, char** argv)
                  ( ! opts.magma  || contains( prev_magma_lwork,  lwork_magma.value  )) &&
                  ( ! opts.lapack || contains( prev_lapack_lwork, lwork_lapack.value )) ) {
                 // %78s without zgesvd_path
-                printf( "   %c%c     %5ld %5ld   skipping repeated lwork %90s %-9s %9ld   %9ld   %s\n",
+                printf( "   %c%c     %5lld %5lld   skipping repeated lwork %90s %-9s %9lld   %9lld   %s\n",
                         lapacke_vec_const(*jobu), lapacke_vec_const(*jobv),
-                        long(M), long(N),
+                        (long long) M, (long long) N,
                         "", work_str.c_str(),
-                        long(lwork_magma.value),
-                        long(lwork_lapack.value),
+                        (long long) lwork_magma.value,
+                        (long long) lwork_lapack.value,
                         lwork_lapack.formula.c_str() );
                 break;
             }
@@ -582,18 +582,18 @@ int main( int argc, char** argv)
                 const char *func = "magma_zgesvd";
                 if ( *svd_work == MagmaSVD_min_1 ) {
                     if (info == -13) {
-                        printf( "ok: with lwork = min-1 = %ld, %s returned expected info = %ld\n",
-                                long(lwork_magma.value), func, long(info) );
+                        printf( "ok: with lwork = min-1 = %lld, %s returned expected info = %lld\n",
+                                (long long) lwork_magma.value, func, (long long) info );
                     }
                     else {
-                        printf( "failed: with lwork = min-1 = %ld, %s returned unexpected info = %ld; expected info = -13\n",
-                                long(lwork_magma.value), func, long(info) );
+                        printf( "failed: with lwork = min-1 = %lld, %s returned unexpected info = %lld; expected info = -13\n",
+                                (long long) lwork_magma.value, func, (long long) info );
                         status += 1;
                     }
                 }
                 else if (info != 0) {
-                    printf( "%s returned error %ld: %s.\n",
-                            func, long(info), magma_strerror( info ));
+                    printf( "%s returned error %lld: %s.\n",
+                            func, (long long) info, magma_strerror( info ));
                     status += 1;
                 }
                 
@@ -622,18 +622,18 @@ int main( int argc, char** argv)
                 const char *func = "lapackf77_zgesvd";
                 if ( *svd_work == MagmaSVD_min_1 ) {
                     if (info == -13) {
-                        printf( "ok: with lwork = min-1 = %ld, %s returned expected info = %ld\n",
-                                long(lwork_magma.value), func, long(info) );
+                        printf( "ok: with lwork = min-1 = %lld, %s returned expected info = %lld\n",
+                                (long long) lwork_magma.value, func, (long long) info );
                     }
                     else {
-                        printf( "failed: with lwork = min-1 = %ld, %s returned unexpected info = %ld; expected info = -13\n",
-                                long(lwork_magma.value), func, long(info) );
+                        printf( "failed: with lwork = min-1 = %lld, %s returned unexpected info = %lld; expected info = -13\n",
+                                (long long) lwork_magma.value, func, (long long) info );
                         status += 1;
                     }
                 }
                 else if (info != 0) {
-                    printf( "%s returned error %ld: %s.\n",
-                            func, long(info), magma_strerror( info ));
+                    printf( "%s returned error %lld: %s.\n",
+                            func, (long long) info, magma_strerror( info ));
                     status += 1;
                 }
                 
@@ -652,16 +652,16 @@ int main( int argc, char** argv)
                     result[4]  = lapackf77_dlange( "f", &min_mn, &ione, Sref, &min_mn, work );
                     result[4] /= lapackf77_dlange( "f", &min_mn, &ione, S,    &min_mn, work );
                 }
-                printf( "   %c%c     %5ld %5ld   %9.4f        %9.4f     ",
+                printf( "   %c%c     %5lld %5lld   %9.4f        %9.4f     ",
                         lapacke_vec_const(*jobu), lapacke_vec_const(*jobv),
-                        long(M), long(N),
+                        (long long) M, (long long) N,
                         cpu_time, gpu_time );
             }
             else {
                 result[4] = -1;  // indicates S - Sref not checked
-                printf( "   %c%c     %5ld %5ld      ---           %9.4f     ",
+                printf( "   %c%c     %5lld %5lld      ---           %9.4f     ",
                         lapacke_vec_const(*jobu), lapacke_vec_const(*jobv),
-                        long(M), long(N),
+                        (long long) M, (long long) N,
                         gpu_time );
             }
             
@@ -696,15 +696,15 @@ int main( int argc, char** argv)
                Print lwork sizes
                =================================================================== */
             if ( opts.verbose ) {
-                printf( "   %-4s %-11s   %-9s %s%9ld%2s %s%9ld%2s %s",
+                printf( "   %-4s %-11s   %-9s %s%9lld%2s %s%9lld%2s %s",
                         path_str.c_str(),
                         zgesvd_path,
                         work_str.c_str(),
-                        lwork_magma.pre.c_str(),  long(lwork_magma.value),  lwork_magma.post.c_str(),
-                        lwork_lapack.pre.c_str(), long(lwork_lapack.value), lwork_lapack.post.c_str(),
+                        lwork_magma.pre.c_str(),  (long long) lwork_magma.value,  lwork_magma.post.c_str(),
+                        lwork_lapack.pre.c_str(), (long long) lwork_lapack.value, lwork_lapack.post.c_str(),
                         lwork_lapack.formula.c_str() );
                 #ifdef COMPLEX
-                printf( "  %9ld   %s", long(lrwork.value), lrwork.formula.c_str() );
+                printf( "  %9lld   %s", (long long) lrwork.value, lrwork.formula.c_str() );
                 #endif
             }
             printf( "\n" );

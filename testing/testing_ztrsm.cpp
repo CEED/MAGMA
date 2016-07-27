@@ -66,9 +66,9 @@ int main( int argc, char** argv)
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% side = %s, uplo = %s, transA = %s, diag = %s, ngpu = %ld\n",
+    printf("%% side = %s, uplo = %s, transA = %s, diag = %s, ngpu = %lld\n",
            lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), long(abs_ngpu));
+           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), (long long) abs_ngpu);
     
     printf("%%   M     N  MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)      MAGMA     CUBLAS   LAPACK error\n");
     printf("%%============================================================================================================\n");
@@ -228,8 +228,8 @@ int main( int argc, char** argv)
                 normX = lapackf77_zlange( "M", &M, &N, hBlapack, &ldb, work );
                 lapack_error = normR/(normX*normA);
                 
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
-                        long(M), long(N),
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
+                        (long long) M, (long long) N,
                         magma_perf,  1000.*magma_time,
                         dev_perf,    1000.*dev_time,
                         cpu_perf,    1000.*cpu_time,
@@ -237,8 +237,8 @@ int main( int argc, char** argv)
                         (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
-                        long(M), long(N),
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
+                        (long long) M, (long long) N,
                         magma_perf,  1000.*magma_time,
                         dev_perf,    1000.*dev_time,
                         magma_error, dev_error,

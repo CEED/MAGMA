@@ -94,8 +94,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapack_zgeqp3 returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapack_zgeqp3 returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
             }
             
@@ -115,20 +115,20 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgeqp3 returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgeqp3 returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) M, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(M), long(N), gpu_perf, gpu_time );
+                printf("%5lld %5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) M, (long long) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
                 double error, ulp;

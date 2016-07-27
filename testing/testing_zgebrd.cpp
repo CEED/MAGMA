@@ -83,8 +83,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgebrd returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgebrd returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -113,13 +113,13 @@ int main( int argc, char** argv)
                 // generate Q & P^H
                 lapackf77_zungbr("Q", &M, &minmn, &N, h_Q,  &lda, tauq, h_work_err, &lwork_err, &info);
                 if (info != 0) {
-                    printf("lapackf77_zungbr #1 returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zungbr #1 returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 lapackf77_zungbr("P", &minmn, &N, &M, h_PT, &lda, taup, h_work_err, &lwork_err, &info);
                 if (info != 0) {
-                    printf("lapackf77_zungbr #2 returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zungbr #2 returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 
                 // Test 1:  Check the decomposition A := Q * B * PT
@@ -172,8 +172,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgebrd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zgebrd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
             }
             
@@ -181,12 +181,12 @@ int main( int argc, char** argv)
                Print performance and error.
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) M, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(M), long(N), gpu_perf, gpu_time );
+                printf("%5lld %5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) M, (long long) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
                 bool okay = (result[0] < tol) && (result[1] < tol) && (result[2] < tol);

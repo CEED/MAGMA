@@ -80,8 +80,8 @@ int main( int argc, char** argv)
             lwork = -1;
             lapackf77_zgetri( &N, NULL, &lda, NULL, &tmp, &lwork, &info );
             if (info != 0) {
-                printf("lapackf77_zgetri returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("lapackf77_zgetri returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             lwork = magma_int_t( MAGMA_Z_REAL( tmp ));
             
@@ -127,11 +127,11 @@ int main( int argc, char** argv)
             for (magma_int_t i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %ld returned error %ld\n", long(i), long(cpu_info[i]) );
+                    printf("magma_zgetrf_batched matrix %lld returned error %lld\n", (long long) i, (long long) cpu_info[i] );
                 }
             }
-            if (info1 != 0) printf("magma_zgetrf_batched returned argument error %ld: %s.\n", long(info1), magma_strerror( info1 ));
-            if (info2 != 0) printf("magma_zgetri_batched returned argument error %ld: %s.\n", long(info2), magma_strerror( info2 ));
+            if (info1 != 0) printf("magma_zgetrf_batched returned argument error %lld: %s.\n", (long long) info1, magma_strerror( info1 ));
+            if (info2 != 0) printf("magma_zgetri_batched returned argument error %lld: %s.\n", (long long) info2, magma_strerror( info2 ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -149,13 +149,13 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zgetrf(&N, &N, h_Ainv + i*lda*N, &lda, ipiv + i*N, &locinfo);
                     if (locinfo != 0) {
-                        printf("lapackf77_zgetrf returned error %ld: %s.\n",
-                               long(locinfo), magma_strerror( locinfo ));
+                        printf("lapackf77_zgetrf returned error %lld: %s.\n",
+                               (long long) locinfo, magma_strerror( locinfo ));
                     }
                     lapackf77_zgetri(&N, h_Ainv + i*lda*N, &lda, ipiv + i*N, work + i*lwork, &lwork, &locinfo );
                     if (locinfo != 0) {
-                        printf("lapackf77_zgetri returned error %ld: %s.\n",
-                               long(locinfo), magma_strerror( locinfo ));
+                        printf("lapackf77_zgetri returned error %lld: %s.\n",
+                               (long long) locinfo, magma_strerror( locinfo ));
                     }
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -164,12 +164,12 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 
-                printf("%10ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(batchCount), long(N), cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
+                printf("%10lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) batchCount, (long long) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
             }
             else {
-                printf("%10ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(batchCount), long(N), gpu_perf, gpu_time*1000. );
+                printf("%10lld %5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) batchCount, (long long) N, gpu_perf, gpu_time*1000. );
             }
             
             /* =====================================================================
@@ -184,8 +184,8 @@ int main( int argc, char** argv)
                     for (magma_int_t k=0; k < N; k++) {
                         if (ipiv[i*N+k] < 1 || ipiv[i*N+k] > N )
                         {
-                            printf("error for matrix %ld ipiv @ %ld = %ld\n",
-                                    long(i), long(k), long(ipiv[i*N+k]) );
+                            printf("error for matrix %lld ipiv @ %lld = %lld\n",
+                                    (long long) i, (long long) k, (long long) ipiv[i*N+k] );
                             error = -1;
                         }
                     }

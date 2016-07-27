@@ -70,9 +70,9 @@ int main( int argc, char** argv)
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu %ld\n",
+    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu %lld\n",
            lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           opts.fraction, long(abs_ngpu));
+           opts.fraction, (long long) abs_ngpu);
 
     printf("%%   N     M  GPU Time (sec)   ||I-Q^H Q||/N   ||A-QDQ^H||/(||A||N)   |D-D_magma|/(|D| * N)\n");
     printf("%%=========================================================================================\n");
@@ -139,7 +139,7 @@ int main( int argc, char** argv)
                                           iwork, liwork, 
                                           &info );
                 } else {
-                    //printf("calling zheevdx_2stage_m %ld GPU\n", long(opts.ngpu));
+                    //printf("calling zheevdx_2stage_m %lld GPU\n", (long long) opts.ngpu);
                     magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
                                             h_R, lda, 
                                             vl, vu, il, iu, 
@@ -171,7 +171,7 @@ int main( int argc, char** argv)
                                       iwork, liwork, 
                                       &info );
             } else {
-                //printf("calling zheevdx_2stage_m %ld GPU\n", long(opts.ngpu));
+                //printf("calling zheevdx_2stage_m %lld GPU\n", (long long) opts.ngpu);
                 magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
                                         h_R, lda, 
                                         vl, vu, il, iu, 
@@ -185,12 +185,12 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zheevdx_2stage returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zheevdx_2stage returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
-            printf("%5ld %5ld  %7.2f      ",
-                   long(N), long(m1), gpu_time );
+            printf("%5lld %5lld  %7.2f      ",
+                   (long long) N, (long long) m1, gpu_time );
 
             if ( opts.check ) {
                 info_solution  = 0;

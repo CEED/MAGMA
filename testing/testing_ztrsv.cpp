@@ -141,15 +141,15 @@ int main( int argc, char** argv)
             bool okay = (cublas_error < tol);
             status += ! okay;
             if ( opts.lapack ) {
-                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                        long(N),
+                printf("%5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                        (long long) N,
                         cublas_perf, 1000.*cublas_time,
                         cpu_perf,    1000.*cpu_time,
                         cublas_error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5ld   %7.2f (%7.2f)     ---  (  ---  )   %8.2e   %s\n",
-                        long(N),
+                printf("%5lld   %7.2f (%7.2f)     ---  (  ---  )   %8.2e   %s\n",
+                        (long long) N,
                         cublas_perf, 1000.*cublas_time,
                         cublas_error, (okay ? "ok" : "failed"));
             }

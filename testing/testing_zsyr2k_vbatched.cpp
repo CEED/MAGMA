@@ -306,15 +306,15 @@ int main( int argc, char** argv)
                 magma_set_lapack_numthreads( la_threads );
                 #endif
                 
-                printf("  %-10ld  %-5ld  %-5ld  %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
-                   long(batchCount), long(max_N), long(max_K),
+                printf("  %-10lld  %-5lld  %-5lld  %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
+                   (long long) batchCount, (long long) max_N, (long long) max_K,
                    magma_perf,  1000.*magma_time,
                    cpu_perf,    1000.*cpu_time,
                    magma_error);
             }
             else {
-                printf("  %-10ld  %-5ld  %-5ld  %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
-                   long(batchCount), long(max_N), long(max_K),
+                printf("  %-10lld  %-5lld  %-5lld  %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
+                   (long long) batchCount, (long long) max_N, (long long) max_K,
                    magma_perf,  1000.*magma_time);
             }
             

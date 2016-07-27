@@ -64,7 +64,7 @@ int main( int argc, char** argv)
     h_Q   = NULL;
     work  = NULL;
 
-    printf("%% uplo = %s, ngpu %ld\n", lapack_uplo_const(opts.uplo), long(opts.ngpu) );
+    printf("%% uplo = %s, ngpu %lld\n", lapack_uplo_const(opts.uplo), (long long) opts.ngpu );
     printf("%% N     CPU Gflop/s (sec)   GPU Gflop/s (sec)   |A-QHQ^H|/N|A|   |I-QQ^H|/N\n");
     printf("%%==========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -107,8 +107,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zhetrd_mgpu returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zhetrd_mgpu returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             gpu_perf = gflops / gpu_time;
@@ -163,8 +163,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhetrd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zhetrd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
             }
             
@@ -172,10 +172,10 @@ int main( int argc, char** argv)
                Print performance and error.
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld   %7.2f (%7.2f)", long(N), cpu_perf, cpu_time );
+                printf("%5lld   %7.2f (%7.2f)", (long long) N, cpu_perf, cpu_time );
             }
             else {
-                printf("%5ld     ---   (  ---  )", long(N) );
+                printf("%5lld     ---   (  ---  )", (long long) N );
             }
             printf("   %7.2f (%7.2f)", gpu_perf, gpu_time );
             if ( opts.check ) {

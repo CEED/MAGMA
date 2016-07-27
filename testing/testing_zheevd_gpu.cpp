@@ -223,7 +223,7 @@ int main( int argc, char** argv)
                                    #endif
                                    iwork, liwork,
                                    &info );
-                //printf( "il %ld, iu %ld, m1 %ld\n", long(il), long(iu), long(m1) );
+                //printf( "il %lld, iu %lld, m1 %lld\n", (long long) il, (long long) iu, (long long) m1 );
             }
             else if ( opts.version == 3 ) {  // version 3: MRRR, computes selected eigenvalues/vectors
                 // only complex version available
@@ -266,8 +266,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zheevd_gpu returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zheevd_gpu returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             bool okay = true;
@@ -315,8 +315,8 @@ int main( int argc, char** argv)
                 //                  iwork, liwork,
                 //                  &info);
                 //if (info != 0) {
-                //    printf("magma_zheevd_gpu returned error %ld: %s.\n",
-                //           long(info), magma_strerror( info ));
+                //    printf("magma_zheevd_gpu returned error %lld: %s.\n",
+                //           (long long) info, magma_strerror( info ));
                 //}
                 //
                 //double maxw=0, diff=0;
@@ -378,8 +378,8 @@ int main( int argc, char** argv)
                 }
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zheevd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zheevd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 
                 // compare eigenvalues
@@ -392,12 +392,12 @@ int main( int argc, char** argv)
                 result[3] = diff / (N*maxw);
                 
                 okay = okay && (result[3] < tolulp);
-                printf("%5ld   %9.4f        %9.4f         %8.2e  ",
-                       long(N), cpu_time, gpu_time, result[3] );
+                printf("%5lld   %9.4f        %9.4f         %8.2e  ",
+                       (long long) N, cpu_time, gpu_time, result[3] );
             }
             else {
-                printf("%5ld      ---           %9.4f           ---     ",
-                       long(N), gpu_time);
+                printf("%5lld      ---           %9.4f           ---     ",
+                       (long long) N, gpu_time);
             }
             
             // print error checks

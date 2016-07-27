@@ -67,10 +67,11 @@ void flops_init();
 
 #define TESTING_CHECK( err )                                                 \
     do {                                                                     \
-        long err_ = (err);                                                   \
+        magma_int_t err_ = (err);                                            \
         if ( err_ != 0 ) {                                                   \
-            fprintf( stderr, "Error: %s\nfailed at %s:%d: error %ld: %s\n",  \
-                     #err, __FILE__, __LINE__, err_, magma_strerror(err_) ); \
+            fprintf( stderr, "Error: %s\nfailed at %s:%d: error %lld: %s\n", \
+                     #err, __FILE__, __LINE__,                               \
+                     (long long) err_, magma_strerror(err_) );               \
             exit(1);                                                         \
         }                                                                    \
     } while( 0 )

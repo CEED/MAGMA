@@ -55,7 +55,7 @@ int main( int argc, char** argv)
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% version %ld, ngpu = %ld\n", long(opts.version), long(abs_ngpu));
+    printf("%% version %lld, ngpu = %lld\n", (long long) opts.version, (long long) abs_ngpu);
     
     printf("%%   N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |A-QHQ^H|/N|A|   |I-QQ^H|/N\n");
     printf("%%==========================================================================\n");
@@ -105,8 +105,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgehrd returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgehrd returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -136,8 +136,8 @@ int main( int argc, char** argv)
                     lapackf77_zunghr( &N, &ione, &N, h_Q, &lda, tau, h_work, &lwork, &info );
                 }
                 if (info != 0) {
-                    printf("magma_zunghr returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("magma_zunghr returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                     return -1;
                 }
                 lapackf77_zhst01( &N, &ione, &N,
@@ -168,8 +168,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgehrd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zgehrd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
             }
             
@@ -177,12 +177,12 @@ int main( int argc, char** argv)
                Print performance and error.
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(N), gpu_perf, gpu_time );
+                printf("%5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
                 bool okay = (result[0] < tol) && (result[1] < tol);

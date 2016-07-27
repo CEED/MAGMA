@@ -57,7 +57,7 @@ int main( int argc, char** argv)
         printf( "%% version 2 requires check 1 (R - Q^H*A)\n" );
     }
     
-    printf( "%% version %ld\n", long(opts.version) );
+    printf( "%% version %lld\n", (long long) opts.version );
     if ( opts.check == 1 ) {
         printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
         printf("%%==============================================================================\n");
@@ -122,14 +122,14 @@ int main( int argc, char** argv)
             }
             #endif
             else {
-                printf( "Unknown version %ld\n", long(opts.version) );
+                printf( "Unknown version %lld\n", (long long) opts.version );
                 return -1;
             }
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgeqrf returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgeqrf returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             if ( opts.check == 1 && (opts.version == 2 || opts.version == 3) ) {
@@ -217,8 +217,8 @@ int main( int argc, char** argv)
                                       d_A, ldda, tau, dT,
                                       d_B, M, hwork, lwork2, &info );
                     if (info != 0) {
-                        printf("magma_zgeqrs returned error %ld: %s.\n",
-                               long(info), magma_strerror( info ));
+                        printf("magma_zgeqrs returned error %lld: %s.\n",
+                               (long long) info, magma_strerror( info ));
                     }
                     magma_free_cpu( hwork );
                 }
@@ -236,14 +236,14 @@ int main( int argc, char** argv)
                                        d_A, ldda, tau, dT,
                                        d_B, M, hwork, lwork2, &info );
                     if (info != 0) {
-                        printf("magma_zgeqrs3 returned error %ld: %s.\n",
-                               long(info), magma_strerror( info ));
+                        printf("magma_zgeqrs3 returned error %lld: %s.\n",
+                               (long long) info, magma_strerror( info ));
                     }
                     magma_free_cpu( hwork );
                 }
                 #endif
                 else {
-                    printf( "Unknown version %ld\n", long(opts.version) );
+                    printf( "Unknown version %lld\n", (long long) opts.version );
                     return -1;
                 }
                 magma_zgetvector( N, d_B, 1, x, 1, opts.queue );
@@ -273,15 +273,15 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgeqrf returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zgeqrf returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
             }
             
             /* =====================================================================
                Print performance and error.
                =================================================================== */
-            printf("%5ld %5ld   ", long(M), long(N) );
+            printf("%5lld %5lld   ", (long long) M, (long long) N );
             if ( opts.lapack ) {
                 printf( "%7.2f (%7.2f)", cpu_perf, cpu_time );
             }

@@ -70,9 +70,9 @@ int main( int argc, char** argv)
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% itype = %ld, jobz = %s, uplo = %s, ngpu %ld\n",
-           long(opts.itype), lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
-           long(abs_ngpu) );
+    printf("%% itype = %lld, jobz = %s, uplo = %s, ngpu %lld\n",
+           (long long) opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
+           (long long) abs_ngpu );
 
     if (opts.version == 1) {
         printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |AZ-BZD|   |I-ZZ^H B|\n");
@@ -147,8 +147,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zhegvd returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zhegvd returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             bool okay = true;
@@ -236,8 +236,8 @@ int main( int argc, char** argv)
                 //              iwork, liwork,
                 //              &info );
                 //if (info != 0) {
-                //    printf("magma_zhegvd returned error %ld: %s.\n",
-                //           long(info), magma_strerror( info ));
+                //    printf("magma_zhegvd returned error %lld: %s.\n",
+                //           (long long) info, magma_strerror( info ));
                 //}
                 //
                 //double maxw=0, diff=0;
@@ -264,8 +264,8 @@ int main( int argc, char** argv)
                                   &info );
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhegvd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zhegvd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 
                 // compare eigenvalues
@@ -278,12 +278,12 @@ int main( int argc, char** argv)
                 result[3] = diff / (N*maxw);
                 
                 okay = okay && (result[3] < tolulp);
-                printf("%5ld   %9.4f        %9.4f        %8.2e   ",
-                       long(N), cpu_time, gpu_time, result[3] );
+                printf("%5lld   %9.4f        %9.4f        %8.2e   ",
+                       (long long) N, cpu_time, gpu_time, result[3] );
             }
             else {
-                printf("%5ld      ---           %9.4f          ---      ",
-                       long(N), gpu_time);
+                printf("%5lld      ---           %9.4f          ---      ",
+                       (long long) N, gpu_time);
             }
             
             // print error checks

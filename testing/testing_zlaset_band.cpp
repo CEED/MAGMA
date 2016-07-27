@@ -53,7 +53,7 @@ int main( int argc, char** argv)
 
     magma_uplo_t uplo[] = { MagmaLower, MagmaUpper, MagmaFull };
     
-    printf("%% K = nb = %ld\n", long(nb) );
+    printf("%% K = nb = %lld\n", (long long) nb );
     printf("%% uplo      M     N   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");
     printf("%%=================================================================\n");
     for( int iuplo = 0; iuplo < 2; ++iuplo ) {
@@ -131,8 +131,8 @@ int main( int argc, char** argv)
             blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_R, &ione);
             error = lapackf77_zlange("f", &M, &N, h_R, &lda, work);
             
-            printf("%4c   %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
-                   lapacke_uplo_const( uplo[iuplo] ), long(M), long(N),
+            printf("%4c   %5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   lapacke_uplo_const( uplo[iuplo] ), (long long) M, (long long) N,
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    (error == 0. ? "ok" : "failed") );
             status += ! (error == 0.);

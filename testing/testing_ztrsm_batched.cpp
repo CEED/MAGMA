@@ -274,8 +274,8 @@ int main( int argc, char** argv)
                 double err = normR/(normX*normA);
 
                 if ( isnan(err) || isinf(err) ) {
-                    printf("error for matrix %ld magma_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
-                           long(s), err, normR, normX, normA);
+                    printf("error for matrix %lld magma_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
+                           (long long) s, err, normR, normX, normA);
                     magma_error = err;
                     break;
                 }
@@ -300,8 +300,8 @@ int main( int argc, char** argv)
                 double err = normR/(normX*normA);
 
                 if ( isnan(err) || isinf(err) ) {
-                    printf("error for matrix %ld cublas_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
-                           long(s), err, normR, normX, normA);
+                    printf("error for matrix %lld cublas_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",
+                           (long long) s, err, normR, normX, normA);
                     cublas_error = err;
                     break;
                 }
@@ -331,8 +331,8 @@ int main( int argc, char** argv)
                     lapack_error = max( err, lapack_error );
                 }
 
-                printf("%10ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
-                        long(batchCount), long(M), long(N),
+                printf("%10lld %5lld %5lld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
+                        (long long) batchCount, (long long) M, (long long) N,
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         cpu_perf,    1000.*cpu_time,
@@ -340,8 +340,8 @@ int main( int argc, char** argv)
                         (okay ? "ok" : "failed"));
             }
             else {
-                printf("%10ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
-                        long(batchCount), long(M), long(N),
+                printf("%10lld %5lld %5lld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e     ---      %s\n",
+                        (long long) batchCount, (long long) M, (long long) N,
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         magma_error, cublas_error,

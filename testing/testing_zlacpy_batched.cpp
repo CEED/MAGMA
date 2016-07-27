@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     mstride = 2*mb;
     nstride = 3*nb;
     
-    printf("%% mb=%ld, nb=%ld, mstride=%ld, nstride=%ld\n", long(mb), long(nb), long(mstride), long(nstride) );
+    printf("%% mb=%lld, nb=%lld, mstride=%lld, nstride=%lld\n", (long long) mb, (long long) nb, (long long) mstride, (long long) nstride );
     printf("%%   M     N ntile    CPU Gflop/s (ms)    GPU Gflop/s (ms)   check\n");
     printf("%%================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -124,8 +124,8 @@ int main( int argc, char** argv)
             bool okay = (error == 0);
             status += ! okay;
 
-            printf("%5ld %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
-                   long(M), long(N), long(ntile),
+            printf("%5lld %5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   (long long) M, (long long) N, (long long) ntile,
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    (okay ? "ok" : "failed") );
             

@@ -137,8 +137,8 @@ int main( int argc, char** argv)
 
             bool okay = (error == 0);
             status += ! okay;
-            printf("%5s %5ld %5ld  %9.4f  %6.4f   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
-                   lapack_uplo_const( uplo[iuplo] ), long(M), long(N),
+            printf("%5s %5lld %5lld  %9.4f  %6.4f   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   lapack_uplo_const( uplo[iuplo] ), (long long) M, (long long) N,
                    real(offdiag), real(diag),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    (okay ? "ok" : "failed") );

@@ -86,8 +86,8 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gbytes / cpu_time;
             if (info != 0) {
-                printf("lapackf77_zlat2c returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("lapackf77_zlat2c returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* ====================================================================
@@ -98,8 +98,8 @@ int main( int argc, char** argv )
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (info != 0) {
-                printf("magmablas_zlat2c returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magmablas_zlat2c returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             magma_cgetmatrix( n, n, dSA, ldda, SR, lda, opts.queue );
@@ -118,8 +118,8 @@ int main( int argc, char** argv )
             blasf77_caxpy( &size, &s_neg_one, SA, &ione, SR, &ione );
             serror = lapackf77_clange( "Fro", &n, &n, SR, &lda, swork );
             
-            printf( "zlat2c %5s %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                    lapack_uplo_const(uplo[iuplo]), long(n),
+            printf( "zlat2c %5s %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                    lapack_uplo_const(uplo[iuplo]), (long long) n,
                     cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                     serror, (serror == 0 ? "ok" : "failed") );
             status += ! (serror == 0);
@@ -155,8 +155,8 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gbytes / cpu_time;
             if (info != 0) {
-                printf("lapackf77_clat2z returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("lapackf77_clat2z returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* ====================================================================
@@ -169,8 +169,8 @@ int main( int argc, char** argv )
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (info != 0) {
-                printf("magmablas_clat2z returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magmablas_clat2z returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             magma_zgetmatrix( n, n, dA, ldda, R, lda, opts.queue );
@@ -189,8 +189,8 @@ int main( int argc, char** argv )
             blasf77_zaxpy( &size, &c_neg_one, A, &ione, R, &ione );
             error = lapackf77_zlange( "Fro", &n, &n, R, &lda, work );
             
-            printf( "clat2z %5s %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                    lapack_uplo_const(uplo[iuplo]), long(n),
+            printf( "clat2z %5s %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                    lapack_uplo_const(uplo[iuplo]), (long long) n,
                     cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                     error, (error == 0 ? "ok" : "failed") );
             status += ! (error == 0);

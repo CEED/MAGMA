@@ -78,9 +78,9 @@ int main( int argc, char** argv)
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %ld\n",
+    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %lld\n",
            lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           opts.fraction, long(abs_ngpu));
+           opts.fraction, (long long) abs_ngpu);
 
     printf("%%   N   CPU Time (sec)   GPU Time (sec)   |S-S_magma|   |A-USU^H|   |I-U^H U|\n");
     printf("%%============================================================================\n");
@@ -204,7 +204,7 @@ int main( int argc, char** argv)
                                   &info );
                 }
                 else {
-                    //printf( "magma_zheevd_m, ngpu %ld (%ld)\n", long(opts.ngpu), long(abs_ngpu) );
+                    //printf( "magma_zheevd_m, ngpu %lld (%lld)\n", (long long) opts.ngpu, (long long) abs_ngpu );
                     magma_zheevd_m( abs_ngpu, opts.jobz, opts.uplo,
                                     N, h_R, lda, w1,
                                     h_work, lwork,
@@ -229,7 +229,7 @@ int main( int argc, char** argv)
                                    &info );
                 }
                 else {
-                    //printf( "magma_zheevdx_m, ngpu %ld (%ld)\n", long(opts.ngpu), long(abs_ngpu) );
+                    //printf( "magma_zheevdx_m, ngpu %lld (%lld)\n", (long long) opts.ngpu, (long long) abs_ngpu );
                     magma_zheevdx_m( abs_ngpu, opts.jobz, range, opts.uplo,
                                      N, h_R, lda,
                                      vl, vu, il, iu,
@@ -241,7 +241,7 @@ int main( int argc, char** argv)
                                      iwork, liwork,
                                      &info );
                 }
-                //printf( "il %ld, iu %ld, m1 %ld\n", long(il), long(iu), long(m1) );
+                //printf( "il %lld, iu %lld, m1 %lld\n", (long long) il, (long long) iu, (long long) m1 );
             }
             else if ( opts.version == 3 ) {  // version 3: MRRR, computes selected eigenvalues/vectors
                 // only complex version available
@@ -280,8 +280,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zheevd returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zheevd returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             bool okay = true;
@@ -326,8 +326,8 @@ int main( int argc, char** argv)
                 //              iwork, liwork,
                 //              &info );
                 //if (info != 0) {
-                //    printf("magma_zheevd returned error %ld: %s.\n",
-                //           long(info), magma_strerror( info ));
+                //    printf("magma_zheevd returned error %lld: %s.\n",
+                //           (long long) info, magma_strerror( info ));
                 //}
                 //
                 //double maxw=0, diff=0;
@@ -389,8 +389,8 @@ int main( int argc, char** argv)
                 }
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zheevd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zheevd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 
                 // compare eigenvalues
@@ -403,12 +403,12 @@ int main( int argc, char** argv)
                 result[3] = diff / (N*maxw);
                 
                 okay = okay && (result[3] < tolulp);
-                printf("%5ld   %9.4f        %9.4f         %8.2e  ",
-                       long(N), cpu_time, gpu_time, result[3] );
+                printf("%5lld   %9.4f        %9.4f         %8.2e  ",
+                       (long long) N, cpu_time, gpu_time, result[3] );
             }
             else {
-                printf("%5ld      ---           %9.4f           ---     ",
-                       long(N), gpu_time);
+                printf("%5lld      ---           %9.4f           ---     ",
+                       (long long) N, gpu_time);
             }
             
             // print error checks

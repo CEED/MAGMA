@@ -227,8 +227,8 @@ int main( int argc, char** argv)
 
                 bool okay = (magma_error < tol);
                 status += ! okay;
-                printf("%10ld %5ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  %s\n",
-                   long(batchCount), long(M), long(N), long(K),
+                printf("%10lld %5lld %5lld %5lld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  %s\n",
+                   (long long) batchCount, (long long) M, (long long) N, (long long) K,
                    magma_perf,  1000.*magma_time,
                    cublas_perf, 1000.*cublas_time,
                    cpu_perf,    1000.*cpu_time,
@@ -242,8 +242,8 @@ int main( int argc, char** argv)
 
                 bool okay = (magma_error < tol);
                 status += ! okay;
-                printf("%10ld %5ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )    %8.2e     ---  %s\n",
-                   long(batchCount), long(M), long(N), long(K),
+                printf("%10lld %5lld %5lld %5lld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )    %8.2e     ---  %s\n",
+                   (long long) batchCount, (long long) M, (long long) N, (long long) K,
                    magma_perf,  1000.*magma_time,
                    cublas_perf, 1000.*cublas_time,
                    magma_error, (okay ? "ok" : "failed") );

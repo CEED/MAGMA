@@ -71,7 +71,7 @@ int main( int argc, char** argv )
         n = opts.nsize[itest];
         k = opts.ksize[itest];
         printf("%%========================================================================\n");
-        printf( "m=%ld, n=%ld, k=%ld\n", long(m), long(n), long(k) );
+        printf( "m=%lld, n=%lld, k=%lld\n", (long long) m, (long long) n, (long long) k );
         
         // allocate matrices
         // over-allocate so they can be any combination of {m,n,k} x {m,n,k}.

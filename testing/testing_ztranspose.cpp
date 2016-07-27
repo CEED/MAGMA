@@ -178,9 +178,9 @@ int main( int argc, char** argv)
                 blasf77_zaxpy( &size, &c_neg_one, h_B, &ione, h_R, &ione );
                 error2 = lapackf77_zlange("f", &N, &M, h_R, &ldb, work );
     
-                printf("%5c %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)  %6s  %7.2f (%7.2f)  %s\n",
+                printf("%5c %5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)  %6s  %7.2f (%7.2f)  %s\n",
                        lapacke_trans_const( trans[itran] ),
-                       long(M), long(N),
+                       (long long) M, (long long) N,
                        cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                        (error  == 0. ? "ok" : "failed"),
                        gpu_perf2, gpu_time2,
@@ -188,9 +188,9 @@ int main( int argc, char** argv)
                 status += ! (error == 0. && error2 == 0.);
             }
             else {
-                printf("%5c %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)  %6s    ---   (  ---  )\n",
+                printf("%5c %5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)  %6s    ---   (  ---  )\n",
                        lapacke_trans_const( trans[itran] ),
-                       long(M), long(N),
+                       (long long) M, (long long) N,
                        cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                        (error  == 0. ? "ok" : "failed") );
                 status += ! (error == 0.);

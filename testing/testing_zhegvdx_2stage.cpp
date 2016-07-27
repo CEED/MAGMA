@@ -73,9 +73,9 @@ int main( int argc, char** argv)
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
     magma_int_t abs_ngpu = std::abs( opts.ngpu );
     
-    printf("%% itype = %ld, jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %ld\n",
-           long(opts.itype), lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           opts.fraction, long(abs_ngpu));
+    printf("%% itype = %lld, jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %lld\n",
+           (long long) opts.itype, lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
+           opts.fraction, (long long) abs_ngpu);
 
     if (opts.itype == 1) {
         printf("%%   N     M   GPU Time (sec)   |AZ-BZD|   |D - D_magma|\n");
@@ -164,8 +164,8 @@ int main( int argc, char** argv)
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0) {
-                printf("magma_zhegvdx_2stage returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zhegvdx_2stage returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             if ( opts.check ) {
@@ -222,8 +222,8 @@ int main( int argc, char** argv)
                                   iwork, &liwork,
                                   &info );
                 if (info != 0) {
-                    printf("lapackf77_zhegvd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zhegvd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 
                 double maxw=0, diff=0;
@@ -238,8 +238,8 @@ int main( int argc, char** argv)
             /* =====================================================================
                Print execution time
                =================================================================== */
-            printf("%5ld %5ld   %9.4f     ",
-                   long(N), long(m1), gpu_time);
+            printf("%5lld %5lld   %9.4f     ",
+                   (long long) N, (long long) m1, gpu_time);
             if ( opts.check ) {
                 bool okay = (result[1] < tolulp);
                 if ( opts.jobz != MagmaNoVec ) {

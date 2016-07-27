@@ -225,11 +225,11 @@ int main( int argc, char** argv)
                      && ( c_gpu_nan == cnt_nan )
                      && ( c_gpu_inf == cnt_inf );
             
-            printf( "%4c %5ld %5ld   %10ld + %-10ld   %10ld + %-10ld   %10ld + %-10ld  %s\n",
-                    lapacke_uplo_const( uplo[iuplo] ), long(M), long(N),
-                    long(c_cpu_nan), long(c_cpu_inf),
-                    long(c_gpu_nan), long(c_gpu_inf),
-                    long(cnt_nan),   long(cnt_inf),
+            printf( "%4c %5lld %5lld   %10lld + %-10lld   %10lld + %-10lld   %10lld + %-10lld  %s\n",
+                    lapacke_uplo_const( uplo[iuplo] ), (long long) M, (long long) N,
+                    (long long) c_cpu_nan, (long long) c_cpu_inf,
+                    (long long) c_gpu_nan, (long long) c_gpu_inf,
+                    (long long) cnt_nan,   (long long) cnt_inf,
                     (okay ? "ok" : "failed"));
             status += ! okay;
             

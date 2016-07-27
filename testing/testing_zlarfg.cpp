@@ -102,8 +102,8 @@ int main( int argc, char** argv)
                 error2 = lapackf77_zlange( "F", &nb, &ione, h_tau2, &nb, work ) / error2;
             }
 
-            printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
-                   long(N), long(nb), cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
+            printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
+                   (long long) N, (long long) nb, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
                    error, error2,
                    (error < tol && error2 < tol ? "ok" : "failed") );
             status += ! (error < tol && error2 < tol);

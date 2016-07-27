@@ -147,15 +147,15 @@ int main( int argc, char** argv)
                 
                 bool okay = (dev_error < tol);
                 status += ! okay;
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
-                       long(N), long(K),
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
+                       (long long) N, (long long) K,
                        dev_perf, 1000.*dev_time,
                        cpu_perf, 1000.*cpu_time,
                        dev_error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5ld %5ld   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
-                       long(N), long(K),
+                printf("%5lld %5lld   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
+                       (long long) N, (long long) K,
                        dev_perf, 1000.*dev_time);
             }
             

@@ -95,8 +95,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (norm_magma == -1) {
-                printf( "%5ld   %4c   skipped because %s norm isn't supported\n",
-                        long(N), lapacke_norm_const( norm[inorm] ), lapack_norm_const( norm[inorm] ));
+                printf( "%5lld   %4c   skipped because %s norm isn't supported\n",
+                        (long long) N, lapacke_norm_const( norm[inorm] ), lapack_norm_const( norm[inorm] ));
                 goto cleanup;
             }
             else if (norm_magma < 0) {
@@ -159,8 +159,8 @@ int main( int argc, char** argv)
             lapack_inf_fail += ! la_inf_okay;
             status          += !    inf_okay;
             
-            printf("%5ld %5ld   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %-6s   %6s%1s  %6s%1s\n",
-                   long(M), long(N),
+            printf("%5lld %5lld   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %-6s   %6s%1s  %6s%1s\n",
+                   (long long) M, (long long) N,
                    lapacke_norm_const( norm[inorm] ),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error,

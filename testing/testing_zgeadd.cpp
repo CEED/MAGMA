@@ -121,8 +121,8 @@ int main( int argc, char** argv)
             Bnorm = lapackf77_zlange( "F", &M, &N, h_B, &lda, work );
             error = lapackf77_zlange( "F", &M, &N, h_A, &lda, work ) / Bnorm;
             
-            printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                   long(M), long(N),
+            printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                   (long long) M, (long long) N,
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error, (error < tol ? "ok" : "failed"));
             status += ! (error < tol);

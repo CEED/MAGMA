@@ -99,8 +99,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflopsS / gpu_time;
             if (info != 0) {
-                printf("magma_zcgesv returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zcgesv returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             //=====================================================================
@@ -127,8 +127,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfdf = gflopsF / gpu_time;
             if (info != 0) {
-                printf("magma_zgetrf returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgetrf returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             //=====================================================================
@@ -143,8 +143,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfds = gflopsS / gpu_time;
             if (info != 0) {
-                printf("magma_zgetrs returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgetrs returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             //=====================================================================
@@ -162,8 +162,8 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfsf = gflopsF / gpu_time;
             if (info != 0) {
-                printf("magma_cgetrf returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_cgetrf returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             //=====================================================================
@@ -179,14 +179,14 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfss = gflopsS / gpu_time;
             if (info != 0) {
-                printf("magma_cgetrs returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_cgetrs returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
-            printf("%5ld %5ld   %7.2f   %7.2f   %7.2f   %7.2f   %7.2f     %4ld   %8.2e   %s\n",
-                   long(N), long(nrhs),
+            printf("%5lld %5lld   %7.2f   %7.2f   %7.2f   %7.2f   %7.2f     %4lld   %8.2e   %s\n",
+                   (long long) N, (long long) nrhs,
                    gpu_perfdf, gpu_perfds, gpu_perfsf, gpu_perfss, gpu_perf,
-                   long(gesv_iter), error, (error < tol ? "ok" : "failed"));
+                   (long long) gesv_iter, error, (error < tol ? "ok" : "failed"));
             status += ! (error < tol);
             
             magma_free_cpu( h_A     );

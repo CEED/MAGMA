@@ -53,8 +53,8 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             K = opts.ksize[itest];
             if ( M < K || N < K || K <= 0 ) {
-                printf( "%5ld %5ld %5ld   skipping because zgeqp3 requires M >= K, N >= K, K(the rank) >= 0\n",
-                        long(M), long(N), long(K) );
+                printf( "%5lld %5lld %5lld   skipping because zgeqp3 requires M >= K, N >= K, K(the rank) >= 0\n",
+                        (long long) M, (long long) N, (long long) K );
                 continue;
             }
  
@@ -115,8 +115,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapack_zgeqp3 returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapack_zgeqp3 returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
             }
             
@@ -145,20 +145,20 @@ int main( int argc, char** argv)
             
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgeqp3 returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgeqp3 returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) M, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(M), long(N), gpu_perf, gpu_time );
+                printf("%5lld %5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) M, (long long) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
                 double error, ulp;

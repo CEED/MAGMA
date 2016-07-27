@@ -86,8 +86,8 @@ void output(
                 (error_inline < gTol);
     gStatus += ! okay;
     
-    printf( "%5ld %5ld %5ld %5ld %5ld   %-8s",
-            long(m), long(n), long(k), long(incx), long(incy), routine );
+    printf( "%5lld %5lld %5lld %5lld %5lld   %-8s",
+            (long long) m, (long long) n, (long long) k, (long long) incx, (long long) incy, routine );
     
     if ( error_cblas == SKIPPED_FLAG )
         printf( "   %8s", "n/a" );

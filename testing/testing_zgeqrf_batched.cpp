@@ -176,8 +176,8 @@ int main( int argc, char** argv)
             magma_zgetmatrix( M, column, d_A, ldda, h_Amagma, lda, opts.queue );
 
             if (info != 0) {
-                printf("magma_zgeqrf_batched returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgeqrf_batched returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* ====================================================================
@@ -201,8 +201,8 @@ int main( int argc, char** argv)
             cublas_perf = gflops / cublas_time;
 
             if (cublas_info != 0) {
-                printf("cublasZgeqrfBatched returned error %ld: %s.\n",
-                       long(cublas_info), magma_strerror( cublas_info ));
+                printf("cublasZgeqrfBatched returned error %lld: %s.\n",
+                       (long long) cublas_info, magma_strerror( cublas_info ));
             }
             #endif
 
@@ -223,8 +223,8 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zgeqrf(&M, &N, h_A + s * lda * N, &lda, tau + s * min_mn, h_work + s * lwork, &lwork, &locinfo);
                     if (locinfo != 0) {
-                        printf("lapackf77_zgeqrf matrix %ld returned error %ld: %s.\n",
-                               long(s), long(locinfo), magma_strerror( locinfo ));
+                        printf("lapackf77_zgeqrf matrix %lld returned error %lld: %s.\n",
+                               (long long) s, (long long) locinfo, magma_strerror( locinfo ));
                     }
                 }
 
@@ -235,8 +235,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zgeqrf returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zgeqrf returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 
                 /* =====================================================================
@@ -302,8 +302,8 @@ int main( int argc, char** argv)
                 //bool okay_cublas = (cublas_error < tol && cublas_error2 < tol);
                 status += ! okay;
 
-                printf("%10ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %15.2e   %15.2e   %15.2e   %15.2e   %s\n",
-                       long(batchCount), long(M), long(N),
+                printf("%10lld %5lld %5lld    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %15.2e   %15.2e   %15.2e   %15.2e   %s\n",
+                       (long long) batchCount, (long long) M, (long long) N,
                        magma_perf,  1000.*magma_time,
                        cublas_perf, 1000.*cublas_time,
                        cpu_perf,    1000.*cpu_time,
@@ -312,8 +312,8 @@ int main( int argc, char** argv)
                        (okay ? "ok" : "failed") );
             }
             else {
-                printf("%10ld %5ld %5ld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   ---\n",
-                       long(batchCount), long(M), long(N),
+                printf("%10lld %5lld %5lld    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   ---\n",
+                       (long long) batchCount, (long long) M, (long long) N,
                        magma_perf,  1000.*magma_time,
                        cublas_perf, 1000.*cublas_time );
             }

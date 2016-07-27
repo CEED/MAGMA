@@ -155,8 +155,8 @@ int main(int argc, char **argv)
             
             bool okay = (magma_error < tol);
             status += ! okay;
-            printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                   long(N),
+            printf("%5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                   (long long) N,
                    magma_perf,  1000.*magma_time,
                    cpu_perf,    1000.*cpu_time,
                    magma_error, (okay ? "ok" : "failed"));

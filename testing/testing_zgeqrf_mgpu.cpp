@@ -54,7 +54,7 @@ int main( int argc, char** argv )
         magma_queue_create( dev, &queues[dev] );
     }
     
-    printf("%% ngpu %ld\n", long(opts.ngpu) );
+    printf("%% ngpu %lld\n", (long long) opts.ngpu );
     if ( opts.check == 1 ) {
         printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||R-Q'A||_1 / (M*||A||_1) ||I-Q'Q||_1 / M\n");
         printf("%%===============================================================================================\n");
@@ -77,7 +77,7 @@ int main( int argc, char** argv )
             // ngpu must be at least the number of blocks
             ngpu = min( opts.ngpu, magma_ceildiv(N,nb) );
             if ( ngpu < opts.ngpu ) {
-                printf( " * too many GPUs for the matrix size, using %ld GPUs\n", long(ngpu) );
+                printf( " * too many GPUs for the matrix size, using %lld GPUs\n", (long long) ngpu );
             }
             
             // query for workspace size
@@ -120,8 +120,8 @@ int main( int argc, char** argv )
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapack_zgeqrf returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapack_zgeqrf returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 magma_free_cpu( tau2 );
             }
@@ -136,8 +136,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgeqrf2 returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgeqrf2 returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
@@ -161,11 +161,11 @@ int main( int argc, char** argv )
                 results[1] *= eps;
 
                 if ( opts.lapack ) {
-                    printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                 %8.2e",
-                           long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time, results[0], results[1] );
+                    printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                 %8.2e",
+                           (long long) M, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0], results[1] );
                 } else {
-                    printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                 %8.2e",
-                           long(M), long(N), gpu_perf, gpu_time, results[0], results[1] );
+                    printf("%5lld %5lld     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                 %8.2e",
+                           (long long) M, (long long) N, gpu_perf, gpu_time, results[0], results[1] );
                 }
                 // todo also check results[1] < tol?
                 printf("   %s\n", (results[0] < tol ? "ok" : "failed"));
@@ -184,18 +184,18 @@ int main( int argc, char** argv )
                 blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
                 error = lapackf77_zlange("f", &M, &N, h_R, &lda, work ) / (min_mn*error);
                 
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                       long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time,
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                       (long long) M, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
                        error, (error < tol ? "ok" : "failed"));
                 status += ! (error < tol);
             }
             else {
                 if ( opts.lapack ) {
-                    printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   ---",
-                           long(M), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                    printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   ---",
+                           (long long) M, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
                 } else {
-                    printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)     ---",
-                           long(M), long(N), gpu_perf, gpu_time);
+                    printf("%5lld %5lld     ---   (  ---  )   %7.2f (%7.2f)     ---",
+                           (long long) M, (long long) N, gpu_perf, gpu_time);
                 }
                 printf("%s\n", (opts.check != 0 ? "  (error check only for M >= N)" : ""));
             }

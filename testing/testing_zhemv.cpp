@@ -206,8 +206,8 @@ int main(int argc, char **argv)
             
             bool okay = (magma_error < tol && dev_error < tol && atomics_error < tol);
             status += ! okay;
-            printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
-                   long(N),
+            printf("%5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
+                   (long long) N,
                    magma_perf,   1000.*magma_time,
                    atomics_perf, 1000.*atomics_time,
                    dev_perf,     1000.*dev_time,

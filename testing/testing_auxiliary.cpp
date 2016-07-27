@@ -48,57 +48,57 @@ void test_num_gpus()
     
     unsetenv("MAGMA_NUM_GPUS");
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", "not set", long(ngpu), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", "not set", (long long) ngpu, (long long) 1 );
     warn( ngpu == 1 );
     
     setenv("MAGMA_NUM_GPUS", "", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 1 );
     warn( ngpu == 1 );
     
     setenv("MAGMA_NUM_GPUS", "-1", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 1 );
     warn( ngpu == 1 );
     
     setenv("MAGMA_NUM_GPUS", "2junk", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 1 );
     warn( ngpu == 1 );
     
     setenv("MAGMA_NUM_GPUS", "0", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 1 );
     warn( ngpu == 1 );
     
     setenv("MAGMA_NUM_GPUS", "1", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 1 );
     warn( ngpu == 1 );
     
     setenv("MAGMA_NUM_GPUS", "2", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(2) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 2 );
     warn( ngpu == min(  2, maxgpu ) );
     
     setenv("MAGMA_NUM_GPUS", "4", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(4) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 4 );
     warn( ngpu == min(  4, maxgpu ) );
     
     setenv("MAGMA_NUM_GPUS", "8", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(8) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 8 );
     warn( ngpu == min(  8, maxgpu ) );
     
     setenv("MAGMA_NUM_GPUS", "16", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(16) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) 16 );
     warn( ngpu == min( 16, maxgpu ) );
     
     setenv("MAGMA_NUM_GPUS", "1000", 1 );
     ngpu = magma_num_gpus();
-    printf( "%-18s  %7ld  %6ld (maxgpu)\n\n", getenv("MAGMA_NUM_GPUS"), long(ngpu), long(maxgpu) );
+    printf( "%-18s  %7lld  %6lld (maxgpu)\n\n", getenv("MAGMA_NUM_GPUS"), (long long) ngpu, (long long) maxgpu );
     warn( ngpu == min( 1000, maxgpu ) );
     
 #endif // not Windows
@@ -113,38 +113,38 @@ void test_num_threads()
     // test that getting & setting numthreads works
     magma_int_t p_nthread_orig = magma_get_parallel_numthreads();
     magma_int_t l_nthread_orig = magma_get_lapack_numthreads();
-    printf( "get;      parallel_numthread=%2ld, lapack_numthread=%2ld\n",
-            long(p_nthread_orig), long(l_nthread_orig) );
+    printf( "get;      parallel_numthread=%2lld, lapack_numthread=%2lld\n",
+            (long long) p_nthread_orig, (long long) l_nthread_orig );
     
     magma_set_lapack_numthreads( 4 );
     magma_int_t p_nthread = magma_get_parallel_numthreads();
     magma_int_t l_nthread = magma_get_lapack_numthreads();
-    printf( "set( 4);  parallel_numthread=%2ld, lapack_numthread=%2ld (expect  4)\n",
-            long(p_nthread), long(l_nthread) );
+    printf( "set( 4);  parallel_numthread=%2lld, lapack_numthread=%2lld (expect  4)\n",
+            (long long) p_nthread, (long long) l_nthread );
     warn( p_nthread == p_nthread_orig );
     warn( l_nthread == 4 );
     
     magma_set_lapack_numthreads( 1 );
     p_nthread = magma_get_parallel_numthreads();
     l_nthread = magma_get_lapack_numthreads();
-    printf( "set( 1);  parallel_numthread=%2ld, lapack_numthread=%2ld (expect  1)\n",
-            long(p_nthread), long(l_nthread) );
+    printf( "set( 1);  parallel_numthread=%2lld, lapack_numthread=%2lld (expect  1)\n",
+            (long long) p_nthread, (long long) l_nthread );
     warn( p_nthread == p_nthread_orig );
     warn( l_nthread == 1 );
     
     magma_set_lapack_numthreads( 8 );
     p_nthread = magma_get_parallel_numthreads();
     l_nthread = magma_get_lapack_numthreads();
-    printf( "set( 8);  parallel_numthread=%2ld, lapack_numthread=%2ld (expect  8)\n",
-            long(p_nthread), long(l_nthread) );
+    printf( "set( 8);  parallel_numthread=%2lld, lapack_numthread=%2lld (expect  8)\n",
+            (long long) p_nthread, (long long) l_nthread );
     warn( p_nthread == p_nthread_orig );
     warn( l_nthread == 8 );
     
     magma_set_lapack_numthreads( l_nthread_orig );
     p_nthread = magma_get_parallel_numthreads();
     l_nthread = magma_get_lapack_numthreads();
-    printf( "set(%2ld);  parallel_numthread=%2ld, lapack_numthread=%2ld (expect %2ld)\n",
-            long(l_nthread_orig), long(p_nthread), long(l_nthread), long(l_nthread_orig) );
+    printf( "set(%2lld);  parallel_numthread=%2lld, lapack_numthread=%2lld (expect %2lld)\n",
+            (long long) l_nthread_orig, (long long) p_nthread, (long long) l_nthread, (long long) l_nthread_orig );
     warn( p_nthread == p_nthread_orig );
     warn( l_nthread == l_nthread_orig );
     
@@ -162,64 +162,64 @@ void test_num_threads()
         omp_threads = atoi( omp_str );
     }
     
-    printf( "\nusing ncores=%ld, omp_num_threads=%ld\n\n", long(ncores), long(omp_threads) );
+    printf( "\nusing ncores=%lld, omp_num_threads=%lld\n\n", (long long) ncores, (long long) omp_threads );
     
     printf( "$MAGMA_NUM_THREADS  nthread  expect\n" );
     printf( "%%==================================\n" );
     
     unsetenv("MAGMA_NUM_THREADS");
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld (omp_threads)\n\n", "not set", long(p_nthread), long(omp_threads) );
+    printf( "%-18s  %7lld  %6lld (omp_threads)\n\n", "not set", (long long) p_nthread, (long long) omp_threads );
     warn( p_nthread == omp_threads );
     
     setenv("MAGMA_NUM_THREADS", "", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 1 );
     warn( p_nthread == 1 );
     
     setenv("MAGMA_NUM_THREADS", "-1", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 1 );
     warn( p_nthread == 1 );
     
     setenv("MAGMA_NUM_THREADS", "2junk", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 1 );
     warn( p_nthread == 1 );
     
     setenv("MAGMA_NUM_THREADS", "0", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 1 );
     warn( p_nthread == 1 );
     
     setenv("MAGMA_NUM_THREADS", "1", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(1) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 1 );
     warn( p_nthread == 1 );
     
     setenv("MAGMA_NUM_THREADS", "2", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(2) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 2 );
     warn( p_nthread == min(  2, ncores ) );
     
     setenv("MAGMA_NUM_THREADS", "4", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(4) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 4 );
     warn( p_nthread == min(  4, ncores ) );
     
     setenv("MAGMA_NUM_THREADS", "8", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(8) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 8 );
     warn( p_nthread == min(  8, ncores ) );
     
     setenv("MAGMA_NUM_THREADS", "16", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(16) );
+    printf( "%-18s  %7lld  %6lld\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) 16 );
     warn( p_nthread == min( 16, ncores ) );
     
     setenv("MAGMA_NUM_THREADS", "1000", 1 );
     p_nthread = magma_get_parallel_numthreads();
-    printf( "%-18s  %7ld  %6ld (ncores)\n\n", getenv("MAGMA_NUM_THREADS"), long(p_nthread), long(ncores) );
+    printf( "%-18s  %7lld  %6lld (ncores)\n\n", getenv("MAGMA_NUM_THREADS"), (long long) p_nthread, (long long) ncores );
     warn( p_nthread == min( 1000, ncores ) );
 #endif // not Windows
 }
@@ -253,7 +253,7 @@ int main( int argc, char** argv )
     test_xerbla();
     
     if ( gFailures > 0 ) {
-        printf( "\n%ld tests failed.\n", long(gFailures) );
+        printf( "\n%lld tests failed.\n", (long long) gFailures );
     }
     else {
         printf( "\nAll tests passed.\n" );

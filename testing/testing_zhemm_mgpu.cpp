@@ -66,12 +66,12 @@ int main( int argc, char** argv)
     magma_int_t ncmplx = 0;
     magma_buildconnection_mgpu( gnode, &ncmplx, opts.ngpu );
     
-    printf("%% Initializing communication pattern... GPU-ncmplx %ld\n", long(ncmplx));
+    printf("%% Initializing communication pattern... GPU-ncmplx %lld\n", (long long) ncmplx);
     for (i=0; i < ncmplx; ++i) {
         magma_int_t myngpu = gnode[i][MagmaMaxGPUs];
-        printf("%% cmplx %ld has %ld GPUs:", long(i), long(myngpu) );
+        printf("%% cmplx %lld has %lld GPUs:", (long long) i, (long long) myngpu );
         for (j=0; j < myngpu; ++j) {
-            printf(" %ld", long(gnode[i][j]) );
+            printf(" %lld", (long long) gnode[i][j] );
             if (j < myngpu-1) {
                 printf(",");
             }
@@ -96,7 +96,7 @@ int main( int argc, char** argv)
         }
     }
 
-    printf("%% nb %ld, ngpu %ld, version %ld\n", long(nb), long(opts.ngpu), long(opts.version) );
+    printf("%% nb %lld, ngpu %lld, version %lld\n", (long long) nb, (long long) opts.ngpu, (long long) opts.version );
     printf("%%   M     N    nb offset  CPU Gflop/s (sec)   GPU Gflop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||B||\n");
     printf("%%========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -173,8 +173,8 @@ int main( int argc, char** argv)
             
             #ifdef TRACING
             char buf[80];
-            snprintf( buf, sizeof(buf), "zhemm-m%ld-n%ld-nb%ld-ngpu%ld-run%ld.svg",
-                      long(M), long(N), long(nb), long(opts.ngpu), long(iter) );
+            snprintf( buf, sizeof(buf), "zhemm-m%lld-n%lld-nb%lld-ngpu%lld-run%lld.svg",
+                      (long long) M, (long long) N, (long long) nb, (long long) opts.ngpu, (long long) iter );
             trace_finalize( buf, "trace.css" );
             #endif
             
@@ -230,22 +230,22 @@ int main( int argc, char** argv)
                     bool okay = (error < tol);
                     status += ! okay;
                     if (dev == 0) {
-                        printf( "%5ld %5ld %5ld %5ld   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %s\n",
-                                long(M), long(N), long(nb), long(offset),
+                        printf( "%5lld %5lld %5lld %5lld   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %s\n",
+                                (long long) M, (long long) N, (long long) nb, (long long) offset,
                                 cpu_perf, cpu_time,
                                 gpu_perf, gpu_time,
                                 gpu_perf2, gpu_time2,
                                 error, (okay ? "ok" : "failed") );
                     }
                     else {
-                        printf( "    dev %ld %74s  %8.2e   %s\n",
-                                long(dev), "",
+                        printf( "    dev %lld %74s  %8.2e   %s\n",
+                                (long long) dev, "",
                                 error, (okay ? "ok" : "failed") );
                     }
                 }
             } else {
-                printf( "%5ld %5ld %5ld %5ld     ---   (  ---  )   %7.1f (%7.4f)     ---   (  ---  )   ---\n",
-                        long(M), long(N), long(nb), long(offset),
+                printf( "%5lld %5lld %5lld %5lld     ---   (  ---  )   %7.1f (%7.4f)     ---   (  ---  )   ---\n",
+                        (long long) M, (long long) N, (long long) nb, (long long) offset,
                         gpu_perf, gpu_time );
             }
             

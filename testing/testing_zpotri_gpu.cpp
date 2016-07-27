@@ -80,8 +80,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zpotri_gpu returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zpotri_gpu returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -95,8 +95,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zpotri returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zpotri returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 
                 /* =====================================================================
@@ -106,14 +106,14 @@ int main( int argc, char** argv)
                 blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
                 Anorm = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
                 error = lapackf77_zlange("f", &N, &N, h_R, &lda, work) / Anorm;
-                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                       long(N), cpu_perf, cpu_time, gpu_perf, gpu_time,
+                printf("%5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                       (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
                        error, (error < tol ? "ok" : "failed") );
                 status += ! (error < tol);
             }
             else {
-                printf("%5ld     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
-                       long(N), gpu_perf, gpu_time );
+                printf("%5lld     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
+                       (long long) N, gpu_perf, gpu_time );
             }
             
             magma_free_cpu( h_A );

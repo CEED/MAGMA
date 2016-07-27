@@ -81,8 +81,8 @@ int main(int argc, char **argv)
     magma_int_t offsets[] = { 0, 1, 31, 32, 33, 63, 64, 65, 100, 200 };
     magma_int_t noffsets = sizeof(offsets) / sizeof(*offsets);
     
-    printf("%% uplo = %s, ngpu %ld, block size = %ld, offset %ld\n",
-            lapack_uplo_const(opts.uplo), long(opts.ngpu), long(nb), long(offset) );
+    printf("%% uplo = %s, ngpu %lld, block size = %lld, offset %lld\n",
+            lapack_uplo_const(opts.uplo), (long long) opts.ngpu, (long long) nb, (long long) offset );
     printf( "%%                 BLAS                CUBLAS              MAGMA 1 GPU         MAGMA MGPU       Error rel  Error rel\n"
             "%%   N  offset     Gflop/s (msec)      Gflop/s (msec)      Gflop/s (msec)      Gflop/s (msec)   to CUBLAS  to LAPACK\n"
             "%%==================================================================================================================\n" );
@@ -205,8 +205,8 @@ int main(int argc, char **argv)
                 dwork, ldwork,
                 opts.ngpu, nb, queues );
             if (info != 0) {
-                printf("magmablas_zhemv_mgpu returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magmablas_zhemv_mgpu returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             info = magmablas_zhemv_mgpu_sync(
@@ -220,8 +220,8 @@ int main(int argc, char **argv)
                 dwork, ldwork,
                 opts.ngpu, nb, queues );
             if (info != 0) {
-                printf("magmablas_zhemv_sync returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magmablas_zhemv_sync returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             mgpu_time = magma_sync_wtime(0) - mgpu_time;
@@ -259,8 +259,8 @@ int main(int argc, char **argv)
             bool okay = (error < tol && error2 < tol);
             status += ! okay;
             if ( opts.lapack ) {
-                printf( "%5ld  %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
-                        long(N), long(offset),
+                printf( "%5lld  %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
+                        (long long) N, (long long) offset,
                          cpu_perf,  cpu_time*1000.,
                         cuda_perf, cuda_time*1000.,
                          gpu_perf,  gpu_time*1000.,
@@ -268,8 +268,8 @@ int main(int argc, char **argv)
                         error, error2, (okay ? "ok" : "failed") );
             }
             else {
-                printf( "%5ld  %5ld     ---   (  ---  )   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e     ---      %s\n",
-                        long(N), long(offset),
+                printf( "%5lld  %5lld     ---   (  ---  )   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e     ---      %s\n",
+                        (long long) N, (long long) offset,
                         cuda_perf, cuda_time*1000.,
                          gpu_perf,  gpu_time*1000.,
                         mgpu_perf, mgpu_time*1000.,

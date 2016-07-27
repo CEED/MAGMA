@@ -65,7 +65,7 @@ int main( int argc, char** argv)
     printf("%% 1 - magma_zhetrd_gpu:   uses ZHEMV from CUBLAS (default)\n");
     printf("%% 2 - magma_zhetrd2_gpu:  uses ZHEMV from MAGMA BLAS that requires extra space\n\n");
 
-    printf("%% uplo = %s, version %ld\n", lapack_uplo_const(opts.uplo), long(opts.version));
+    printf("%% uplo = %s, version %lld\n", lapack_uplo_const(opts.uplo), (long long) opts.version);
     printf("%% N     CPU Gflop/s (sec)   GPU Gflop/s (sec)   |A-QHQ^H|/N|A|   |I-QQ^H|/N\n");
     printf("%%==========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -112,8 +112,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zhetrd_gpu returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zhetrd_gpu returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
@@ -167,8 +167,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhetrd returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zhetrd returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
             }
             
@@ -176,11 +176,11 @@ int main( int argc, char** argv)
                Print performance and error.
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             } else {
-                printf("%5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(N), gpu_perf, gpu_time );
+                printf("%5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
                 printf("   %8.2e        %8.2e   %s\n", result[0], result[1],

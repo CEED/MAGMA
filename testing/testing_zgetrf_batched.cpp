@@ -154,14 +154,14 @@ int main( int argc, char** argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %ld returned internal error %ld\n",
-                            long(i), long(cpu_info[i]) );
+                    printf("magma_zgetrf_batched matrix %lld returned internal error %lld\n",
+                            (long long) i, (long long) cpu_info[i] );
                 }
             }
             
             if (info != 0) {
-                printf("magma_zgetrf_batched returned argument error %ld: %s.\n",
-                        long(info), magma_strerror( info ));
+                printf("magma_zgetrf_batched returned argument error %lld: %s.\n",
+                        (long long) info, magma_strerror( info ));
             }
             
             /* ====================================================================
@@ -199,8 +199,8 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zgetrf(&M, &N, h_A + s * lda * N, &lda, ipiv + s * min_mn, &locinfo);
                     if (locinfo != 0) {
-                        printf("lapackf77_zgetrf matrix %ld returned error %ld: %s.\n",
-                               long(s), long(info), magma_strerror( info ));
+                        printf("lapackf77_zgetrf matrix %lld returned error %lld: %s.\n",
+                               (long long) s, (long long) info, magma_strerror( info ));
                     }
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -215,15 +215,15 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%10ld %5ld %5ld   %7.2f (%7.2f)    %7.2f (%7.2f)     %7.2f (%7.2f)",
-                       long(batchCount), long(M), long(N),
+                printf("%10lld %5lld %5lld   %7.2f (%7.2f)    %7.2f (%7.2f)     %7.2f (%7.2f)",
+                       (long long) batchCount, (long long) M, (long long) N,
                        cpu_perf, cpu_time*1000.,
                        magma_perf, magma_time*1000.,
                        cublas_perf, cublas_time*1000.  );
             }
             else {
-                printf("%10ld %5ld %5ld     ---   (  ---  )    %7.2f (%7.2f)     %7.2f (%7.2f)",
-                       long(batchCount), long(M), long(N),
+                printf("%10lld %5lld %5lld     ---   (  ---  )    %7.2f (%7.2f)     %7.2f (%7.2f)",
+                       (long long) batchCount, (long long) M, (long long) N,
                        magma_perf, magma_time*1000.,
                        cublas_perf, cublas_time*1000. );
             }
@@ -234,8 +234,8 @@ int main( int argc, char** argv)
                 for (int i=0; i < batchCount; i++) {
                     for (int k=0; k < min_mn; k++) {
                         if (ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M ) {
-                            printf("error for matrix %ld ipiv @ %ld = %ld\n",
-                                    long(i), long(k), long(ipiv[i*min_mn+k]) );
+                            printf("error for matrix %lld ipiv @ %lld = %lld\n",
+                                    (long long) i, (long long) k, (long long) ipiv[i*min_mn+k] );
                             error = -1;
                         }
                     }

@@ -56,7 +56,7 @@ int main( int argc, char** argv )
             M = opts.msize[itest];
             N = opts.nsize[itest];
             if ( M < N ) {
-                printf( "%5ld %5ld %5ld   skipping because M < N is not yet supported.\n", long(M), long(N), long(nrhs) );
+                printf( "%5lld %5lld %5lld   skipping because M < N is not yet supported.\n", (long long) M, (long long) N, (long long) nrhs );
                 continue;
             }
             min_mn = min(M, N);
@@ -102,8 +102,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zgels_gpu returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zgels_gpu returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             // compute the residual
@@ -125,8 +125,8 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0) {
-                printf("lapackf77_zgels returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("lapackf77_zgels returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N,
@@ -142,8 +142,8 @@ int main( int argc, char** argv )
             blasf77_zaxpy( &size, &c_neg_one, h_B, &ione, h_R, &ione );
             error = lapackf77_zlange("f", &M, &nrhs, h_R, &ldb, work) / (min_mn*Anorm);
             
-            printf("%5ld %5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e",
-                   long(M), long(N), long(nrhs),
+            printf("%5lld %5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e",
+                   (long long) M, (long long) N, (long long) nrhs,
                    cpu_perf, cpu_time, gpu_perf, gpu_time, cpu_error, gpu_error, error );
             
             if ( M == N ) {

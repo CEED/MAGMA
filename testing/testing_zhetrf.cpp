@@ -104,8 +104,8 @@ double get_residual(
         lapackf77_zhetrs( lapack_uplo_const(uplo), &n, &ione, A, &lda, ipiv, x, &n, &info );
     }
     if (info != 0) {
-        printf("lapackf77_zhetrs returned error %ld: %s.\n",
-               long(info), magma_strerror( info ));
+        printf("lapackf77_zhetrs returned error %lld: %s.\n",
+               (long long) info, magma_strerror( info ));
     }
     // reset to original A
     init_matrix( nopiv, n, A, lda );
@@ -124,7 +124,7 @@ double get_residual(
     magma_free_cpu( x );
     magma_free_cpu( b );
     
-    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%ld\n", norm_r, norm_A, norm_x, long(n) );
+    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%lld\n", norm_r, norm_A, norm_x, (long long) n );
     return norm_r / (n * norm_A * norm_x);
 }
 
@@ -249,7 +249,7 @@ double get_residual_aasen(
     #undef T
     #undef L
     #undef A
-    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%ld\n", norm_r, norm_A, norm_x, long(n) );
+    //printf( "r=%.2e, A=%.2e, x=%.2e, n=%lld\n", norm_r, norm_A, norm_x, (long long) n );
     return norm_r / (n * norm_A * norm_x);
 }
 
@@ -502,7 +502,7 @@ double get_LTLt_error(
     }
     printf( " p=[" );
     for (i=0; i < N; i++) {
-        printf("%ld ", long(p[i]) );
+        printf("%lld ", (long long) p[i] );
     }
     printf( "];\n" );
     magma_free_cpu( p );
@@ -635,7 +635,7 @@ int main( int argc, char** argv)
             printf( "\n%% CPU-Interface to Aasen's (%s)",(cpu_panel ? "CPU panel" : "GPU panel") );
             break;
         default:
-            printf( "\nversion = %ld not supported\n\n", long(opts.version) );
+            printf( "\nversion = %lld not supported\n\n", (long long) opts.version );
             return 0;
     }
     printf( " (%s)\n", lapack_uplo_const(opts.uplo) );
@@ -675,8 +675,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
-                    printf("lapackf77_zhetrf returned error %ld: %s.\n",
-                           long(info), magma_strerror( info ));
+                    printf("lapackf77_zhetrf returned error %lld: %s.\n",
+                           (long long) info, magma_strerror( info ));
                 }
                 error_lapack = get_residual( nopiv, opts.uplo, N, h_A, lda, ipiv );
 
@@ -689,7 +689,7 @@ int main( int argc, char** argv)
             init_matrix( (nopiv | nopiv_gpu), N, h_A, lda );
 
             //printf( "A0=" );
-            //magma_zprlong(N,N,h_A,lda);
+            //magma_zprlong( N, N, h_A, lda );
             if (nopiv) {
                 // CPU-interface to non-piv LDLt
                 gpu_time = magma_wtime();
@@ -723,20 +723,20 @@ int main( int argc, char** argv)
             }
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
-                printf("magma_zhetrf returned error %ld: %s.\n",
-                       long(info), magma_strerror( info ));
+                printf("magma_zhetrf returned error %lld: %s.\n",
+                       (long long) info, magma_strerror( info ));
             }
             
             /* =====================================================================
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%5ld %5ld   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       long(N), long(N), cpu_perf, cpu_time, gpu_perf, gpu_time );
+                printf("%5lld %5lld   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (long long) N, (long long) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5ld %5ld     ---   (  ---  )   %7.2f (%7.2f)",
-                       long(N), long(N), gpu_perf, gpu_time );
+                printf("%5lld %5lld     ---   (  ---  )   %7.2f (%7.2f)",
+                       (long long) N, (long long) N, gpu_perf, gpu_time );
             }
             if ( opts.check == 2 && info == 0) {
                 if (aasen) {
