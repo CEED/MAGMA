@@ -238,7 +238,10 @@ magma_z_precondsetup(
         if( info == 0 && 
             ( precond->trisolver == Magma_ISAI 
                 || precond->trisolver == Magma_JACOBI ) ){
-                info = magma_ziluisaisetup_t( A, b, precond, queue );
+                // simple solution: copy
+                info = info + magma_zmtranspose( precond->LD, &precond->LDT, queue );
+                info = info + magma_zmtranspose( precond->UD, &precond->UDT, queue );
+                // info = magma_ziluisaisetup_t( A, b, precond, queue );
         }
     }
     

@@ -327,7 +327,7 @@ magma_ziluisaisetup_t(
     // ILU setup
     
     // we need this in any case
-    CHECK( magma_zmtranspose( precond->LT, &MT, queue ) );
+    CHECK( magma_zmtranspose( precond->L, &MT, queue ) );
     
     // SPAI for L 
     if( precond->pattern <= 0 ){ // block diagonal structure
@@ -379,17 +379,17 @@ magma_ziluisaisetup_t(
        goto cleanup;
     }
     // via registers
-     CHECK( magma_zisai_generator_regs( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-                    precond->LT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+     CHECK( magma_zisai_generator_regs( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
+                    precond->L, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
       
     
-    
-    CHECK( magma_zmtranspose( MT, &precond->LDT, queue ) );
+    CHECK( magma_z_mtransfer( MT, &precond->LDT, Magma_CPU, Magma_DEV, queue ) );
+    //CHECK( magma_zmtranspose( MT, &precond->LDT, queue ) );
     magma_zmfree( &LT, queue );
     magma_zmfree( &MT, queue );
    
    // we need this in any case
-   CHECK( magma_zmtranspose( precond->UT, &MT, queue ) );
+   CHECK( magma_zmtranspose( precond->U, &MT, queue ) );
     
     // SPAI for U
     if( precond->pattern <= 0 ){ // block diagonal structure
@@ -443,10 +443,11 @@ magma_ziluisaisetup_t(
        goto cleanup;
     }
     // via registers
-     CHECK( magma_zisai_generator_regs( MagmaLower, MagmaNoTrans, MagmaNonUnit, 
-                    precond->UT, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
-
-    CHECK( magma_zmtranspose( MT, &precond->UDT, queue ) );
+     CHECK( magma_zisai_generator_regs( MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+                    precond->U, &MT, sizes_d, locations_d, trisystems_d, rhs_d, queue ) );
+     
+     CHECK( magma_z_mtransfer( MT, &precond->UDT, Magma_CPU, Magma_DEV, queue ) );
+    //CHECK( magma_zmtranspose( MT, &precond->UDT, queue ) );
      
 cleanup:
     magma_free_cpu( sizes_h );
