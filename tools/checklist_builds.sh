@@ -16,7 +16,8 @@ j=8
 usage="Usage: $0 [-c] [-t] [-p] [-j #] [acml macos mkl-gcc openblas ...]
     -h  --help   help
     -c  --clean  clean
-    -j           parallel make threads, default $j
+    -j #         parallel make threads, default $j
+    -s  --save   save lib and executables
     -t  --tar    tar object files and executables
     -p  --pause  pause after each build"
 
@@ -34,6 +35,9 @@ while [ $# -gt 0 ]; do
             ;;
         -t|--tar)
             tar=1
+            ;;
+        -s|--save)
+            save=1
             ;;
         -p|--pause)
             pause=1
@@ -125,6 +129,18 @@ for config in $@; do
     run "$make test -k"         $builds/$config/out-test.txt         $builds/$config/err-test.txt
     run "$make sparse-lib"      $builds/$config/out-sparse-lib.txt   $builds/$config/err-sparse-lib.txt
     run "$make sparse-test -k"  $builds/$config/out-sparse-test.txt  $builds/$config/err-sparse-test.txt
+    
+    if [ -n "${save+set}" ]; then
+        echo "saving libs and executables to $builds/$config/{lib, testing, sparse-testing}"
+        mkdir $builds/$config/lib
+        mkdir $builds/$config/testing
+        mkdir $builds/$config/sparse-testing
+        mv lib/lib* $builds/$config/lib
+        mv `find testing             -maxdepth 1 -perm /u+x -type f` $builds/$config/testing
+        mv `find sparse-iter/testing -maxdepth 1 -perm /u+x -type f` $builds/$config/sparse-testing
+    else
+        echo "SKIPPING SAVE"
+    fi
     
     if [ -n "${tar+set}" ]; then
         echo "tar objs " `date`
