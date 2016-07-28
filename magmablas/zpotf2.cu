@@ -214,8 +214,8 @@ void zpotf2_zdotc(
 
     */
     if (n > zdotc_max_bs) {
-        fprintf( stderr, "n = %ld > %ld is not supported in zpotf2_zdotc\n",
-                 long(n), long(zdotc_max_bs) );
+        fprintf( stderr, "n = %lld > %lld is not supported in zpotf2_zdotc\n",
+                 (long long) n, (long long) zdotc_max_bs );
         return;
     }
     int threadSize;

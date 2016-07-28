@@ -70,8 +70,8 @@ magma_int_t magma_ivec_max( magma_int_t vecsize,
     dim3 threads(MAX_REDUCE_TX, 1, 1);
     dim3 grid( magma_ceildiv( vecsize, MAX_REDUCE_SEGMENT ), 1, 1);
     if (lwork < (magma_int_t)grid.x) {
-        printf("error in %s: lwork must be at least %ld, input is %ld\n",
-               __func__, long(grid.x), long(lwork) );
+        printf("error in %s: lwork must be at least %lld, input is %lld\n",
+               __func__, (long long) grid.x, (long long) lwork );
     }
     
     magma_ivec_max_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, work, 0);
@@ -141,8 +141,8 @@ magma_int_t magma_isum_reduce( magma_int_t vecsize,
     dim3 threads(ISUM_REDUCE_TX, 1, 1);
     dim3 grid( magma_ceildiv( vecsize, ISUM_REDUCE_SEGMENT ), 1, 1);
     if (lwork < (magma_int_t)grid.x) {
-        printf("error in %s: lwork must be at least %ld, input is %ld\n",
-               __func__, long(grid.x), long(lwork) );
+        printf("error in %s: lwork must be at least %lld, input is %lld\n",
+               __func__, (long long) grid.x, (long long) lwork );
     }
     
     magma_isum_reduce_kernel<<<grid, threads, 0, queue->cuda_stream()>>>(vecsize, x, work, 0);

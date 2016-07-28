@@ -104,7 +104,7 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
     int height = k2-k1;
     if ( height  > 1024) 
     {
-        fprintf( stderr, "%s: n=%ld > 1024, not supported\n", __func__, long(n) );
+        fprintf( stderr, "%s: n=%lld > 1024, not supported\n", __func__, (long long) n );
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );
@@ -145,8 +145,8 @@ magma_zlaswp_rowparallel(
     int height = k2-k1;
     if ( height  > MAX_NTHREADS) 
     {
-        fprintf( stderr, "%s: height=%ld > %ld, magma_zlaswp_rowparallel_q not supported\n",
-                 __func__, long(n), long(MAX_NTHREADS) );
+        fprintf( stderr, "%s: height=%lld > %lld, magma_zlaswp_rowparallel_q not supported\n",
+                 __func__, (long long) n, (long long) MAX_NTHREADS );
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );

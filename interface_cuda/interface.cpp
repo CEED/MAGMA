@@ -237,7 +237,7 @@ extern "C"
 void magma_warn_leaks( const std::map< void*, size_t >& pointers, const char* type )
 {
     if ( pointers.size() > 0 ) {
-        fprintf( stderr, "Warning: MAGMA detected memory leak of %ld %s pointers:\n",
+        fprintf( stderr, "Warning: MAGMA detected memory leak of %lld %s pointers:\n",
                  pointers.size(), type );
         std::map< void*, size_t >::const_iterator iter;
         for( iter = pointers.begin(); iter != pointers.end(); ++iter ) {
@@ -311,9 +311,12 @@ void magma_print_environment()
 {
     magma_int_t major, minor, micro;
     magma_version( &major, &minor, &micro );
-    printf( "%% MAGMA %d.%d.%d %s compiled for CUDA capability >= %.1f, %d-bit magma_int_t, %d-bit pointer.\n",
-            (int) major, (int) minor, (int) micro, MAGMA_VERSION_STAGE, MIN_CUDA_ARCH/100.,
-            (int) (8*sizeof(magma_int_t)), (int) (8*sizeof(void*)) );
+    printf( "%% MAGMA %lld.%lld.%lld %s compiled for CUDA capability >= %.1f, %lld-bit magma_int_t, %lld-bit pointer.\n",
+            (long long) major, (long long) minor, (long long) micro,
+            MAGMA_VERSION_STAGE,
+            MIN_CUDA_ARCH/100.,
+            (long long) (8*sizeof(magma_int_t)),
+            (long long) (8*sizeof(void*)) );
     
     int cuda_runtime=0, cuda_driver=0;
     cudaError_t err;
@@ -541,7 +544,7 @@ magma_queue_t magmablasGetQueue()
         // create queue w/ NULL stream first time that NULL queue is used
         if ( g_null_queues[dev] == NULL ) {
             magma_queue_create_from_cuda( dev, NULL, NULL, NULL, &g_null_queues[dev] );
-            printf( "dev %ld create queue %p\n", long(dev), (void*) g_null_queues[dev] );
+            printf( "dev %lld create queue %p\n", (long long) dev, (void*) g_null_queues[dev] );
             assert( g_null_queues[dev] != NULL );
         }
         queue = g_null_queues[dev];

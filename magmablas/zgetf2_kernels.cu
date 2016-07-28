@@ -223,8 +223,8 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
 
     if ( num_blocks > zamax) 
     {
-        fprintf( stderr, "%s: length(=%ld), num_blocks(=%ld) is too big > zamax(=%ld), the second layer reduction can not be launched, Plz incread zamax\n",
-                 __func__, long(length), long(num_blocks), long(zamax));
+        fprintf( stderr, "%s: length(=%lld), num_blocks(=%lld) is too big > zamax(=%lld), the second layer reduction can not be launched, Plz incread zamax\n",
+                 __func__, (long long) length, (long long) num_blocks, (long long) zamax);
     }
     else
     {
@@ -446,8 +446,8 @@ magma_int_t magma_zswap_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
     */
     if ( n  > MAX_NTHREADS) 
     {
-        fprintf( stderr, "%s nb=%ld > %ld, not supported\n",
-                 __func__, long(n), long(MAX_NTHREADS) );
+        fprintf( stderr, "%s nb=%lld > %lld, not supported\n",
+                 __func__, (long long) n, (long long) MAX_NTHREADS );
         return -15;
     }
     dim3 grid(1,1, batchCount);
@@ -515,8 +515,8 @@ magma_int_t magma_zscal_zgeru_batched(magma_int_t m, magma_int_t n, magma_int_t 
     if ( n == 0) return 0;
     if ( n > MAX_NTHREADS ) 
     {
-        fprintf( stderr, "%s nb=%ld, > %ld, not supported\n",
-                 __func__, long(n), long(MAX_NTHREADS) );
+        fprintf( stderr, "%s nb=%lld, > %lld, not supported\n",
+                 __func__, (long long) n, (long long) MAX_NTHREADS );
         return -15;
     }
 
@@ -1030,8 +1030,8 @@ magma_int_t  magma_zgetf2_sm_batched(
 
     if (shared_size > 47000)
     {
-        fprintf( stderr, "%s: shared memory = %ld, exceeds 48K, kernel cannot run\n",
-                 __func__, long(shared_size) );
+        fprintf( stderr, "%s: shared memory = %lld, exceeds 48K, kernel cannot run\n",
+                 __func__, (long long) shared_size );
         return 1;
     }
 

@@ -40,8 +40,8 @@ void magma_xerror( cublasStatus_t err, const char* func, const char* file, int l
 void magma_xerror( magma_int_t err, const char* func, const char* file, int line )
 {
     if ( err != MAGMA_SUCCESS ) {
-        fprintf( stderr, "MAGMA error: %s (%d) in %s at %s:%d\n",
-                 magma_strerror( err ), (int) err, func, file, line );
+        fprintf( stderr, "MAGMA error: %s (%lld) in %s at %s:%d\n",
+                 magma_strerror( err ), (long long) err, func, file, line );
     }
 }
 

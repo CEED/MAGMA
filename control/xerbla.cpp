@@ -52,21 +52,21 @@ void magma_xerbla(const char *srname, magma_int_t minfo)
     // the first 3 cases are unusual for calling xerbla;
     // normally runtime errors are passed back in info.
     if ( minfo < 0 ) {
-        fprintf( stderr, "Error in %s, function-specific error (info = %ld)\n",
-                 srname, long(-minfo) );
+        fprintf( stderr, "Error in %s, function-specific error (info = %lld)\n",
+                 srname, (long long) -minfo );
     }
     else if ( minfo == 0 ) {
-        fprintf( stderr, "No error, why is %s calling xerbla? (info = %ld)\n",
-                 srname, long(-minfo) );
+        fprintf( stderr, "No error, why is %s calling xerbla? (info = %lld)\n",
+                 srname, (long long) -minfo );
     }
     else if ( minfo >= -MAGMA_ERR ) {
-        fprintf( stderr, "Error in %s, %s (info = %ld)\n",
-                 srname, magma_strerror(-minfo), long(-minfo) );
+        fprintf( stderr, "Error in %s, %s (info = %lld)\n",
+                 srname, magma_strerror(-minfo), (long long) -minfo );
     }
     else {
         // this is the normal case for calling xerbla;
         // invalid parameter values are usually logic errors, not runtime errors.
-        fprintf( stderr, "On entry to %s, parameter %ld had an illegal value (info = %ld)\n",
-                 srname, long(minfo), long(-minfo) );
+        fprintf( stderr, "On entry to %s, parameter %lld had an illegal value (info = %lld)\n",
+                 srname, (long long) minfo, (long long) -minfo );
     }
 }
