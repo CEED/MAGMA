@@ -59,7 +59,7 @@ magma_zmeliminate_duplicates(
     magma_int_t info = 0;
     magma_int_t num_threads=1, chunksize;
     magmaDoubleComplex element;
-    magma_int_t i, count = 0;
+    magma_int_t count = 0;
     omp_lock_t counter;
     omp_init_lock(&(counter));
     magma_int_t duplicate = 0;
@@ -90,7 +90,7 @@ magma_zmeliminate_duplicates(
                 magma_int_t col = LU_new->col[i];
                 magma_int_t row = LU_new->rowidx[i];
                 #pragma omp parallel for
-                for( magma_int_t j=0;j<count;j++ ){
+                for( magma_int_t j = 0; j < count; j++ ){
                     if( LU_new->rowidx[j] == row ){
                         if( LU_new->col[j] == col ){
                             // two times the same candidate
@@ -122,7 +122,8 @@ magma_zmeliminate_duplicates(
 
         
         if( count < num_rm ){
-             printf("%% error: %d < %d -> increase threshold\n", count, num_rm);
+            printf("%% error: %lld < %lld -> increase threshold\n",
+                    (long long) count, (long long) num_rm);
             // make the threshold smaller:
             element = element * MAGMA_Z_MAKE(.01,0.0);
             #pragma omp parallel for
@@ -134,7 +135,7 @@ magma_zmeliminate_duplicates(
                     magma_int_t col = LU_new->col[i];
                     magma_int_t row = LU_new->rowidx[i];
                     #pragma omp parallel for
-                    for( magma_int_t j=0;j<count;j++ ){
+                    for( magma_int_t j = 0; j < count; j++ ){
                         if( LU_new->rowidx[j] == row ){
                             if( LU_new->col[j] == col ){
                                 // two times the same candidate
@@ -168,17 +169,17 @@ magma_zmeliminate_duplicates(
                 }
             }
             
-            success=1;
-             printf("%% now: %d > %d\n", count, num_rm);
+            success = 1;
+            printf("%% now: %lld > %lld\n", (long long) count, (long long) num_rm);
           //exit(-1);
         //} else if ( count > num_rm*thrs ) {
         //  printf("%% error: something wrong.\n", count, num_rm); fflush(stdout);
-        } else if(count > num_rm || count <= (int)num_rm*1.2 ){      
+        } else if(count > num_rm || count <= (magma_int_t)(num_rm*1.2)){      
             //printf("order again %d %d\n", count, num_rm);
             //CHECK( magma_zmorderstatistics(
             //    LU_new->val, LU_new->col, LU_new->rowidx, count, num_rm,  1, &element, queue ) );
             success=1;
-        } else if( count > (int)num_rm*1.2 ){   
+        } else if( count > (magma_int_t)(num_rm*1.2) ){   
             //thrs = thrs-0.1;
             //printf("%% error: %d > %d -> decrease threshold\n", count, (int)num_rm*1.2);
             success=1;
@@ -191,7 +192,7 @@ magma_zmeliminate_duplicates(
     // as we have no longer duplicates, we just need to sort num_rm elements to the front
     
      //      printf("unsorted:\n");
-     //  for(int z=1;z<LU_new->nnz;z++)
+     //  for(int z = 1; z < LU_new->nnz; z++)
      //      printf("(%d,%d)=%f\t", LU_new->rowidx[z],LU_new->col[z],LU_new->val[z]);
      //   printf("\n");
     
@@ -201,7 +202,7 @@ magma_zmeliminate_duplicates(
    
    //rintf("%%done2.\n"); fflush(stdout);
    //           printf("sorted:\n");
-   //   for(int z=1;z<LU_new->nnz;z++)
+   //   for(int z = 1; z < LU_new->nnz; z++)
    //       printf("(%d,%d)=%f\t", LU_new->rowidx[z],LU_new->col[z],LU_new->val[z]);
    //    printf("\n");
     // Now another sweep. 
@@ -366,7 +367,7 @@ magma_zparilut_insert_LU(
                                  // if( U->col[ j ] == new_col-1){
                                  //     printf("%%problem in L: (%d,%d)\n", new_row, new_col);
                                  // }
-            //for(int z=0;z<num_rm;z++){
+            //for(int z = 0; z < num_rm; z++){
             //    if(LU_new->col[z]==new_col && LU_new->rowidx[z]==new_row){
             //    printf("here:%d \n\n",z);
             //    }
@@ -417,10 +418,10 @@ magma_zparilut_insert_LU(
                         // and we always have the diagonal!
                         while( j!=0 ){
                             if( L->col[jn]==new_col ){
-                        printf("%% tried to insert duplicate case 2 2 in L: (%d %d) \n", new_row, new_col);
-                             // if( L->col[ j ] == new_col-1){
-                             //         printf("%%problem in L: (%d,%d)\n", new_row, new_col);
-                             // }
+                                printf("%% tried to insert duplicate case 2 2 in L: (%d %d) \n", new_row, new_col);
+                                // if( L->col[ j ] == new_col-1){
+                                //         printf("%%problem in L: (%d,%d)\n", new_row, new_col);
+                                // }
                                 // L->list[j]=loc;
                                 // L->list[loc]=jn;
                                 // L->rowidx[ loc ] = new_row;
@@ -430,14 +431,13 @@ magma_zparilut_insert_LU(
                                 //rm_loc[duplL] = loc;
                                 //duplL++;
 
-
-                for(int z=0;z<num_rm;z++){
-                                if(LU_new->col[z]==new_col && LU_new->rowidx[z]==new_row){
-                                printf("here:%d \n\n",z);
-                                }
-                        }           
+                                for(int z = 0; z < num_rm; z++){
+                                    if(LU_new->col[z]==new_col && LU_new->rowidx[z]==new_row){
+                                        printf("here:%d \n\n",z);
+                                    }
+                                }           
                                 j=0; //break;
-                            }else if( L->col[jn]>new_col ){
+                            } else if( L->col[jn] > new_col ) {
                                 //printf("%insert in L: (%d,%d)\n", new_row, new_col);
                                 L->list[j]=loc;
                                 L->list[loc]=jn;
@@ -446,7 +446,7 @@ magma_zparilut_insert_LU(
                                 L->val[ loc ] = MAGMA_Z_ZERO;
                                 j=0; //break;
                                 
-                            } else{
+                            } else {
                                 j=jn;
                                 jn=L->list[jn];
                             }
@@ -483,18 +483,18 @@ magma_zparilut_insert_LU(
                     U->val[ loc ] = MAGMA_Z_ONE;
                     jnT=0; //break;
                 }else if( U->col[jnT]==new_col ){
-                            printf("%%insert duplicate in U 1 2 : %d (%d,%d)\n", r, new_row, new_col);
-                                 // if( U->col[ jT ] == new_col-1){
-                                 //     printf("%%problem in U: (%d,%d)\n", new_row, new_col);
-                                 // }
-                                //rm_loc2[duplU] = loc;
-                                //duplU++;
-                                // U->list[jT]=loc;
-                                // U->list[loc]=jnT;
-                                // U->rowidx[ loc ] = new_row;
-                                // U->col[ loc ] = new_col-1;
-                                // U->val[ loc ] = MAGMA_Z_ZERO;
-            jnT=0; //break;
+                    printf("%% insert duplicate in U 1 2 : %lld (%d,%d)\n", (long long) r, new_row, new_col);
+                    // if( U->col[ jT ] == new_col-1){
+                    //     printf("%%problem in U: (%d,%d)\n", new_row, new_col);
+                    // }
+                    //rm_loc2[duplU] = loc;
+                    //duplU++;
+                    // U->list[jT]=loc;
+                    // U->list[loc]=jnT;
+                    // U->rowidx[ loc ] = new_row;
+                    // U->col[ loc ] = new_col-1;
+                    // U->val[ loc ] = MAGMA_Z_ZERO;
+                    jnT = 0; //break;
                 }else if( U->col[jnT]>new_col ){
                     //printf("%%insert in U: %d (%d,%d)->(%d,%d)->(%d,%d) in location rm[%d] = %d\n", r, U->rowidx[jT], U->col[jT], new_row, new_col, U->rowidx[jnT], U->col[jnT], r, loc);
                     U->list[jT]=loc;
@@ -520,9 +520,9 @@ magma_zparilut_insert_LU(
                     magma_int_t jnT = old_rowstart;
                     magma_int_t jT;
                     // diagonal element always exists!
-                    while( jnT!=0 ){
-                        jT=jnT;
-                        jnT=U->list[jnT];
+                    while( jnT != 0 ){
+                        jT = jnT;
+                        jnT = U->list[jnT];
                         if( jnT == 0 ){
                             //printf("%%insert in U: (%d,%d)\n", new_row, new_col);
                             U->list[jT]=loc;
@@ -530,20 +530,21 @@ magma_zparilut_insert_LU(
                             U->rowidx[ loc ] = new_row;
                             U->col[ loc ] = new_col;
                             U->val[ loc ] = MAGMA_Z_ONE;
-                            jnT=0; //break;
+                            jnT = 0; //break;
                         }else if( U->col[jnT]==new_col ){
-                              printf("%%insert duplicate in U 2 2: %d %d (%d,%d)\n", r, r2, new_row, new_col);
-                                //rm_loc2[duplU] = loc;
-                                 //duplU++;
-                                 // if( U->col[ jT ] == new_col-1){
-                                 //     printf("%%problem in U: (%d,%d)\n", new_row, new_col);
-                                 // }
-                             //   U->list[jT]=loc;
-                             // U->list[loc]=jnT;
-                             // U->rowidx[ loc ] = new_row;
-                             // U->col[ loc ] = new_col-1;
-                             // U->val[ loc ] = MAGMA_Z_ZERO;                            
-                                jnT=0; //break;
+                            printf("%% insert duplicate in U 2 2: %lld %lld (%d,%d)\n",
+                                    (long long) r, (long long) r2, new_row, new_col);
+                            //rm_loc2[duplU] = loc;
+                            //duplU++;
+                            // if( U->col[ jT ] == new_col-1){
+                            //     printf("%%problem in U: (%d,%d)\n", new_row, new_col);
+                            // }
+                            //   U->list[jT]=loc;
+                            // U->list[loc]=jnT;
+                            // U->rowidx[ loc ] = new_row;
+                            // U->col[ loc ] = new_col-1;
+                            // U->val[ loc ] = MAGMA_Z_ZERO;                            
+                            jnT = 0; //break;
                         }else if( U->col[jnT]>new_col ){
                             //printf("%%insert in U case 2: %d %d (%d,%d)->(%d,%d)->(%d,%d)\n", r, r2, U->rowidx[jT], U->col[jT], new_row, new_col, U->rowidx[jnT], U->col[jnT]);
                             U->list[jT]=loc;
@@ -551,7 +552,7 @@ magma_zparilut_insert_LU(
                             U->rowidx[ loc ] = new_row;
                             U->col[ loc ] = new_col;
                             U->val[ loc ] = MAGMA_Z_ONE;
-                            jnT=0; //break;
+                            jnT = 0; //break;
                             
                         } 
                     }
@@ -1486,7 +1487,12 @@ magma_zparilut_rm_thrs_U(
             else if( U->col[elo] > rm_col ){
                 //U->val[elo] = MAGMA_Z_ZERO;
                 //success = 1;
-                printf("%% error: does not exist in U: %d (%d,%d)  %d (%d,%d) -> %d (%d,%d) row starts with (%d,%d) \n", rm, rm_row, rm_col, elo, U->rowidx[elo],U->col[elo],el,U->rowidx[el],U->col[el], U->rowidx[U->row[rm_row]], U->col[U->row[rm_row]]);fflush(stdout);
+                printf("%% error: does not exist in U: %lld (%lld,%lld)  %lld (%d,%d) -> %lld (%d,%d) row starts with (%d,%d) \n",
+                        (long long) rm, (long long) rm_row, (long long) rm_col,
+                        (long long) elo, U->rowidx[elo], U->col[elo],
+                        (long long) el,  U->rowidx[el],  U->col[el],
+                        U->rowidx[U->row[rm_row]], U->col[U->row[rm_row]]);
+                fflush(stdout);
                 el = 0;
             }
             elo = el;
@@ -1558,7 +1564,7 @@ magma_zparilut_rm_thrs_U(
                     
             }
             //else if( U->col[i] > rm_col || i == 0 ){
-            //    //printf("error:does not exist: %d (%d,%d)  (%d,%d) -> (%d,%d)\n", i, rm_row, rm_col, U->rowidx[lasti],U->col[lasti],U->rowidx[nexti],U->col[nexti]);fflush(stdout);
+            //    //printf("error:does not exist: %d (%d,%d)  (%d,%d) -> (%d,%d)\n", i, rm_row, rm_col, U->rowidx[lasti],U->col[lasti],U->rowidx[nexti],U->col[nexti]); fflush(stdout);
             //    omp_set_lock(&(counter));
             //    U->val[i] = MAGMA_Z_ZERO;
             //    rm_loc[ count_rm ] = i; 
@@ -1774,7 +1780,7 @@ magma_zparilut_set_thrs(
     magma_int_t info = 0;
 
     magmaDoubleComplex element;
-    magmaDoubleComplex *val=NULL;;
+    magmaDoubleComplex *val=NULL;
     const magma_int_t ione = 1;
     
     CHECK( magma_zmalloc_cpu( &val, LU->nnz ));
@@ -1988,7 +1994,7 @@ magma_zparilut_set_approx_thrs(
 {
     magma_int_t info = 0;
     magmaDoubleComplex element;
-    magmaDoubleComplex *val=NULL;;
+    magmaDoubleComplex *val=NULL;
     const magma_int_t incy = 1;
     const magma_int_t incx = (int) (LU->nnz)/(1024);
     magma_int_t loc_nnz; 
@@ -2022,7 +2028,7 @@ magma_zparilut_set_approx_thrs(
                 }
             }
             element = MAGMA_Z_ZERO;
-            for( int z=0; z<num_threads;z++){
+            for( int z=0; z < num_threads; z++){
                 element = element+MAGMA_Z_MAKE(MAGMA_Z_ABS(elements[z]), 0.0);
             }
             element = element/MAGMA_Z_MAKE((double)num_threads, 0.0);
@@ -2046,7 +2052,7 @@ magma_zparilut_set_approx_thrs(
                     }
                 }
                 element = MAGMA_Z_ZERO;
-                for( int z=0; z<num_threads;z++){
+                for( int z=0; z < num_threads; z++){
                     element = element+MAGMA_Z_MAKE(MAGMA_Z_ABS(elements[z]), 0.0);
                 }
                 element = element/MAGMA_Z_MAKE((double)num_threads, 0.0);
@@ -2108,7 +2114,7 @@ magma_zparilut_LU_approx_thrs(
 {
     magma_int_t info = 0;
     magmaDoubleComplex element;
-    magmaDoubleComplex *val=NULL;;
+    magmaDoubleComplex *val=NULL;
     const magma_int_t incy = 1;
     const magma_int_t incxL = (int) (L->nnz)/(1024);
     const magma_int_t incxU = (int) (U->nnz)/(1024);
@@ -2148,7 +2154,7 @@ magma_zparilut_LU_approx_thrs(
                     }
                 }
                 element = MAGMA_Z_ZERO;
-                for( int z=0; z<num_threads;z++){
+                for( int z=0; z < num_threads; z++){
                     element = element+MAGMA_Z_MAKE(MAGMA_Z_ABS(elements[z]), 0.0);
                 }
                 element = element/MAGMA_Z_MAKE((double)num_threads, 0.0);
@@ -2211,7 +2217,7 @@ magma_zparilut_set_multi_thrs(
 {
     magma_int_t info = 0;
     magmaDoubleComplex element;
-    magmaDoubleComplex *val=NULL;;
+    magmaDoubleComplex *val=NULL;
     const magma_int_t incy = 1;
     const magma_int_t incx = (int) LU->nnz/1000;
     magma_int_t loc_nnz; 
@@ -2293,7 +2299,7 @@ magma_zparict_sweep(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    //printf("\n");fflush(stdout);
+    //printf("\n"); fflush(stdout);
     // parallel for using openmp
     #pragma omp parallel for
     for( magma_int_t e=0; e<LU->nnz; e++){
@@ -2303,7 +2309,7 @@ magma_zparict_sweep(
             magma_index_t row = LU->rowidx[ e ];
             magma_index_t col = LU->col[ e ];
             // as we look at the lower triangular, col<=row
-            //printf("(%d,%d) ", row, col);fflush(stdout);
+            //printf("(%d,%d) ", row, col); fflush(stdout);
             magmaDoubleComplex A_e = MAGMA_Z_ZERO;
             // check whether A contains element in this location
             for( i = A->row[row]; i<A->row[row+1]; i++){
@@ -2347,7 +2353,7 @@ magma_zparict_sweep(
         }// end check whether part of LU
         
     }// end omp parallel section
-        //printf("\n");fflush(stdout);
+    //printf("\n"); fflush(stdout);
     return info;
 }
 
@@ -2731,7 +2737,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = L.row[ cand_row ];//el1;
+                magma_index_t checkel = L.row[ cand_row ]; //el1;
                 magma_index_t checkcol = L.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -2761,7 +2767,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = el1;//L.row[ cand_row ];//el1;
+                magma_index_t checkel = el1; //L.row[ cand_row ]; //el1;
                 magma_index_t checkcol = L.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -2807,7 +2813,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = el1;//U.row[ cand_row ];//el1;
+                magma_index_t checkel = el1; //U.row[ cand_row ]; //el1;
                 magma_index_t checkcol = U.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -2837,7 +2843,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = el1;//U.row[ cand_row ];//el1;
+                magma_index_t checkel = el1; //U.row[ cand_row ]; //el1;
                 magma_index_t checkcol = U.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -2873,7 +2879,8 @@ magma_zmilu0_candidates(
     }
     // printf("cand count:%d\n", LU_new->nnz);
     if( LU_new->nnz > L.nnz*20 ){
-        printf("error: more candidates than space allocated: %d>%d. Increase candidate allocation.\n", LU_new->nnz, L.nnz*20 );
+        printf("error: more candidates than space allocated: %lld > %lld. Increase candidate allocation.\n",
+                (long long) LU_new->nnz, (long long) L.nnz*20 );
         goto cleanup;
     }
         // parallel loop
@@ -2894,7 +2901,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = L.row[ cand_row ];//el1;
+                magma_index_t checkel = L.row[ cand_row ]; //el1;
                 magma_index_t checkcol = L.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -2931,7 +2938,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = el1;//L.row[ cand_row ];//el1;
+                magma_index_t checkel = el1; //L.row[ cand_row ]; //el1;
                 magma_index_t checkcol = L.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -2985,7 +2992,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = el1;//U.row[ cand_row ];//el1;
+                magma_index_t checkel = el1; //U.row[ cand_row ]; //el1;
                 magma_index_t checkcol = U.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -3022,7 +3029,7 @@ magma_zmilu0_candidates(
                 magma_index_t cand_col = min(row, col2);
                 // check whether this element already exists
                 magma_int_t exist = 0;
-                magma_index_t checkel = el1;//U.row[ cand_row ];//el1;
+                magma_index_t checkel = el1; //U.row[ cand_row ]; //el1;
                 magma_index_t checkcol = U.col[ checkel ];
                 while( checkcol <= cand_col && checkel!=0 ) {
                     if( checkcol == cand_col ){
@@ -3167,18 +3174,18 @@ magma_zdiagcheck_cpu(
     
     // rowpointer
     #pragma omp parallel for
-    for(magma_int_t i=0; i<A.num_rows; i++){
+    for(magma_int_t i=0; i < A.num_rows; i++){
         magmaDoubleComplex diag = MAGMA_Z_ZERO;
-        for( magma_int_t j=A.row[i]; j<A.row[i+1]; j++ ){
-            if( A.col[j] == i ){
+        for( magma_int_t j = A.row[i]; j < A.row[i+1]; j++ ) {
+            if( A.col[j] == i ) {
                 diag = A.val[j];
-            }   
+            }
         }
-        if( diag == MAGMA_Z_ZERO ){
-            printf("%%error: zero diagonal element in row %d.\n", i );    
+        if( diag == MAGMA_Z_ZERO ) {
+            printf("%% error: zero diagonal element in row %lld.\n", (long long) i );    
             info = i;
-            for( magma_int_t l=A.row[i]; l<A.row[i+1]; l++ ){
-                printf("(%d,%d)%.2e -> ", i, A.col[l], A.val[l]);
+            for( magma_int_t l = A.row[i]; l < A.row[i+1]; l++ ) {
+                printf("(%lld,%d)%.2e -> ", (long long) i, A.col[l], real(A.val[l]) );
             }   
             printf("\n\n");
         }

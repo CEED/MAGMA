@@ -168,7 +168,7 @@ magma_zmisai_blockstruct_gpu(
     A->nnz = n*max(bs,offs);
     A->memory_location = Magma_DEV;
     A->storage_type = Magma_CSR;
-    printf(" allocate memory of size %d and %d\n",A->num_rows+1, A->nnz );
+    printf(" allocate memory of size %lld and %lld\n", (long long) A->num_rows+1, (long long) A->nnz );
     magma_zmalloc( &A->dval, A->nnz );
     magma_index_malloc( &A->drow, A->num_rows+1 );
     magma_index_malloc( &A->dcol, A->nnz );
