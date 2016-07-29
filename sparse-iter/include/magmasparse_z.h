@@ -507,6 +507,8 @@ magma_zsolverinfo_free(
     magma_z_preconditioner *precond,
     magma_queue_t queue );
 
+magma_int_t
+magma_zKrylov_check( magma_solver_type solver );
 
 
 /* ////////////////////////////////////////////////////////////////////////////

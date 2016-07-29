@@ -919,3 +919,49 @@ cleanup:
     magma_free_cpu( initial_guess );
     return info;
 }
+
+
+
+
+/**
+    Checks whether a solver is among the list of Krylov solvers.
+    The result is passed in info:
+    1   yes - Krylov solver
+    0   no - no Krylov solver of the list.
+    
+    @param[in]
+    solver      magma_solver_type
+    
+    @return error
+    
+    @ingroup magma_util
+    ********************************************************************/
+extern "C" magma_int_t
+magma_zKrylov_check( magma_solver_type solver )
+{
+    switch( solver ) {
+        case  Magma_CG:
+        case  Magma_CGMERGE:
+        case  Magma_BICGSTAB:
+        case  Magma_BICGSTABMERGE:
+        case  Magma_BICGSTABMERGE2:
+        case  Magma_GMRES:
+        case  Magma_IDR:
+        case  Magma_IDRMERGE:
+        case  Magma_CGS:
+        case  Magma_CGSMERGE:
+        case  Magma_BICG:
+        case  Magma_BICGMERGE:
+        case  Magma_QMR:
+        case  Magma_QMRMERGE:
+        case  Magma_LSQR:
+        case  Magma_TFQMR:
+        case  Magma_TFQMRMERGE:
+            return MAGMA_SUCCESS;                                
+            break;
+        
+        default:
+            return MAGMA_ERR_UNKNOWN;
+            break;
+    }
+}
