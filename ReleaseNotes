@@ -24,6 +24,12 @@ Included are routines for the following algorithms:
 Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
+ 2.X.X 
+ 
+    MAGMA sparse
+    * Added a preconditioned QMR iterative solver (PQMR) including a kernel-merged version.
+    * Updated the preconditioner structure to allow for a specific ILU triangular solver.
+    
 
  2.0.1 - Feb 26, 2016
     * Fixed bug with 'make install'
