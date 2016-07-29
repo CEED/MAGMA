@@ -60,13 +60,11 @@ libsparse_src += \
 	$(cdir)/zpidr_strms.cpp               \
 	$(cdir)/zbombard.cpp                  \
 	$(cdir)/zbombard_merge.cpp            \
-        $(cdir)/zpbicgstab_merge.cpp          \
+    $(cdir)/zpbicgstab_merge.cpp          \
 
 # Krylov space eigen-solvers
 libsparse_src += \
 	$(cdir)/zlobpcg.cpp                   \
-#	$(cdir)/zcgeig.cpp                    \
-#	$(cdir)/zlancsoz.cpp                  \
 
 # Krylov space least squares
 libsparse_src += \
@@ -92,14 +90,18 @@ libsparse_src += \
 	$(cdir)/ziterilu.cpp                  \
 	$(cdir)/zcustomic.cpp                 \
 	$(cdir)/zcustomilu.cpp                \
-	$(cdir)/zparilut.cpp                  \
+#	$(cdir)/zparilut.cpp                  \
 #	$(cdir)/zparict.cpp                   \
 #	$(cdir)/zdummy.cpp                    \
 
 # incomplete sparse approximate inverse
 libsparse_src += \
-        $(cdir)/zgeisai.cpp                   \
-	$(cdir)/zsyisai.cpp                   \
+#   $(cdir)/zgeisai.cpp                   \
+#   $(cdir)/zsyisai.cpp                   \
+
+# dummy to compensate for routines not included in release
+libsparse_src += \
+	$(cdir)/zdummy.cpp                    \
 
 
 # orthogonalization schemes and wrappers to dense MAGMA

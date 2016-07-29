@@ -298,6 +298,20 @@ magma_zisai_l(
 
     return info;
 }
+extern "C"
+magma_int_t
+magma_zisai_l_t(
+    magma_z_matrix b,
+    magma_z_matrix *x,
+    magma_z_preconditioner *precond,
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
+
+    printf("error: not yet released\n");
+
+    return info;
+}
 
 
 /**
@@ -335,6 +349,20 @@ magma_zisai_l(
 extern "C"
 magma_int_t
 magma_zisai_r(
+    magma_z_matrix b,
+    magma_z_matrix *x,
+    magma_z_preconditioner *precond,
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
+
+    printf("error: not yet released\n");
+
+    return info;
+}
+extern "C"
+magma_int_t
+magma_zisai_r_t(
     magma_z_matrix b,
     magma_z_matrix *x,
     magma_z_preconditioner *precond,
