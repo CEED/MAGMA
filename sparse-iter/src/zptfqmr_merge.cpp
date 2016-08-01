@@ -73,7 +73,7 @@ magma_zptfqmr_merge(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
-    double nom0, r0,  res, nomb;
+    double nom0, r0,  res=0, nomb;
     magmaDoubleComplex rho = c_one, rho_l = c_one, eta = c_zero , c = c_zero , 
                         theta = c_zero , tau = c_zero, alpha = c_one, beta = c_zero,
                         sigma = c_zero;
