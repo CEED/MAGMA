@@ -136,8 +136,8 @@ for config in $@; do
         mkdir $builds/$config/testing
         mkdir $builds/$config/sparse-testing
         mv lib/lib* $builds/$config/lib
-        mv `find testing             -maxdepth 1 -perm /u+x -type f` $builds/$config/testing
-        mv `find sparse-iter/testing -maxdepth 1 -perm /u+x -type f` $builds/$config/sparse-testing
+        mv `find testing             -maxdepth 1 -perm /u+x -type f -not -name '*.py'` $builds/$config/testing
+        mv `find sparse-iter/testing -maxdepth 1 -perm /u+x -type f -not -name '*.py'` $builds/$config/sparse-testing
     else
         echo "SKIPPING SAVE"
     fi
