@@ -1122,7 +1122,19 @@ batched = (
 	('testing_zherk_batched',     batch + '         -U    -c',  nk,   ''),
 	('testing_zherk_batched',     batch + '         -U -C -c',  nk,   ''),
 	
+	# lower/upper, no-trans/conj-trans
+	('testing_zher2k_batched',    batch + '         -L    -c',  nk,   ''),
+	('testing_zher2k_batched',    batch + '         -L -C -c',  nk,   ''),
+	('testing_zher2k_batched',    batch + '         -U    -c',  nk,   ''),
+	('testing_zher2k_batched',    batch + '         -U -C -c',  nk,   ''),
+	
 	('testing_zlacpy_batched',    batch + '               -c',  mn,   ''),
+	
+	# lower/upper, no-trans/conj-trans
+	('testing_zsyr2k_batched',    batch + '         -L    -c',  nk,   ''),
+	('testing_zsyr2k_batched',    batch + '         -L -C -c',  nk,   ''),
+	('testing_zsyr2k_batched',    batch + '         -U    -c',  nk,   ''),
+	('testing_zsyr2k_batched',    batch + '         -U -C -c',  nk,   ''),
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
 	('testing_ztrsm_batched',     batch + '-SL -L    -DN  -c',  n + wide, ''),
@@ -1172,6 +1184,9 @@ batched = (
 	
 	('testing_zpotrf_batched',    batch + '         -L    -c2', n,    ''),
 	('#testing_zpotrf_batched',   batch + '         -U    -c2', n,    'upper not implemented'),
+	
+	# ----------
+	# vbatched (BLAS, LU, etc.)
 )
 if ( opts.batched ):
 	tests += batched
