@@ -99,7 +99,7 @@
     @ingroup magma_zheev_2stage
     ********************************************************************/
 extern "C" magma_int_t
-magma_zunmqr_gpu_2stages(
+magma_zunmqr_2stage_gpu(
     magma_side_t side, magma_trans_t trans,
     magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex_ptr dA,   magma_int_t ldda,
@@ -205,4 +205,4 @@ magma_zunmqr_gpu_2stages(
     magma_queue_destroy( queues[0] );
     magma_free( dwork );
     return *info;
-} /* magma_zunmqr_gpu_2stages */
+} /* magma_zunmqr_2stage_gpu */

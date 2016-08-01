@@ -537,8 +537,8 @@ magma_zheevdx_2stage(
 
         magma_zsetmatrix( n, n, A, lda, dA, ldda, queue );
 
-        magma_zunmqr_gpu_2stages(MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, dA+nb, ldda,
-                                 dZ+nb, n, dT1, nb, info);
+        magma_zunmqr_2stage_gpu( MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, dA+nb, ldda,
+                                 dZ+nb, n, dT1, nb, info );
 
         magma_zgetmatrix( n, *m, dZ, lddz, A, lda, queue );
 

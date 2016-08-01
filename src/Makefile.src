@@ -214,7 +214,7 @@ libmagma_src += \
 	$(cdir)/zhetrd_hb2st.cpp	\
 	$(cdir)/zbulge_back.cpp		\
 	$(cdir)/zungqr_2stage_gpu.cpp	\
-	$(cdir)/zunmqr_gpu_2stage.cpp	\
+	$(cdir)/zunmqr_2stage_gpu.cpp	\
 	$(cdir)/zhegvdx_2stage.cpp	\
 	$(cdir)/zheevdx_2stage.cpp	\
 	\
