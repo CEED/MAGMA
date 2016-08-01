@@ -9,12 +9,12 @@
 # @author Mark Gates
 
 svn st -vq \
-    | perl -pi -e 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
+    | perl -pe 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
     | egrep -v '^\.$$|obsolete|Makefile\.|deprecated|^exp|contrib|\.png|results/v' \
     | egrep 'Makefile|\w\.\w' >! files.txt
 
-setenv FILES   `cat files.txt`
-setenv HEADERS `egrep '\.h$' files.txt`
+setenv FILES        `egrep -v checklist files.txt`
+setenv HEADERS      `egrep '\.h$' files.txt`
 setenv MAKEFILES    `egrep Makefile files.txt | egrep -v sparse-iter`
 setenv MAKEFILES_SP `egrep Makefile files.txt | egrep    sparse-iter`
 
@@ -22,7 +22,7 @@ echo "============================================================ required fixe
 
 # fixed
 echo "========== don't use MIN_CUDA_ARCH; use __CUDA_ARCH__ and magma_getdevice_arch  *** required fix ***"
-egrep MIN_CUDA_ARCH $FILES | egrep -v 'CMakeLists.txt|Makefile|interface.cpp|checklist.csh'
+egrep MIN_CUDA_ARCH $FILES | egrep -v 'CMakeLists.txt|Makefile|interface.cpp'
 echo
 
 # fixed
@@ -62,12 +62,12 @@ echo
 
 # fixed
 echo "========== C malloc, instead of magma_*malloc_cpu                          *** required fix ***"
-egrep '\b(malloc|calloc|realloc|reallocf|valloc|strdup) *\(' $FILES | egrep -v 'quark|alloc.cpp'
+egrep '\b(malloc|calloc|realloc|reallocf|valloc|strdup) *\(' $FILES | egrep -v 'quark|alloc.cpp|magma_util.cpp'
 echo
 
 # fixed
 echo "========== C free, instead of magma_free_cpu                               *** required fix ****"
-egrep '^ *free *\('                    $FILES | egrep -v 'quark|alloc.cpp'
+egrep '^ *free *\('                    $FILES | egrep -v 'quark|alloc.cpp|magma_util.cpp'
 echo
 
 # fixed except trevc3; needs rewrite to fix
@@ -84,7 +84,7 @@ echo
 
 # fixed
 echo "========== C++ streams                                                     *** required fix ***"
-egrep '\b(fstream|iostream|sstream|cin|cout)\b' $FILES | egrep -v 'checklist.csh'
+egrep '\b(fstream|iostream|sstream|cin|cout)\b' $FILES
 echo
 
 # fixed
@@ -118,60 +118,38 @@ echo
 
 # fixed
 echo "========== using defunct GPUSHMEM                                          *** required fix ***"
-egrep 'GPUSHMEM'                       $FILES | egrep -v 'checklist.csh'
+egrep 'GPUSHMEM'                       $FILES
 echo
 
 # fixed
 echo "========== CUDA driver routines (cu[A-Z]*; MathWorks cannot use these)     *** required fix ***"
-egrep 'cu[A-Z]\w+ *\(' `cat files.txt` $FILES \
+egrep 'cu[A-Z]\w+ *\(' $FILES \
     | egrep -v 'make_cuComplex|make_cuDoubleComplex|make_cuFloatComplex|cuComplexDoubleToFloat|cuComplexFloatToDouble|cuGetErrorString|cuConj|cuC(real|imag|add|sub|mul|div|addf|subf|mulf|divf|fmaf|abs|fma)'
 echo
 
 # fixed
 echo "========== cuda.h (mostly only needed for CUDA driver routines, cu[A-Z]*)  *** required fix ***"
-egrep 'cuda\.h'                        $FILES | egrep -v 'checklist.csh|interface_cuda/error.h|fortran2.cpp|for CUDA_VERSION'
+egrep 'cuda\.h'                        $FILES | egrep -v 'interface_cuda/error.h|fortran2.cpp|for CUDA_VERSION'
 echo
 
 # fixed except 2-stage
 echo "========== exit, instead of returning error code                           *** required fix ***"
-egrep '\bexit *\( *-?\w+ *\)'          $FILES | egrep -v 'trace.cpp|quark|magma_util.cpp|testings.h|\.py'
+egrep '\bexit *\( *-?\w+ *\)'          $FILES | egrep -v 'trace.cpp|quark|magma_util.cpp|testing|\.py'
 echo
 
 # fixed
 echo "========== old formulas for ceildiv & roundup                              *** required fix ***"
-./tools/checklist_ceildiv.pl           $FILES | egrep -v 'checklist_ceildiv.pl|documentation.txt|magma\.h|\.f:|\.F90:'
+./tools/checklist_ceildiv.pl           $FILES | egrep -v 'documentation.txt|magma\.h|\.f:|\.F90:'
 echo
 
 # fixed
 echo "========== sprintf; use snprintf for safety                                *** required fix ***"
-egrep sprintf `cat files.txt` | egrep -v 'checklist.csh|\.pl|quark|strlcpy'
-echo
-
-# fixed
-echo "========== routines in wrong documentation groups (in src)                 *** requried fix ***"
-cd src
-echo "driver:"
-egrep ingroup *gesv* *posv* *gels* *hesv* *sysv* *geev* *heev* *syev* *gesvd* *gesdd* | egrep -v driver
-echo "comp:"
-egrep ingroup *getrf* *potrf* *geqrf* *hetrf* *sytrf* | egrep -v comp
-echo "aux:"
-egrep ingroup *getf2* *potf2* *geqr2* *[sdcz]la*      | egrep -v aux
-cd ..
-echo
-
-# fixed
-echo "========== routines in wrong documentation groups (2nd check)              *** requried fix ***"
-echo "driver:"
-egrep 'ingroup.*_driver' $FILES -l | egrep -v 'checklist.csh|[sdcz](gesv|posv|gels|gesvd|gesdd|syev|heev|geev|hegvd|hesv|sygvd|hegvr|hegvx|sysv|cgeqrsv_gpu)'
-echo "comp:"
-egrep 'ingroup.*_comp'   $FILES -l | egrep -v 'checklist.csh|[sdcz](getrf|potrf|geqrf|hetrf|sytrf|gerbt|gerfs|getri|getrs|potri|trtri|potrs|gelqf|geqlf|geqrs|geqp3|stedx|trevc|hetrs|sytrs|gehrd|hetrd|gebrd|hegst|gegqr|unglq|ungqr|unghr|ungtr|ungbr|unmlq|unmql|unmqr|unmbr|unmtr)'
-echo "aux:"
-egrep 'ingroup.*_aux'    $FILES -l | egrep -v 'checklist.csh|[sdcz](getf2|potf2|geqr2|la)'
+egrep sprintf $FILES | egrep -v '\.pl|quark|strlcpy'
 echo
 
 # fixed
 echo "========== sync_wtime of NULL stream (excluding _mgpu codes)               *** required fix ***"
-egrep sync_wtime testing/*.cpp | egrep -v 'sync_wtime\( opts.queue \)' | egrep -v '_mgpu.cpp'
+egrep sync_wtime $FILES | egrep -v 'sync_wtime\( opts.queue \)' | egrep -v '_mgpu.cpp'
 echo
 
 # fixed
@@ -181,7 +159,7 @@ echo
 
 # fixed
 echo "========== use standard c_one and c_neg_one names                          *** required fix ***"
-egrep "\b(mz_one|z_one|zone|mzone|c_mone)\b" $FILES | egrep -v 'tools/checklist.csh'
+egrep "\b(mz_one|z_one|zone|mzone|c_mone)\b" $FILES
 egrep "done *= *-?[0-9]" $FILES
 echo
 
@@ -269,31 +247,5 @@ echo
 # fixed
 # exclude "strings;" and scripts
 echo "========== missing space after semicolons"
-egrep ';\S'                           $FILES | egrep -v '".*;.*"|\.(csh|sh|py|pl)|quark'
+egrep ';\S'                           $FILES | egrep -v '".*;.*"|\.(csh|sh|py|pl|html)|quark|Makefile'
 echo
-
-# too many
-#echo "========== single-line if, without { } braces"
-#egrep '^ *if *\([^{]*;'               $FILES | egrep -v fortran2.cpp
-#echo
-
-# way too many exceptions like A(i,j), min(m,n), etc.
-#echo "========== no space after comma"
-#egrep ',\S'                           $FILES | egrep -v '(min|max)\(\w+,\w+\)|ISEED'
-#echo
-
-# 213 files, 4305 lines need fix
-#echo "========== trailing spaces"
-#egrep '\S +$'               $FILES | egrep -v 'fortran2.cpp' | wc
-#echo
-
-# not sure what these do
-#echo "========== ngpu and info on own line"
-#egrep 'magma_int_t ngpu, '             $FILES
-#egrep ', +magma_int_t *\* *info'       $FILES
-#echo
-
-# not sure what these do
-#echo "========== lwork, lda, etc. starting line (A & lda, work & lwork, should be on same line)"
-#egrep '^ +magma_int_t +l\w+[^;]+$'     $FILES
-#echo
