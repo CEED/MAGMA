@@ -1187,6 +1187,30 @@ batched = (
 	
 	# ----------
 	# vbatched (BLAS, LU, etc.)
+	
+	# no-trans/conj-trans; there are other combinations with trans
+	('testing_zgemm_vbatched',     batch + '-NN            -c',  mn,   ''),
+	('testing_zgemm_vbatched',     batch + '-NC            -c',  mn,   ''),
+	('testing_zgemm_vbatched',     batch + '-CN            -c',  mn,   ''),
+	('testing_zgemm_vbatched',     batch + '-CC            -c',  mn,   ''),
+	
+	# no-trans/trans/conj-trans
+	('testing_zgemv_vbatched',     batch + '               -c',  mn,   ''),
+	('testing_zgemv_vbatched',     batch + '-T             -c',  mn,   ''),
+	('testing_zgemv_vbatched',     batch + '-C             -c',  mn,   ''),
+	
+	# lower/upper, no-trans/conj-trans
+	('testing_zherk_vbatched',     batch + '         -L    -c',  nk,   ''),
+	('testing_zherk_vbatched',     batch + '         -L -C -c',  nk,   ''),
+	('testing_zherk_vbatched',     batch + '         -U    -c',  nk,   ''),
+	('testing_zherk_vbatched',     batch + '         -U -C -c',  nk,   ''),
+	
+	# lower/upper, no-trans/conj-trans
+	('testing_zher2k_vbatched',    batch + '         -L    -c',  nk,   ''),
+	('testing_zher2k_vbatched',    batch + '         -L -C -c',  nk,   ''),
+	('testing_zher2k_vbatched',    batch + '         -U    -c',  nk,   ''),
+	('testing_zher2k_vbatched',    batch + '         -U -C -c',  nk,   ''),
+	
 )
 if ( opts.batched ):
 	tests += batched
