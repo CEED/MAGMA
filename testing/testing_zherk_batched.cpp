@@ -65,6 +65,11 @@ int main( int argc, char** argv)
         opts.transA = MagmaConjTrans; 
         printf("%% WARNING: transA = MagmaTrans changed to MagmaConjTrans\n");
     }
+    #else
+    if (opts.transA == MagmaConjTrans) {
+        opts.transA = MagmaTrans; 
+        printf("%% WARNING: transA = MagmaConjTrans changed to MagmaTrans\n");
+    }
     #endif
    
     printf("%% If running lapack (option --lapack), MAGMA error is computed\n"
