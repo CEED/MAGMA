@@ -21,10 +21,10 @@
 #include <math.h>
 
 // includes, project
-#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
+#include "testings.h"
 
 #if defined(_OPENMP)
 #include <omp.h>
