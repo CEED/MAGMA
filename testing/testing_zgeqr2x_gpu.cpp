@@ -59,7 +59,7 @@ int main( int argc, char** argv)
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("%% version %lld\n", (long long) opts.version );
-    printf("%% It's okay if |Q - Q_lapack| is large; MAGMA and LAPACK\n"
+    printf("%% It's okay if |Q - Q_magma| is large; MAGMA and LAPACK\n"
            "%% just chose different Householder reflectors, both valid.\n\n");
     
     printf("%%   M     N    CPU Gflop/s (ms)    GPU Gflop/s (ms)   |R - Q^H*A|   |I - Q^H*Q|   |T - T_magma|   |Q - Q_magma|\n");

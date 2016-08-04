@@ -33,8 +33,6 @@
 #define h_A(i,j,s) (h_A + (i) + (j)*lda + (s)*lda*Ak)
 
 
-//#define PRINTMAT
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing ztrsm_batched
 */
