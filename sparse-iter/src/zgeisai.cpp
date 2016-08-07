@@ -138,8 +138,7 @@ magma_ziluisaisetup(
             break;
         }
     }
-    printf("%% nnz in L-ISAI: %d\n", nnzL); 
-    printf("maxnnz_ISAI_L = %d;\n", maxsize); 
+    printf("%% nnz in L-ISAI (mean max): %d %d\n", nnzL, maxsize); 
     // this can be modified to the thread-block-size
     if( maxsize > warpsize ){
        info = -(maxsize - warpsize);     
@@ -215,8 +214,7 @@ magma_ziluisaisetup(
             break;
         }
     }
-    printf("%% nnz in U-ISAI: %d\n", nnzU); 
-    printf("maxnnz_ISAI_U = %d;\n", maxsize); 
+    printf("%% nnz in U-ISAI (mean max): %d %d\n", nnzU, maxsize); 
     // this can be modified to the thread-block-size
     if( maxsize > warpsize ){
        info = -(maxsize - warpsize);     
