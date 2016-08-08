@@ -148,7 +148,7 @@ magma_zpcg_merge(
     magma_zsetvector( 7, skp_h, 1, skp, 1, queue );
 
     //Chronometry
-    real_Double_t tempo1, tempo2, tempop1, tempop2;
+    real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
@@ -177,12 +177,9 @@ magma_zpcg_merge(
             CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
             
             // preconditioner in between
-            tempop1 = magma_sync_wtime( queue );
             CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, r, &rt, precond_par, queue ));
             CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, rt, &h, precond_par, queue ));
             //            magma_zcopy( dofs, r.dval, 1, h.dval, 1 );  
-            tempop2 = magma_sync_wtime( queue );
-            precond_par->runtime += tempop2-tempop1;
             
             // computes scalars and updates d
             CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, h.dval, r.dval, d.dval, skp, queue ));

@@ -134,7 +134,7 @@ magma_zptfqmr(
     rho_l = rho;
     
     //Chronometry
-    real_Double_t tempo1, tempo2, tempop1, tempop2;
+    real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
@@ -195,11 +195,8 @@ magma_zptfqmr(
         }
               
         // preconditioner
-        tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, u_mp1, &t, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, t, &pu_m, precond_par, queue ));
-        tempop2 = magma_sync_wtime( queue );
-        precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, Au_new, queue )); // Au_new = A pu_m
         solver_par->spmv_count++;

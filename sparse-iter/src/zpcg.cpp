@@ -124,7 +124,7 @@ magma_zpcg(
     }
 
     //Chronometry
-    real_Double_t tempo1, tempo2, tempop1, tempop2;
+    real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
@@ -135,11 +135,8 @@ magma_zpcg(
         solver_par->numiter++;
 
         // preconditioner
-        tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, r, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, rt, &h, precond_par, queue ));
-        tempop2 = magma_sync_wtime( queue );
-        precond_par->runtime += tempop2-tempop1;
         
         gammanew = magma_zdotc( dofs, r.dval, 1, h.dval, 1, queue );
                                                             // gn = < r,h>
