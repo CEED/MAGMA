@@ -471,10 +471,6 @@ cleanup:
     ---------
 
     @param[in]
-    A           magma_z_matrix
-                input matrix A
-                
-    @param[in]
     b           magma_z_matrix
                 input RHS b
                 
@@ -529,10 +525,6 @@ magma_zisai_l(
     Arguments
     ---------
 
-    @param[in]
-    A           magma_z_matrix
-                input matrix A
-                
     @param[in]
     b           magma_z_matrix
                 input RHS b
@@ -589,10 +581,6 @@ magma_zisai_r(
     ---------
 
     @param[in]
-    A           magma_z_matrix
-                input matrix A
-                
-    @param[in]
     b           magma_z_matrix
                 input RHS b
                 
@@ -647,10 +635,6 @@ magma_zisai_l_t(
     Arguments
     ---------
 
-    @param[in]
-    A           magma_z_matrix
-                input matrix A
-                
     @param[in]
     b           magma_z_matrix
                 input RHS b

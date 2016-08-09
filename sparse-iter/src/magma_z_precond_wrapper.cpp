@@ -117,10 +117,15 @@ cleanup:
     @param[in]
     b           magma_z_matrix
                 input vector y
-
+    
+    @param[in]
+    solver      magma_z_solver_par
+                solver structure using the preconditioner
+                
     @param[in,out]
     precond     magma_z_preconditioner
                 preconditioner
+                
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -340,6 +345,10 @@ cleanup:
     ---------
 
     @param[in]
+    trans       magma_trans_t
+                mode of the preconditioner: MagmaTrans or MagmaNoTrans
+                
+    @param[in]
     A           magma_z_matrix
                 sparse matrix A
 
@@ -491,6 +500,10 @@ cleanup:
 
     Arguments
     ---------
+    
+    @param[in]
+    trans       magma_trans_t
+                mode of the preconditioner: MagmaTrans or MagmaNoTrans
 
     @param[in]
     A           magma_z_matrix
