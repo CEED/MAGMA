@@ -65,6 +65,16 @@
     @param[in]
     lda     INTEGER
             The leading dimension of the array A. LDA >= max(1,M).
+    
+    @param[in,out]
+    dA      COMPLEX_16 array, dimension (LDA,N)
+            Copy of A on the GPU.
+            Portions of  A are updated on the CPU;
+            portions of dA are updated on the GPU. See code for details.
+
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array dA. LDDA >= max(1,M).
 
     @param[in,out]
     jpvt    INTEGER array, dimension (N)
@@ -94,6 +104,14 @@
     @param[in]
     ldf     INTEGER
             The leading dimension of the array F. LDF >= max(1,N).
+
+    @param[in,out]
+    dF      COMPLEX_16 array, dimension (LDDF,NB)
+            Copy of F on the GPU. See code for details.
+
+    @param[in]
+    lddf    INTEGER
+            The leading dimension of the array dF. LDDF >= max(1,N).
 
     @ingroup magma_zgeqp3_aux
     ********************************************************************/
