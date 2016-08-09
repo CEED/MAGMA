@@ -673,8 +673,6 @@ void magmablas_ztrsm_work_batched(
         return;
     }
 
-
-
     magmablas_ztrsm_outofplace_batched( 
                     side, uplo, transA, diag, flag,
                     m, n, alpha,
@@ -842,16 +840,12 @@ void magmablas_ztrsm_batched(
     magmaDoubleComplex **dX_array     = NULL;
     magmaDoubleComplex **dinvA_array  = NULL;
 
-    magma_malloc((void**)&dA_displ,  batchCount * sizeof(*dA_displ));
-    magma_malloc((void**)&dB_displ,  batchCount * sizeof(*dB_displ));
-    magma_malloc((void**)&dX_displ,  batchCount * sizeof(*dX_displ));
-    magma_malloc((void**)&dinvA_displ,  batchCount * sizeof(*dinvA_displ));
+    magma_malloc((void**)&dA_displ,    batchCount * sizeof(*dA_displ));
+    magma_malloc((void**)&dB_displ,    batchCount * sizeof(*dB_displ));
+    magma_malloc((void**)&dX_displ,    batchCount * sizeof(*dX_displ));
+    magma_malloc((void**)&dinvA_displ, batchCount * sizeof(*dinvA_displ));
     magma_malloc((void**)&dinvA_array, batchCount * sizeof(*dinvA_array));
-    magma_malloc((void**)&dX_array, batchCount * sizeof(*dX_array));
-
-
-
-
+    magma_malloc((void**)&dX_array,    batchCount * sizeof(*dX_array));
 
     magma_int_t size_dinvA;
     magma_int_t lddx = m;

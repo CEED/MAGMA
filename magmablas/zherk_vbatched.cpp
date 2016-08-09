@@ -76,7 +76,7 @@ magmablas_zherk_vbatched_nocheck(
 /**
     Purpose
     -------
-    ZHERK performs one of the hermitian rank k operations
+    ZHERK performs one of the Hermitian rank k operations
 
     C := alpha*A*A**H + beta*C,
 
@@ -84,7 +84,7 @@ magmablas_zherk_vbatched_nocheck(
 
     C := alpha*A**H*A + beta*C,
 
-    where alpha and beta are real scalars, C is an n by n hermitian
+    where alpha and beta are real scalars, C is an n by n Hermitian
     matrix and A is an n by k matrix in the first case and a k by n
     matrix in the second case.
     
@@ -92,25 +92,25 @@ magmablas_zherk_vbatched_nocheck(
     ----------
 
     @param[in]
-    uplo    CHARACTER*1.
+    uplo    magma_uplo_t.
            On entry, uplo specifies whether the upper or lower
            triangular part of the array C is to be referenced as
            follows:
 
-           uplo = 'U' or 'u' Only the upper triangular part of C
+           uplo = MagmaUpper Only the upper triangular part of C
            is to be referenced.
 
-           uplo = 'L' or 'l' Only the lower triangular part of C
+           uplo = MagmaLower Only the lower triangular part of C
            is to be referenced.
     
     @param[in]
-    trans   CHARACTER*1.
+    trans   magma_trans_t.
             On entry, trans specifies the operation to be performed as
             follows:
 
-            trans = 'N' or 'n' C := alpha*A*A**H + beta*C.
+            trans = MagmaNoTrans C := alpha*A*A**H + beta*C.
 
-            trans = 'C' or 'c' C := alpha*A**H*A + beta*C.
+            trans = MagmaConjTrans C := alpha*A**H*A + beta*C.
 
     @param[in]
     n       Array of integers, size (batchCount + 1).
@@ -120,9 +120,9 @@ magmablas_zherk_vbatched_nocheck(
     
     @param[in]
     k       Array of integers, size (batchCount + 1).
-            On entry with trans = 'N' or 'n', each INTEGER K specifies the number
+            On entry with trans = MagmaNoTrans, each INTEGER K specifies the number
             of columns of the corresponding matrix A, and on entry with
-            trans = 'C' or 'c', K specifies the number of rows of the
+            trans = MagmaConjTrans, K specifies the number of rows of the
             corresponding matrix A. K must be at least zero. 
             The last element of the array is used internally by the routine. 
 
@@ -155,17 +155,17 @@ magmablas_zherk_vbatched_nocheck(
     @param[in,out]
     dC_array     Array of pointers, size (batchCount).
             Each is a COMPLEX_16 array of DIMENSION ( LDDC, N ).
-            Before entry with uplo = 'U' or 'u', the leading N by N
+            Before entry with uplo = MagmaUpper, the leading N by N
             upper triangular part of the corresponding array C must 
             contain the upper triangular part of the corresponding 
-            hermitian matrix and the strictly lower triangular part of C 
+            Hermitian matrix and the strictly lower triangular part of C 
             is not referenced. On exit, the upper triangular part of the 
             array C is overwritten by the upper triangular part of 
             the updated matrix.
-            Before entry with uplo = 'L' or 'l', the leading N by N
+            Before entry with uplo = MagmaLower, the leading N by N
             lower triangular part of the corresponding array C must 
             contain the lower triangular part of the corresponding 
-            hermitian matrix and the strictly upper triangular part 
+            Hermitian matrix and the strictly upper triangular part 
             of C is not referenced. On exit, the lower triangular 
             part of the array C is overwritten by the lower triangular 
             part of the updated matrix.

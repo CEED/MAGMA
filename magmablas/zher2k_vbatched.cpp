@@ -99,7 +99,7 @@ magmablas_zher2k_vbatched_nocheck(
 /**
     Purpose
     -------
-   ZHER2K  performs one of the hermitian rank 2k operations
+   ZHER2K  performs one of the Hermitian rank 2k operations
    
       C := alpha*A*B**H + conjg( alpha )*B*A**H + beta*C,
    
@@ -108,7 +108,7 @@ magmablas_zher2k_vbatched_nocheck(
       C := alpha*A**H*B + conjg( alpha )*B**H*A + beta*C,
    
    where  alpha and beta  are scalars with  beta  real,  C is an  n by n
-   hermitian matrix and  A and B  are  n by k matrices in the first case
+   Hermitian matrix and  A and B  are  n by k matrices in the first case
    and  k by n  matrices in the second case.
     
     Parameters
@@ -189,13 +189,13 @@ magmablas_zher2k_vbatched_nocheck(
              Each is COMPLEX*16 array of DIMENSION ( lddc, n ).
              Before entry  with  UPLO = MagmaUpper,  the leading  n by n
              upper triangular part of the array C must contain the upper
-             triangular part  of the  hermitian matrix  and the strictly
+             triangular part  of the  Hermitian matrix  and the strictly
              lower triangular part of C is not referenced.  On exit, the
              upper triangular part of the array  C is overwritten by the
              upper triangular part of the updated matrix.
              Before entry  with  UPLO = MagmaLower,  the leading  n by n
              lower triangular part of the array C must contain the lower
-             triangular part  of the  hermitian matrix  and the strictly
+             triangular part  of the  Hermitian matrix  and the strictly
              upper triangular part of C is not referenced.  On exit, the
              lower triangular part of the array  C is overwritten by the
              lower triangular part of the updated matrix.

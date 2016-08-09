@@ -124,7 +124,7 @@ magmablas_cherk_internal_vbatched(
 /**
     Purpose
     -------
-    CHERK performs one of the hermitian rank k operations
+    CHERK performs one of the Hermitian rank k operations
 
     C := alpha*A*A**H + beta*C,
 
@@ -132,7 +132,7 @@ magmablas_cherk_internal_vbatched(
 
     C := alpha*A**H*A + beta*C,
 
-    where alpha and beta are real scalars, C is an n by n hermitian
+    where alpha and beta are real scalars, C is an n by n Hermitian
     matrix and A is an n by k matrix in the first case and a k by n
     matrix in the second case.
     
@@ -140,25 +140,25 @@ magmablas_cherk_internal_vbatched(
     ----------
 
     @param[in]
-    uplo    CHARACTER*1.
+    uplo    magma_uplo_t.
            On entry, uplo specifies whether the upper or lower
            triangular part of the array C is to be referenced as
            follows:
 
-           uplo = 'U' or 'u' Only the upper triangular part of C
+           uplo = MagmaUpper Only the upper triangular part of C
            is to be referenced.
 
-           uplo = 'L' or 'l' Only the lower triangular part of C
+           uplo = MagmaLower Only the lower triangular part of C
            is to be referenced.
     
     @param[in]
-    trans   CHARACTER*1.
+    trans   magma_trans_t.
             On entry, trans specifies the operation to be performed as
             follows:
 
-            trans = 'N' or 'n' C := alpha*A*A**H + beta*C.
+            trans = MagmaNoTrans C := alpha*A*A**H + beta*C.
 
-            trans = 'C' or 'c' C := alpha*A**H*A + beta*C.
+            trans = MagmaConjTrans C := alpha*A**H*A + beta*C.
 
     @param[in]
     n       INTEGER.
@@ -167,9 +167,9 @@ magmablas_cherk_internal_vbatched(
     
     @param[in]
     k       INTEGER.
-            On entry with trans = 'N' or 'n', k specifies the number
+            On entry with trans = MagmaNoTrans, k specifies the number
             of columns of the matrix A, and on entry with
-            trans = 'C' or 'c', k specifies the number of rows of the
+            trans = MagmaConjTrans, k specifies the number of rows of the
             matrix A. K must be at least zero.
 
     @param[in]
@@ -198,15 +198,15 @@ magmablas_cherk_internal_vbatched(
     
     @param[in,out]
     dC      COMPLEX array of DIMENSION ( lddc, n ).
-            Before entry with uplo = 'U' or 'u', the leading n by n
+            Before entry with uplo = MagmaUpper, the leading n by n
             upper triangular part of the array C must contain the upper
-            triangular part of the hermitian matrix and the strictly
+            triangular part of the Hermitian matrix and the strictly
             lower triangular part of C is not referenced. On exit, the
             upper triangular part of the array C is overwritten by the
             upper triangular part of the updated matrix.
-            Before entry with uplo = 'L' or 'l', the leading n by n
+            Before entry with uplo = MagmaLower, the leading n by n
             lower triangular part of the array C must contain the lower
-            triangular part of the hermitian matrix and the strictly
+            triangular part of the Hermitian matrix and the strictly
             upper triangular part of C is not referenced. On exit, the
             lower triangular part of the array C is overwritten by the
             lower triangular part of the updated matrix.
