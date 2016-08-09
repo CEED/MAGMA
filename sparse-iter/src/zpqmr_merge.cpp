@@ -23,7 +23,8 @@
     Solves a system of linear equations
        A * X = B
     where A is a general complex matrix A.
-    This is a GPU implementation of the Quasi-Minimal Residual method (QMR).
+    This is a GPU implementation of the preconditioned 
+    Quasi-Minimal Residual method (QMR) using custom-designed kernels.
 
     Arguments
     ---------
@@ -43,6 +44,10 @@
     @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
+                
+    @param[in]
+    precond_par magma_z_preconditioner*
+                preconditioner
 
     @param[in]
     queue       magma_queue_t
