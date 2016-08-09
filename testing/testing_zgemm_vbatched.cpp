@@ -101,6 +101,7 @@ int main( int argc, char** argv)
     TESTING_CHECK( magma_malloc((void**)&d_B_array, batchCount*sizeof(magmaDoubleComplex*)) );
     TESTING_CHECK( magma_malloc((void**)&d_C_array, batchCount*sizeof(magmaDoubleComplex*)) );
     
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     printf("%% If running lapack (option --lapack), MAGMA error is computed\n"
            "%% relative to CPU BLAS result. \n\n"
            "%% transA = %s, transB = %s\n",
@@ -303,13 +304,17 @@ int main( int argc, char** argv)
                     h_Cmagma_tmp += h_N[s] * h_ldc[s];
                 }
 
-                printf("  %-10lld  %-5lld %-5lld %-5lld %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  \n",
+                bool okay = (magma_error < tol);
+                status += ! okay;
+                printf("  %-10lld  %-5lld %-5lld %-5lld %-7.2f ( %-7.2f )  %-7.2f ( %-7.2f )  %-8.2e  %s\n",
                        (long long) batchCount, (long long) max_M, (long long) max_N, (long long) max_K,
                        magma_perf,  1000.*magma_time,
                        cpu_perf,    1000.*cpu_time,
-                       magma_error);
+                       magma_error, (okay ? "ok" : "failed") );
             }
             else {
+                bool okay = (magma_error < tol);
+                status += ! okay;
                 printf("  %-10lld  %-5lld %-5lld %-5lld %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
                        (long long) batchCount, (long long) max_M, (long long) max_N, (long long) max_K,
                        magma_perf,  1000.*magma_time);
