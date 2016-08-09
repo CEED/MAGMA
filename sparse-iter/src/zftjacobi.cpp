@@ -39,15 +39,6 @@
     b           magma_z_matrix
                 input RHS b
                 
-    @param[in]
-    d           magma_z_matrix
-                input matrix diagonal elements diag(A)
-                
-    @param[in]
-    t           magma_z_matrix
-                temporary vector
-
-
     @param[in,out]
     x           magma_z_matrix*
                 iteration vector x
