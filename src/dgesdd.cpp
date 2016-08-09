@@ -193,9 +193,6 @@ magma_dgesdd(
     double *U,    magma_int_t ldu,
     double *VT,   magma_int_t ldvt,
     double *work, magma_int_t lwork,
-    #ifdef COMPLEX
-    double *rwork,
-    #endif
     magma_int_t *iwork,
     magma_int_t *info)
 {
