@@ -772,7 +772,8 @@ INPUT                  = \
 	../control/get_batched_crossover.cpp                        \
 	../control/get_batched_gemm_decision.cpp                    \
 	../control/get_nb.cpp                                       \
-	../control/magma.f90                                        \
+	../control/ilaenv.cpp                                       \
+	../control/magma.F90                                        \
 	../control/magma_bulge.cpp                                  \
 	../control/magma_cf77.cpp                                   \
 	../control/magma_cfortran.F90                               \
@@ -782,7 +783,7 @@ INPUT                  = \
 	../control/magma_dsfortran.F90                              \
 	../control/magma_f77.cpp                                    \
 	../control/magma_internal.h                                 \
-	../control/magma_param.f90                                  \
+	../control/magma_param.F90                                  \
 	../control/magma_sf77.cpp                                   \
 	../control/magma_sfortran.F90                               \
 	../control/magma_threadsetting.cpp                          \
@@ -836,6 +837,7 @@ INPUT                  = \
 	../include/magma_operators.h                                \
 	../include/magma_types.h                                    \
 	../include/magma_v2.h                                       \
+	../include/magma_vbatched.h                                 \
 	../include/magma_z.h                                        \
 	../include/magma_zbatched.h                                 \
 	../include/magma_zbulge.h                                   \
@@ -843,6 +845,7 @@ INPUT                  = \
 	../include/magma_zc.h                                       \
 	../include/magma_zgehrd_m.h                                 \
 	../include/magma_zlapack.h                                  \
+	../include/magma_zvbatched.h                                \
 	../include/magmablas_q.h                                    \
 	../include/magmablas_v1.h                                   \
 	../include/magmablas_v2.h                                   \
@@ -863,15 +866,21 @@ INPUT                  = \
 	../interface_cuda/interface.cpp                             \
 	../magmablas/cgemm_batched_core.cu                          \
 	../magmablas/cgemm_fermi_kernels.h                          \
+	../magmablas/cgemm_vbatched_core.cu                         \
 	../magmablas/cgemv_batched_core.cu                          \
+	../magmablas/cgemv_vbatched_core.cu                         \
 	../magmablas/cherk_batched_core.cu                          \
+	../magmablas/cherk_vbatched_core.cu                         \
 	../magmablas/clag2z.cu                                      \
 	../magmablas/clat2z.cu                                      \
 	../magmablas/commonblas_z.h                                 \
 	../magmablas/dgemm_batched_core.cu                          \
 	../magmablas/dgemm_fermi_kernels.h                          \
+	../magmablas/dgemm_vbatched_core.cu                         \
 	../magmablas/dgemv_batched_core.cu                          \
+	../magmablas/dgemv_vbatched_core.cu                         \
 	../magmablas/dsyrk_batched_core.cu                          \
+	../magmablas/dsyrk_vbatched_core.cu                         \
 	../magmablas/dznrm2.cu                                      \
 	../magmablas/gemm_config/cgemm_param_nn.h                   \
 	../magmablas/gemm_config/cgemm_param_nt.h                   \
@@ -896,21 +905,29 @@ INPUT                  = \
 	../magmablas/gemm_template_device.cuh                       \
 	../magmablas/gemm_template_device_defs.cuh                  \
 	../magmablas/gemm_template_kernel_batched.cuh               \
+	../magmablas/gemm_template_kernel_vbatched.cuh              \
 	../magmablas/gemv_config/gemvn_param.h                      \
 	../magmablas/gemv_config/gemvt_param.h                      \
 	../magmablas/gemv_template_device.cuh                       \
 	../magmablas/gemv_template_kernel_batched.cuh               \
+	../magmablas/gemv_template_kernel_vbatched.cuh              \
 	../magmablas/getrf_setup_pivinfo.cu                         \
 	../magmablas/herk_kernel_batched.cuh                        \
 	../magmablas/herk_template_kernel_batched.cuh               \
+	../magmablas/herk_template_kernel_vbatched.cuh              \
 	../magmablas/magma_templates.h                              \
 	../magmablas/magmablas_z_v1.cpp                             \
 	../magmablas/magmablas_zc_v1.cpp                            \
 	../magmablas/set_pointer.cu                                 \
 	../magmablas/sgemm_batched_core.cu                          \
 	../magmablas/sgemm_fermi_kernels.h                          \
+	../magmablas/sgemm_vbatched_core.cu                         \
 	../magmablas/sgemv_batched_core.cu                          \
+	../magmablas/sgemv_vbatched_core.cu                         \
 	../magmablas/ssyrk_batched_core.cu                          \
+	../magmablas/ssyrk_vbatched_core.cu                         \
+	../magmablas/vbatched_aux.cu                                \
+	../magmablas/vbatched_check.cu                              \
 	../magmablas/zaxpycp.cu                                     \
 	../magmablas/zbcyclic.cpp                                   \
 	../magmablas/zcaxpycp.cu                                    \
@@ -923,9 +940,13 @@ INPUT                  = \
 	../magmablas/zgemm_fermi.cu                                 \
 	../magmablas/zgemm_fermi_kernels.h                          \
 	../magmablas/zgemm_reduce.cu                                \
+	../magmablas/zgemm_vbatched.cpp                             \
+	../magmablas/zgemm_vbatched_core.cu                         \
 	../magmablas/zgemv_batched_core.cu                          \
 	../magmablas/zgemv_conj.cu                                  \
 	../magmablas/zgemv_fermi.cu                                 \
+	../magmablas/zgemv_vbatched.cpp                             \
+	../magmablas/zgemv_vbatched_core.cu                         \
 	../magmablas/zgeqr2.cpp                                     \
 	../magmablas/zgeqr2_batched.cu                              \
 	../magmablas/zgeqr2_kernels.cu                              \
@@ -943,11 +964,15 @@ INPUT                  = \
 	../magmablas/zhemv_mgpu.cu                                  \
 	../magmablas/zhemv_mgpu_upper.cu                            \
 	../magmablas/zhemv_upper.cu                                 \
+	../magmablas/zher2k_batched.cpp                             \
 	../magmablas/zher2k_mgpu.cpp                                \
+	../magmablas/zher2k_vbatched.cpp                            \
 	../magmablas/zherk_batched.cpp                              \
 	../magmablas/zherk_batched_core.cu                          \
 	../magmablas/zherk_gpu.cpp                                  \
 	../magmablas/zherk_mgpu.cpp                                 \
+	../magmablas/zherk_vbatched.cpp                             \
+	../magmablas/zherk_vbatched_core.cu                         \
 	../magmablas/zlacpy.cu                                      \
 	../magmablas/zlacpy_conj.cu                                 \
 	../magmablas/zlacpy_sym_in.cu                               \
@@ -989,6 +1014,9 @@ INPUT                  = \
 	../magmablas/zsymmetrize_tiles.cu                           \
 	../magmablas/zsymv.cu                                       \
 	../magmablas/zsymv_upper.cu                                 \
+	../magmablas/zsyr2k_batched.cpp                             \
+	../magmablas/zsyr2k_vbatched.cpp                            \
+	../magmablas/zsyrk_vbatched.cpp                             \
 	../magmablas/ztranspose.cu                                  \
 	../magmablas/ztranspose_conj.cu                             \
 	../magmablas/ztranspose_conj_inplace.cu                     \
@@ -1020,12 +1048,20 @@ INPUT                  = \
 	../sparse-iter/blas/zbcsrtrsv.cu                            \
 	../sparse-iter/blas/zcompact.cu                             \
 	../sparse-iter/blas/zgeaxpy.cu                              \
+	../sparse-iter/blas/zgeblockstruct.cu                       \
 	../sparse-iter/blas/zgecsrmv.cu                             \
 	../sparse-iter/blas/zgecsrreimsplit.cu                      \
 	../sparse-iter/blas/zgedensereimsplit.cu                    \
 	../sparse-iter/blas/zgeellmv.cu                             \
 	../sparse-iter/blas/zgeellrtmv.cu                           \
 	../sparse-iter/blas/zgeelltmv.cu                            \
+	../sparse-iter/blas/zgeisai.cu                              \
+	../sparse-iter/blas/zgeisai_16.cu                           \
+	../sparse-iter/blas/zgeisai_32.cu                           \
+	../sparse-iter/blas/zgeisai_32_develop.cu                   \
+	../sparse-iter/blas/zgeisai_8.cu                            \
+	../sparse-iter/blas/zgeisai_maxblock.cu                     \
+	../sparse-iter/blas/zgeisai_trsv.cu                         \
 	../sparse-iter/blas/zgemvmdot.cu                            \
 	../sparse-iter/blas/zgesellcmmv.cu                          \
 	../sparse-iter/blas/zgesellcmv.cu                           \
@@ -1119,6 +1155,8 @@ INPUT                  = \
 	../sparse-iter/src/zcustomilu.cpp                           \
 	../sparse-iter/src/zdummy.cpp                               \
 	../sparse-iter/src/zfgmres.cpp                              \
+	../sparse-iter/src/zftjacobi.cpp                            \
+	../sparse-iter/src/zgeisai.cpp                              \
 	../sparse-iter/src/zidr.cpp                                 \
 	../sparse-iter/src/zidr_merge.cpp                           \
 	../sparse-iter/src/zidr_strms.cpp                           \
@@ -1129,6 +1167,8 @@ INPUT                  = \
 	../sparse-iter/src/zjacobidomainoverlap.cpp                 \
 	../sparse-iter/src/zlobpcg.cpp                              \
 	../sparse-iter/src/zlsqr.cpp                                \
+	../sparse-iter/src/zparict.cpp                              \
+	../sparse-iter/src/zparilut.cpp                             \
 	../sparse-iter/src/zpbicg.cpp                               \
 	../sparse-iter/src/zpbicgstab.cpp                           \
 	../sparse-iter/src/zpbicgstab_merge.cpp                     \
@@ -1139,12 +1179,15 @@ INPUT                  = \
 	../sparse-iter/src/zpidr.cpp                                \
 	../sparse-iter/src/zpidr_merge.cpp                          \
 	../sparse-iter/src/zpidr_strms.cpp                          \
+	../sparse-iter/src/zpqmr.cpp                                \
+	../sparse-iter/src/zpqmr_merge.cpp                          \
 	../sparse-iter/src/zptfqmr.cpp                              \
 	../sparse-iter/src/zptfqmr_merge.cpp                        \
 	../sparse-iter/src/zqmr.cpp                                 \
 	../sparse-iter/src/zqmr_merge.cpp                           \
 	../sparse-iter/src/zresidual.cpp                            \
 	../sparse-iter/src/zresidualvec.cpp                         \
+	../sparse-iter/src/zsyisai.cpp                              \
 	../sparse-iter/src/ztfqmr.cpp                               \
 	../sparse-iter/src/ztfqmr_merge.cpp                         \
 	../sparse-iter/src/ztfqmr_unrolled.cpp                      \
@@ -1187,7 +1230,6 @@ INPUT                  = \
 	../src/tiled/zssssm_gpu.cpp                                 \
 	../src/tiled/ztsqrt_gpu.cpp                                 \
 	../src/tiled/ztstrf_gpu.cpp                                 \
-	../src/zbulge_applyQ.cpp                                    \
 	../src/zbulge_applyQ_v2.cpp                                 \
 	../src/zbulge_applyQ_v2_m.cpp                               \
 	../src/zbulge_aux.cpp                                       \
@@ -1198,6 +1240,7 @@ INPUT                  = \
 	../src/zcgeqrsv_gpu.cpp                                     \
 	../src/zcgesv_gpu.cpp                                       \
 	../src/zcgetrs_gpu.cpp                                      \
+	../src/zchesv_gpu.cpp                                       \
 	../src/zcposv_gpu.cpp                                       \
 	../src/zgebrd.cpp                                           \
 	../src/zgeev.cpp                                            \
@@ -1360,8 +1403,8 @@ INPUT                  = \
 	../src/zunmql2_gpu.cpp                                      \
 	../src/zunmqr.cpp                                           \
 	../src/zunmqr2_gpu.cpp                                      \
+	../src/zunmqr_2stage_gpu.cpp                                \
 	../src/zunmqr_gpu.cpp                                       \
-	../src/zunmqr_gpu_2stage.cpp                                \
 	../src/zunmqr_m.cpp                                         \
 	../src/zunmtr.cpp                                           \
 	../src/zunmtr_gpu.cpp                                       \
@@ -1369,6 +1412,7 @@ INPUT                  = \
 	../testing/flops.h                                          \
 	../testing/fortran2.cpp                                     \
 	../testing/magma_util.cpp                                   \
+	../testing/magma_zgesvd_check.cpp                           \
 	../testing/magma_zutil.cpp                                  \
 	../testing/run_summarize.py                                 \
 	../testing/run_tests.py                                     \
