@@ -18,9 +18,11 @@
 #ifndef ZTRTRI_H
 #define ZTRTRI_H
 
-// TODO this IB is a half warp -- that seems really ineffficient!
-#define IB 16   // inner blocking size, <= 32
-#define NB 128  // outer blocking size, > IB
+#define PRECISION_z 
+
+#include "batched_kernel_param.h"
+#define IB    (ZTRTRI_BATCHED_BLOCK_SIZE)
+#define NB    (ZTRTRI_BATCHED_NB)
 
 
 /*

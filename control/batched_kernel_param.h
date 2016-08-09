@@ -37,18 +37,13 @@
 #define TRI_BLOCK_SIZE    16
 
 // TRSM tuning parameters 
-#if     defined(PRECISION_s)
-    #define TRI_BATCHED_NB           (64)
-    #define TRI_BATCHED_BLOCK_SIZE   (16)
-#elif defined(PRECISION_d)
-    #define TRI_BATCHED_NB           (32)
-    #define TRI_BATCHED_BLOCK_SIZE   (16)
-#elif defined(PRECISION_c)
-    #define TRI_BATCHED_NB           (32)
-    #define TRI_BATCHED_BLOCK_SIZE   (16)
-#else         //PRECISION_z
-    #define TRI_BATCHED_NB           (128)
-    #define TRI_BATCHED_BLOCK_SIZE   (16)
-#endif
+#define STRTRI_BATCHED_NB         (64)
+#define STRTRI_BATCHED_BLOCK_SIZE (16)
+#define DTRTRI_BATCHED_NB         (64)
+#define DTRTRI_BATCHED_BLOCK_SIZE (16)
+#define CTRTRI_BATCHED_NB         (32)
+#define CTRTRI_BATCHED_BLOCK_SIZE (16)
+#define ZTRTRI_BATCHED_NB         (128)
+#define ZTRTRI_BATCHED_BLOCK_SIZE (16)
 
 #endif /* COMMON_CUDA_KERNEL_NB_H */
