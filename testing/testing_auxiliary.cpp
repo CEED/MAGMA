@@ -13,7 +13,7 @@
 
 // tests internal routines: magma_{set,get}_lapack_numthreads, magma_get_parallel_numthreads
 // so include magma_internal.h instead of magma_v2.h
-#include "magma_internal.h"
+#include "../control/magma_internal.h"  // internal header
 
 
 ////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,7 @@
 
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
+#include "../control/magma_threadsetting.h"  // internal header
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////

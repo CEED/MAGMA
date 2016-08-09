@@ -22,12 +22,13 @@
 #include "flops.h"
 #include "magma_v2.h"
 #include "magma_lapack.h"
-#include "batched_kernel_param.h"  // for TRI_NB; TODO: in control
 #include "testings.h"
+
+#include "../control/batched_kernel_param.h"  // internal header; for TRI_NB
 
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
+#include "../control/magma_threadsetting.h"  // internal header
 #endif
 
 #define h_A(i,j,s) (h_A + (i) + (j)*lda + (s)*lda*Ak)

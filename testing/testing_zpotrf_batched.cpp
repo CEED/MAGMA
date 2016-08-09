@@ -24,11 +24,10 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#include "magma_threadsetting.h"
-
 #if defined(_OPENMP)
 #include <omp.h>
 #endif
+#include "../control/magma_threadsetting.h"  // internal header
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf_batched

@@ -24,7 +24,7 @@
 #include "magma_operators.h"
 #include "testings.h"
 
-#include "magma_threadsetting.h"  // to work around MKL bug
+#include "../control/magma_threadsetting.h"  // internal header, to work around MKL bug
 
 #define PRECISION_z
 #define COMPLEX

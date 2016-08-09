@@ -22,9 +22,10 @@
 #include "magma_v2.h"
 #include "magma_lapack.h"
 #include "testings.h"
+
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
+#include "../control/magma_threadsetting.h"  // internal header
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////

@@ -28,7 +28,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#include "trace.h"
+#include "../control/trace.h"  // internal header
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zhemm_mgpu

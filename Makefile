@@ -255,11 +255,12 @@ force: ;
 
 
 # ----- include paths
-MAGMA_INC  = -I./include -I./control
+MAGMA_INC  = -I./include
 
+$(libmagma_obj):       MAGMA_INC += -I./control
 $(libtest_obj):        MAGMA_INC += -I./testing
 $(testing_obj):        MAGMA_INC += -I./testing
-$(libsparse_obj):      MAGMA_INC += -I./sparse-iter/include -I./sparse-iter/control
+$(libsparse_obj):      MAGMA_INC += -I./control -I./sparse-iter/include -I./sparse-iter/control
 $(sparse_testing_obj): MAGMA_INC += -I./sparse-iter/include -I./sparse-iter/control -I./testing
 
 

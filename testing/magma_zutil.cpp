@@ -14,7 +14,7 @@
 
 #include "magma_v2.h"
 #include "magma_lapack.h"
-#include "magma_threadsetting.h"  // to work around MKL bug
+#include "../control/magma_threadsetting.h"  // internal header, to work around MKL bug
 
 #include "testings.h"
 

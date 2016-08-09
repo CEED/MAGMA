@@ -28,7 +28,7 @@
 #if defined(_OPENMP)
 #include <omp.h>
 #endif
-#include "magma_threadsetting.h"
+#include "../control/magma_threadsetting.h"  // internal header
 
 #define PRECISION_z 
 
