@@ -97,6 +97,12 @@
             The leading dimension of the array W. LDW >= max(1,N).
     
     @param
+    work    TODO: dimension (lwork)?
+    
+    @param
+    lwork   TODO: size??
+    
+    @param
     dA      TODO: dimension (ldda, n)?
     
     @param
