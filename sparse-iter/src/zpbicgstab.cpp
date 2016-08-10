@@ -93,7 +93,7 @@ magma_zpbicgstab(
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
-    double nom, betanom, nom0, r0, res, nomb;
+    double betanom, nom0, r0, res, nomb;
     res=0;
     //double den;
 
@@ -101,7 +101,6 @@ magma_zpbicgstab(
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     magma_zcopy( dofs, r.dval, 1, rr.dval, 1, queue );                  // rr = r
     betanom = nom0;
-    nom = nom0*nom0;
     rho_new = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     solver_par->init_res = nom0;
 
@@ -119,7 +118,7 @@ magma_zpbicgstab(
         solver_par->res_vec[0] = nom0;
         solver_par->timing[0] = 0.0;
     }
-    if ( nom < r0 ) {
+    if ( nomb < r0 ) {
         info = MAGMA_SUCCESS;
         goto cleanup;
     }
@@ -177,8 +176,6 @@ magma_zpbicgstab(
         magma_zcopy( dofs, s.dval, 1 , r.dval, 1, queue );             // r=s
         magma_zaxpy( dofs, c_neg_one * omega, t.dval, 1 , r.dval, 1, queue ); // r=r-omega*t
         res = betanom = magma_dznrm2( dofs, r.dval, 1, queue );
-
-        nom = betanom*betanom;
 
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );

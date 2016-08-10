@@ -71,7 +71,7 @@ magma_zpcg(
     
     // solver variables
     magmaDoubleComplex alpha, beta;
-    double nom, nom0, r0,  res, nomb;
+    double nom0, r0,  res, nomb;
     magmaDoubleComplex den, gammanew, gammaold = MAGMA_Z_MAKE(1.0,0.0);
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -95,7 +95,6 @@ magma_zpcg(
     CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, rt, &h, precond_par, queue ));
 
     magma_zcopy( dofs, h.dval, 1, p.dval, 1, queue );                    // p = h
-    nom = MAGMA_Z_ABS( magma_zdotc( dofs, r.dval, 1, h.dval, 1, queue ));
     CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));             // q = A p
     den =  magma_zdotc( dofs, p.dval, 1, q.dval, 1, queue ); // den = p dot q
     solver_par->init_res = nom0;
@@ -113,7 +112,7 @@ magma_zpcg(
         solver_par->res_vec[0] = (real_Double_t)nom0;
         solver_par->timing[0] = 0.0;
     }
-    if ( nom < r0 ) {
+    if ( nomb < r0 ) {
         info = MAGMA_SUCCESS;
         goto cleanup;
     }
