@@ -275,7 +275,7 @@ int main( int argc, char** argv)
                 cublas_error  = 0;
                 cublas_error2 = 0;
                 #if CUDA_VERSION >= 6050
-                magma_zgetvector(min_mn*batchCount, dtau_magma, 1, tau, 1, opts.queue );
+                magma_zgetvector(min_mn*batchCount, dtau_cublas, 1, tau, 1, opts.queue );
                 magma_zgetmatrix( M, column, d_A, ldda, h_A, lda, opts.queue );
                 for (int i=0; i < batchCount; i++)
                 {
