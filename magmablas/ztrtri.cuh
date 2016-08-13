@@ -21,9 +21,15 @@
 #define PRECISION_z 
 
 #include "batched_kernel_param.h"
+#if   defined(TRTRI_BATCHED)
 #define IB    (ZTRTRI_BATCHED_BLOCK_SIZE)
 #define NB    (ZTRTRI_BATCHED_NB)
-
+#elif defined(TRTRI_NONBATCHED)
+#define IB    (16)
+#define NB    (128)
+#else
+#error "One of {TRTRI_BATCHED, TRTRI_NONBATCHED} must be defined."
+#endif
 
 /*
  * zaxpy16 computes c += alpha*b, where b and c are 16-element vectors.

@@ -12,6 +12,8 @@
        @author Mark Gates
 */
 #include "magma_internal.h"
+
+#define TRTRI_NONBATCHED
 #include "ztrtri.cuh"  // get NB from ztrtri
 
 /**

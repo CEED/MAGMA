@@ -15,6 +15,8 @@ cdir      := magmablas
 hdr += \
 	$(cdir)/commonblas_z.h		\
 	$(cdir)/ztrtri.cuh		\
+	$(cdir)/ztrtri_lower_device.cuh		\
+	$(cdir)/ztrtri_upper_device.cuh		\
 	$(cdir)/zgerbt.h		\
 	$(cdir)/zpotf2_devicesfunc.cuh		\
 	$(cdir)/zlarfg_devicesfunc.cuh		\
@@ -79,7 +81,9 @@ libmagma_src += \
 	$(cdir)/ztrsv.cu		\
 	$(cdir)/ztrtri_diag.cu		\
 	$(cdir)/ztrtri_lower.cu		\
+	$(cdir)/ztrtri_lower_batched.cu		\
 	$(cdir)/ztrtri_upper.cu		\
+	$(cdir)/ztrtri_upper_batched.cu		\
 	$(cdir)/magmablas_z_v1.cpp	\
 	$(cdir)/magmablas_zc_v1.cpp	\
 
@@ -170,6 +174,16 @@ $(cdir)/dtrtri_diag.$(o_ext): $(cdir)/dtrtri.cuh
 $(cdir)/ctrtri_diag.$(o_ext): $(cdir)/ctrtri.cuh
 $(cdir)/ztrtri_diag.$(o_ext): $(cdir)/ztrtri.cuh
 
+$(cdir)/strtri_upper.$(o_ext): $(cdir)/strtri.cuh $(cdir)/strtri_upper_device.cuh
+$(cdir)/dtrtri_upper.$(o_ext): $(cdir)/dtrtri.cuh $(cdir)/dtrtri_upper_device.cuh
+$(cdir)/ctrtri_upper.$(o_ext): $(cdir)/ctrtri.cuh $(cdir)/ctrtri_upper_device.cuh
+$(cdir)/ztrtri_upper.$(o_ext): $(cdir)/ztrtri.cuh $(cdir)/ztrtri_upper_device.cuh
+
+$(cdir)/strtri_lower.$(o_ext): $(cdir)/strtri.cuh $(cdir)/strtri_lower_device.cuh
+$(cdir)/dtrtri_lower.$(o_ext): $(cdir)/dtrtri.cuh $(cdir)/dtrtri_lower_device.cuh
+$(cdir)/ctrtri_lower.$(o_ext): $(cdir)/ctrtri.cuh $(cdir)/ctrtri_lower_device.cuh
+$(cdir)/ztrtri_lower.$(o_ext): $(cdir)/ztrtri.cuh $(cdir)/ztrtri_lower_device.cuh
+
 $(cdir)/sgerbt.$(o_ext): $(cdir)/sgerbt.h
 $(cdir)/dgerbt.$(o_ext): $(cdir)/dgerbt.h
 $(cdir)/cgerbt.$(o_ext): $(cdir)/cgerbt.h
@@ -184,6 +198,16 @@ $(cdir)/strtri_diag_batched.$(o_ext): $(cdir)/strtri.cuh
 $(cdir)/dtrtri_diag_batched.$(o_ext): $(cdir)/dtrtri.cuh
 $(cdir)/ctrtri_diag_batched.$(o_ext): $(cdir)/ctrtri.cuh
 $(cdir)/ztrtri_diag_batched.$(o_ext): $(cdir)/ztrtri.cuh
+
+$(cdir)/strtri_upper_batched.$(o_ext): $(cdir)/strtri.cuh $(cdir)/strtri_upper_device.cuh
+$(cdir)/dtrtri_upper_batched.$(o_ext): $(cdir)/dtrtri.cuh $(cdir)/dtrtri_upper_device.cuh
+$(cdir)/ctrtri_upper_batched.$(o_ext): $(cdir)/ctrtri.cuh $(cdir)/ctrtri_upper_device.cuh
+$(cdir)/ztrtri_upper_batched.$(o_ext): $(cdir)/ztrtri.cuh $(cdir)/ztrtri_upper_device.cuh
+
+$(cdir)/strtri_lower_batched.$(o_ext): $(cdir)/strtri.cuh $(cdir)/strtri_lower_device.cuh
+$(cdir)/dtrtri_lower_batched.$(o_ext): $(cdir)/dtrtri.cuh $(cdir)/dtrtri_lower_device.cuh
+$(cdir)/ctrtri_lower_batched.$(o_ext): $(cdir)/ctrtri.cuh $(cdir)/ctrtri_lower_device.cuh
+$(cdir)/ztrtri_lower_batched.$(o_ext): $(cdir)/ztrtri.cuh $(cdir)/ztrtri_lower_device.cuh
 
 $(cdir)/sgeqr2_batched.$(o_ext): $(cdir)/slarfg_devicesfunc.cuh
 $(cdir)/dgeqr2_batched.$(o_ext): $(cdir)/dlarfg_devicesfunc.cuh

@@ -17,6 +17,8 @@
 */
 
 #include "magma_internal.h"
+
+#define TRTRI_BATCHED
 #include "ztrtri.cuh"
 
 
