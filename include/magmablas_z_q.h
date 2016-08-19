@@ -51,18 +51,18 @@ magmablas_ztranspose_conj_q(
 
 void
 magmablas_zgetmatrix_transpose_q(
-    magma_int_t m, magma_int_t n,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     magmaDoubleComplex_const_ptr dAT,   magma_int_t ldda,
     magmaDoubleComplex          *hA,    magma_int_t lda,
-    magmaDoubleComplex_ptr       dwork, magma_int_t lddwork, magma_int_t nb,
+    magmaDoubleComplex_ptr       dwork, magma_int_t lddw,
     magma_queue_t queues[2] );
 
 void
 magmablas_zsetmatrix_transpose_q(
-    magma_int_t m, magma_int_t n,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     const magmaDoubleComplex *hA,    magma_int_t lda,
     magmaDoubleComplex_ptr    dAT,   magma_int_t ldda,
-    magmaDoubleComplex_ptr    dwork, magma_int_t lddwork, magma_int_t nb,
+    magmaDoubleComplex_ptr    dwork, magma_int_t lddw,
     magma_queue_t queues[2] );
 
   /*
@@ -127,19 +127,21 @@ magma_zsetmatrix_1D_row_bcyclic_q(
 
 void
 magmablas_zgetmatrix_transpose_mgpu(
-    magma_int_t ngpu, magma_queue_t queues[][2],
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     magmaDoubleComplex_const_ptr const dAT[],    magma_int_t ldda,
     magmaDoubleComplex                *hA,       magma_int_t lda,
     magmaDoubleComplex_ptr             dwork[],  magma_int_t lddw,
-    magma_int_t m, magma_int_t n, magma_int_t nb );
+    magma_queue_t queues[][2] );
 
 void
 magmablas_zsetmatrix_transpose_mgpu(
-    magma_int_t ngpu, magma_queue_t queues[][2],
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     const magmaDoubleComplex *hA,      magma_int_t lda,
     magmaDoubleComplex_ptr    dAT[],   magma_int_t ldda,
     magmaDoubleComplex_ptr    dwork[], magma_int_t lddw,
-    magma_int_t m, magma_int_t n, magma_int_t nb );
+    magma_queue_t queues[][2] );
 
 // in src/zhetrd_mgpu.cpp
 // TODO rename zsetmatrix_sy or similar

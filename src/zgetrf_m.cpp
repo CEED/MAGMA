@@ -15,7 +15,7 @@
 #include "magma_timer.h"
 //#include "../testing/flops.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRF_m computes an LU factorization of a general M-by-N matrix A
@@ -76,8 +76,8 @@
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrf
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrf_m(
     magma_int_t ngpu,
@@ -218,8 +218,8 @@ magma_zgetrf_m(
             
             /* upload the next big panel into GPU, transpose (A->A'), and pivot it */
             timer_start( time );
-            magmablas_zsetmatrix_transpose_mgpu(ngpu, queues, A(0,I), lda,
-                                                dAT, ldn_local, dA, maxm, M, N, nb);
+            magmablas_zsetmatrix_transpose_mgpu(ngpu, M, N, nb, A(0,I), lda,
+                                                dAT, ldn_local, dA, maxm, queues);
             for( d=0; d < ngpu; d++ ) {
                 magma_setdevice(d);
                 magma_queue_sync( queues[d][0] );
@@ -322,7 +322,8 @@ magma_zgetrf_m(
     
             /* get the current big panel to CPU from devices */
             timer_start( time );
-            magmablas_zgetmatrix_transpose_mgpu(ngpu, queues, dAT, ldn_local, A(0,I), lda, dA, maxm, M, N, nb);
+            magmablas_zgetmatrix_transpose_mgpu(ngpu, M, N, nb, dAT, ldn_local,
+                                                A(0,I), lda, dA, maxm, queues);
             for( d=0; d < ngpu; d++ ) {
                 magma_setdevice(d);
                 magma_queue_sync( queues[d][0] );
