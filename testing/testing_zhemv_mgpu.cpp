@@ -181,7 +181,7 @@ int main(int argc, char **argv)
             /* =====================================================================
                Performs operation using MAGMABLAS (multi-GPU)
                =================================================================== */
-            magma_zsetmatrix_1D_col_bcyclic( Noffset, Noffset, A, lda, d_lA, ldda, opts.ngpu, nb, queues );
+            magma_zsetmatrix_1D_col_bcyclic( opts.ngpu, Noffset, Noffset, nb, A, lda, d_lA, ldda, queues );
             blasf77_zcopy( &Noffset, Y, &incx, Ymagma, &incx );
             
             // workspaces do NOT need to be zero -- set to NAN to prove

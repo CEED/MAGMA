@@ -129,7 +129,7 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            magma_zsetmatrix_1D_col_bcyclic( M, N, h_R, lda, d_lA, ldda, ngpu, nb, queues );
+            magma_zsetmatrix_1D_col_bcyclic( ngpu, M, N, nb, h_R, lda, d_lA, ldda, queues );
 
             gpu_time = magma_wtime();
             magma_zgeqrf2_mgpu( ngpu, M, N, d_lA, ldda, tau, &info );
@@ -140,7 +140,7 @@ int main( int argc, char** argv )
                        (long long) info, magma_strerror( info ));
             }
             
-            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
+            magma_zgetmatrix_1D_col_bcyclic( ngpu, M, N, nb, d_lA, ldda, h_R, lda, queues );
             
             if ( opts.check == 1 && M >= N ) {
                 /* =====================================================================

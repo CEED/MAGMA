@@ -148,7 +148,7 @@ magmablas_zgetmatrix_transpose(
     magma_queue_create( &queues[0] );
     magma_queue_create( &queues[1] );
 
-    magmablas_zgetmatrix_transpose_q( m, n, dAT, ldda, hA, lda, dwork, lddwork, nb, queues );
+    magmablas_zgetmatrix_transpose_q( m, n, nb, dAT, ldda, hA, lda, dwork, lddwork, queues );
 
     magma_queue_destroy( queues[0] );
     magma_queue_destroy( queues[1] );
@@ -642,7 +642,7 @@ magmablas_zsetmatrix_transpose(
     magma_queue_create( &queues[0] );
     magma_queue_create( &queues[1] );
 
-    magmablas_zsetmatrix_transpose_q( m, n, hA, lda, dAT, ldda, dwork, lddwork, nb, queues );
+    magmablas_zsetmatrix_transpose_q( m, n, nb, hA, lda, dAT, ldda, dwork, lddwork, queues );
 
     magma_queue_destroy( queues[0] );
     magma_queue_destroy( queues[1] );
@@ -866,7 +866,7 @@ magma_zgetmatrix_1D_row_bcyclic(
         magma_setdevice( dev );
         magma_queue_create( &queues[dev] );
     }
-    magma_zgetmatrix_1D_row_bcyclic_q( m, n, dA, ldda, hA, lda, ngpu, nb, queues );
+    magma_zgetmatrix_1D_row_bcyclic_q( ngpu, m, n, nb, dA, ldda, hA, lda, queues );
     for( int dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         magma_queue_sync( queues[dev] );
@@ -891,7 +891,7 @@ magma_zgetmatrix_1D_col_bcyclic(
         magma_setdevice( dev );
         magma_queue_create( &queues[dev] );
     }
-    magma_zgetmatrix_1D_col_bcyclic_q( m, n, dA, ldda, hA, lda, ngpu, nb, queues );
+    magma_zgetmatrix_1D_col_bcyclic_q( ngpu, m, n, nb, dA, ldda, hA, lda, queues );
     for( int dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         magma_queue_sync( queues[dev] );
@@ -916,7 +916,7 @@ magma_zsetmatrix_1D_row_bcyclic(
         magma_setdevice( dev );
         magma_queue_create( &queues[dev] );
     }
-    magma_zsetmatrix_1D_row_bcyclic_q( m, n, hA, lda, dA, ldda, ngpu, nb, queues );
+    magma_zsetmatrix_1D_row_bcyclic_q( ngpu, m, n, nb, hA, lda, dA, ldda, queues );
     for( int dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         magma_queue_sync( queues[dev] );
@@ -941,7 +941,7 @@ magma_zsetmatrix_1D_col_bcyclic(
         magma_setdevice( dev );
         magma_queue_create( &queues[dev] );
     }
-    magma_zsetmatrix_1D_col_bcyclic_q( m, n, hA, lda, dA, ldda, ngpu, nb, queues );
+    magma_zsetmatrix_1D_col_bcyclic_q( ngpu, m, n, nb, hA, lda, dA, ldda, queues );
     for( int dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         magma_queue_sync( queues[dev] );

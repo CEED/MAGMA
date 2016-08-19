@@ -237,7 +237,7 @@ int main( int argc, char** argv )
                Performs operation using MAGMA
                =================================================================== */
             init_matrix( M, N, h_A, lda );
-            magma_zsetmatrix_1D_col_bcyclic( M, N, h_A, lda, d_lA, ldda, ngpu, nb, queues );
+            magma_zsetmatrix_1D_col_bcyclic( ngpu, M, N, nb, h_A, lda, d_lA, ldda, queues );
 
             gpu_time = magma_wtime();
             magma_zgetrf_mgpu( ngpu, M, N, d_lA, ldda, ipiv, &info );
@@ -248,7 +248,7 @@ int main( int argc, char** argv )
                        (long long) info, magma_strerror( info ));
             }
                        
-            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_A, lda, ngpu, nb, queues );
+            magma_zgetmatrix_1D_col_bcyclic( ngpu, M, N, nb, d_lA, ldda, h_A, lda, queues );
     
             /* =====================================================================
                Check the factorization

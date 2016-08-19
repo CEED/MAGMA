@@ -17,7 +17,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEEVD_2STAGE_M computes all eigenvalues and, optionally, eigenvectors of a
@@ -176,8 +176,8 @@
 
     Modified description of INFO. Sven, 16 Feb 05.
 
-    @ingroup magma_zheevd_driver
-    ********************************************************************/
+    @ingroup magma_heevdx
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zheevdx_2stage_m(
     magma_int_t ngpu,
@@ -482,7 +482,7 @@ magma_zheevdx_2stage_m(
         magma_setdevice( dev );
         magma_queue_create( dev, &distqueues[dev] );
     }
-    magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, dA, ldda, ngpu, distblk, distqueues );
+    magma_zsetmatrix_1D_col_bcyclic( ngpu, n, n, distblk, A, lda, dA, ldda, distqueues );
     for( magma_int_t dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         magma_queue_sync( distqueues[dev] );

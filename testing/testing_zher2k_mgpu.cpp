@@ -114,7 +114,7 @@ int main( int argc, char** argv)
                 /* ====================================================================
                    Performs operation using MAGMA
                    =================================================================== */
-                magma_zsetmatrix_1D_col_bcyclic( n, n, hC, lda, dC, ldda, ngpu, nb, queues0 );
+                magma_zsetmatrix_1D_col_bcyclic( ngpu, n, n, nb, hC, lda, dC, ldda, queues0 );
                 for( int dev = 0; dev < ngpu; ++dev ) {
                     magma_setdevice( dev );
                     dB[dev] = dA[dev] + ldda*k;
@@ -159,7 +159,7 @@ int main( int argc, char** argv)
                 gpu_perf = gflops / gpu_time;
                 
                 // Get dC back to the CPU to compare with the CPU result.
-                magma_zgetmatrix_1D_col_bcyclic( n, n, dC, ldda, hR, lda, ngpu, nb, queues0 );
+                magma_zgetmatrix_1D_col_bcyclic( ngpu, n, n, nb, dC, ldda, hR, lda, queues0 );
                 
                 /* =====================================================================
                    Performs operation using LAPACK

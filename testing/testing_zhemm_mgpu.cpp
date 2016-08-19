@@ -148,7 +148,7 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            magma_zsetmatrix_1D_col_bcyclic( M, M, hA, lda, dA, ldda, opts.ngpu, nb, queues0 );
+            magma_zsetmatrix_1D_col_bcyclic( opts.ngpu, M, M, nb, hA, lda, dA, ldda, queues0 );
             for( dev = 0; dev < opts.ngpu; ++dev ) {
                 magma_setdevice( dev );
                 magma_zsetmatrix( M, N, hB, lda, dB[dev], ldda, opts.queue );

@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEHRD reduces a COMPLEX_16 general matrix A to upper Hessenberg form H by
@@ -121,8 +121,8 @@
 
     This version stores the T matrices, for later use in magma_zunghr.
 
-    @ingroup magma_zgeev_comp
-    ********************************************************************/
+    @ingroup magma_gehrd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgehrd_m(
     magma_int_t n, magma_int_t ilo, magma_int_t ihi,
@@ -254,7 +254,7 @@ magma_zgehrd_m(
         }
         
         // Copy the matrix to GPUs
-        magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, data.A, ldda, ngpu, nb, data.queues );
+        magma_zsetmatrix_1D_col_bcyclic( ngpu, n, n, nb, A, lda, data.A, ldda, data.queues );
         
         // round ilo down to block boundary
         ilo = (ilo/nb)*nb;

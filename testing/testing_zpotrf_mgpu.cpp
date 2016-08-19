@@ -107,11 +107,11 @@ int main( int argc, char** argv )
                =================================================================== */
             if ( opts.uplo == MagmaUpper ) {
                 ldda = magma_roundup( N, nb );
-                magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb, queues );
+                magma_zsetmatrix_1D_col_bcyclic( ngpu, N, N, nb, h_R, lda, d_lA, ldda, queues );
             }
             else {
                 ldda = (1+N/(nb*ngpu))*nb;
-                magma_zsetmatrix_1D_row_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb, queues );
+                magma_zsetmatrix_1D_row_bcyclic( ngpu, N, N, nb, h_R, lda, d_lA, ldda, queues );
             }
 
             gpu_time = magma_wtime();
@@ -124,10 +124,10 @@ int main( int argc, char** argv )
             }
             
             if ( opts.uplo == MagmaUpper ) {
-                magma_zgetmatrix_1D_col_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
+                magma_zgetmatrix_1D_col_bcyclic( ngpu, N, N, nb, d_lA, ldda, h_R, lda, queues );
             }
             else {
-                magma_zgetmatrix_1D_row_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
+                magma_zgetmatrix_1D_row_bcyclic( ngpu, N, N, nb, d_lA, ldda, h_R, lda, queues );
             }
             
             /* =====================================================================

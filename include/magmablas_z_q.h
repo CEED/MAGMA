@@ -95,35 +95,35 @@ magmablas_zprbt_mtv_q(
    */
 void
 magma_zgetmatrix_1D_col_bcyclic_q(
-    magma_int_t m, magma_int_t n,
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     magmaDoubleComplex_const_ptr const dA[], magma_int_t ldda,
     magmaDoubleComplex                *hA,   magma_int_t lda,
-    magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t queue[ MagmaMaxGPUs ] );
+    magma_queue_t queue[] );
 
 void
 magma_zsetmatrix_1D_col_bcyclic_q(
-    magma_int_t m, magma_int_t n,
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     const magmaDoubleComplex *hA,   magma_int_t lda,
     magmaDoubleComplex_ptr    dA[], magma_int_t ldda,
-    magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t queue[ MagmaMaxGPUs ] );
+    magma_queue_t queue[] );
 
 void
 magma_zgetmatrix_1D_row_bcyclic_q(
-    magma_int_t m, magma_int_t n,
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     magmaDoubleComplex_const_ptr const dA[], magma_int_t ldda,
     magmaDoubleComplex                *hA,   magma_int_t lda,
-    magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t queue[ MagmaMaxGPUs ] );
+    magma_queue_t queue[] );
 
 void
 magma_zsetmatrix_1D_row_bcyclic_q(
-    magma_int_t m, magma_int_t n,
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n, magma_int_t nb,
     const magmaDoubleComplex *hA,   magma_int_t lda,
     magmaDoubleComplex_ptr    dA[], magma_int_t ldda,
-    magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t queue[ MagmaMaxGPUs ] );
+    magma_queue_t queue[] );
 
 void
 magmablas_zgetmatrix_transpose_mgpu(
