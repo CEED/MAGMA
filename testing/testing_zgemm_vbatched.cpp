@@ -313,8 +313,6 @@ int main( int argc, char** argv)
                        magma_error, (okay ? "ok" : "failed") );
             }
             else {
-                bool okay = (magma_error < tol);
-                status += ! okay;
                 printf("  %-10lld  %-5lld %-5lld %-5lld %-7.2f ( %-7.2f )  ------- ( ------- )  --------  \n",
                        (long long) batchCount, (long long) max_M, (long long) max_N, (long long) max_K,
                        magma_perf,  1000.*magma_time);
