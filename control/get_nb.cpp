@@ -19,7 +19,7 @@ extern "C" {
 // Definition of blocking sizes for NVIDIA cards
 #ifdef HAVE_CUBLAS
 
-/******************************************************************************/
+// =============================================================================
 /// @addtogroup magma_tuning
 /// Optimal block sizes vary with GPU and, to a lesser extent, CPU.
 /// Kepler tuning was on K20c   705 MHz with SandyBridge 2.6 GHz host (bunsen).
@@ -1122,7 +1122,7 @@ magma_int_t magma_get_zbulge_mgpu_nb( magma_int_t n )
 }
 
 
-/******************************************************************************/
+// =============================================================================
 /// @}
 // end group magma_tuning
 
