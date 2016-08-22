@@ -74,7 +74,7 @@ __global__ void zlaswp_sym_kernel( zlaswp_sym_params_t params )
 }
 
 
-// Launch zlaswpx kernel with ceil( n / NTHREADS ) blocks of NTHREADS threads each.
+// Launch zlaswp_sym kernel with ceil( n / NTHREADS ) blocks of NTHREADS threads each.
 extern "C" void zlaswp_sym( zlaswp_sym_params_t &params, magma_queue_t queue )
 {
     int blocks = magma_ceildiv(params.n,  NTHREADS);
@@ -85,12 +85,8 @@ extern "C" void zlaswp_sym( zlaswp_sym_params_t &params, magma_queue_t queue )
 /**
     Purpose:
     =============
-    ZLASWPX performs a series of row interchanges on the matrix A.
-    One row interchange is initiated for each of rows K1 through K2 of A.
-    
-    ** Unlike LAPACK, here A is stored either row-wise or column-wise,
-       depending on ldx and ldy. **
-    Otherwise, this is identical to LAPACK's interface.
+    ZLASWP_SYM applies a series of symmetric pivoting on a symmetric matrix A.
+    Currently, it is only implemented for the lower-triangular part of the matrix.
     
     Arguments:
     ==========
