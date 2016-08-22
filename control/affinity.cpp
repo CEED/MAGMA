@@ -20,16 +20,16 @@ affinity_set::affinity_set()
 }
 
 
-affinity_set::affinity_set(int cpu_nr)
+affinity_set::affinity_set(int cpu)
 {
     CPU_ZERO(&set);
-    CPU_SET(cpu_nr, &set);
+    CPU_SET(cpu, &set);
 }
 
 
-void affinity_set::add(int cpu_nr)
+void affinity_set::add(int cpu)
 {
-    CPU_SET(cpu_nr, &set);
+    CPU_SET(cpu, &set);
 }
 
 

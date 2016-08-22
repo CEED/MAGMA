@@ -27,9 +27,9 @@ public:
 
     affinity_set();
 
-    affinity_set(int cpu_nr);
+    affinity_set(int cpu);
 
-    void add(int cpu_nr);
+    void add(int cpu);
 
     int get_affinity();
 
