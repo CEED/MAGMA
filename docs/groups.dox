@@ -53,12 +53,13 @@
 
 
 ============================================================
-@defgroup group_internal            Internal routines
+@defgroup magma_internal            Internal routines
 @{
     @defgroup magma_error_internal  Error handling
     @defgroup magma_testing         Testing routines
     @defgroup magma_thread          Thread management
     @defgroup magma_timer           Timer utilities
+    @defgroup magma_panel2q         QR panel to q, q to panel
 @}
 
 

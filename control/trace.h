@@ -16,14 +16,14 @@
 #include "magma_v2.h"
 #endif
 
-// ----------------------------------------
+// =============================================================================
 const magma_int_t MAX_CORES       = 1;                 // CPU cores
 const magma_int_t MAX_GPU_QUEUES  = MagmaMaxGPUs * 4;  // #devices * #queues per device
 const magma_int_t MAX_EVENTS      = 20000;
 const magma_int_t MAX_LABEL_LEN   = 16;
 
 
-// ----------------------------------------
+// =============================================================================
 #ifdef TRACING
 
 void trace_init     ( magma_int_t ncore, magma_int_t ngpu, magma_int_t nqueue, magma_queue_t *queues );

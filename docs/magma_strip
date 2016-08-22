@@ -8,4 +8,8 @@
 
 s/^ +Arguments *\n +[-=]{2,}$/\n/gm;
 s/^ +Purpose *\n +[-=]{2,}$/\n/gm;
-s/\b(magma\w+)_q\(/$1(/g;
+
+# strip "_q" from end of function names, but keep "magma_zpanel_to_q"
+if (not m/magma_\wpanel_to_q/ ) {
+    s/\b(magma\w+)_q\(/$1(/g;
+}

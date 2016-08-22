@@ -12,14 +12,14 @@
 
 #include "magma_operators.h"
 
-/**
+/***************************************************************************//**
     @return Complex square root of x.
     
     @param[in]
     x       COMPLEX_16
     
-    @ingroup magma_zaux0
-    ********************************************************************/
+    @ingroup magma_sqrt
+*******************************************************************************/
 extern "C"
 magmaDoubleComplex magma_zsqrt( magmaDoubleComplex x )
 {
@@ -28,14 +28,14 @@ magmaDoubleComplex magma_zsqrt( magmaDoubleComplex x )
 }
 
 
-/**
+/***************************************************************************//**
     @return Complex square root of x.
     
     @param[in]
     x       COMPLEX
     
-    @ingroup magma_caux0
-    ********************************************************************/
+    @ingroup magma_sqrt
+*******************************************************************************/
 extern "C"
 magmaFloatComplex magma_csqrt( magmaFloatComplex x )
 {

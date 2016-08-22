@@ -33,10 +33,14 @@ typedef long long magma_flops_t;
   #define  __attribute__(x)  /*NOTHING*/
 #endif
 
-
-// ------------------------------------------------------------
-// Set timer to current time.
-// If ENABLE_TIMER is not defined, does nothing.
+/***************************************************************************//**
+    @param[out]
+    t       On output, set to current time.
+    
+    If ENABLE_TIMER is not defined, does nothing.
+    
+    @ingroup magma_timer
+*******************************************************************************/
 static inline void timer_start( magma_timer_t &t )
 {
     #if defined(ENABLE_TIMER)
@@ -44,19 +48,27 @@ static inline void timer_start( magma_timer_t &t )
     #endif
 }
 
-// Set timer to difference between current time and when timer_start() was called.
-// Returns timer, to sum up times:
-//
-// magma_timer_t time, time_sum=0;
-// for( ... ) {
-//     timer_start( time );
-//     ...do timed operations...
-//     time_sum += timer_stop( time );
-//
-//     ...do other operations...
-// }
-//
-// If ENABLE_TIMER is not defined, returns 0.
+
+/***************************************************************************//**
+    @param[in,out]
+    t       On input, time when timer_start() was called.
+            On output, set to (current time - start time).
+
+    @return t, to sum up times:
+    
+        magma_timer_t time, time_sum=0;
+        for( ... ) {
+            timer_start( time );
+            ...do timed operations...
+            time_sum += timer_stop( time );
+        
+            ...do other operations...
+        }
+    
+    If ENABLE_TIMER is not defined, returns 0.
+    
+    @ingroup magma_timer
+*******************************************************************************/
 static inline magma_timer_t timer_stop( magma_timer_t &t )
 {
     #if defined(ENABLE_TIMER)
@@ -68,11 +80,18 @@ static inline magma_timer_t timer_stop( magma_timer_t &t )
 }
 
 
-// ------------------------------------------------------------
-// see gPAPI_flops_set in testing/magma_util.cpp
-
-// Set flops counter to current flops.
-// If ENABLE_TIMER and HAVE_PAPI are not both defined, does nothing.
+/***************************************************************************//**
+    @param[out]
+    flops   On output, set to current flop counter.
+    
+    Requires global gPAPI_flops_set to be setup by testing/magma_util.cpp
+    Note that newer CPUs may not support flop counts; see
+    https://icl.cs.utk.edu/projects/papi/wiki/PAPITopics:SandyFlops
+    
+    If ENABLE_TIMER and HAVE_PAPI are not both defined, does nothing.
+    
+    @ingroup magma_timer
+*******************************************************************************/
 static inline void flops_start( magma_flops_t &flops )
 {
     #if defined(ENABLE_TIMER) && defined(HAVE_PAPI)
@@ -80,9 +99,18 @@ static inline void flops_start( magma_flops_t &flops )
     #endif
 }
 
-// Set flops counter to difference between current flops and when flops_start() was called.
-// Returns counter, so you can sum up; see timer_stop().
-// If ENABLE_TIMER and HAVE_PAPI are not both defined, returns 0.
+
+/***************************************************************************//**
+    @param[out]
+    flops   On input, flop counter when flops_start() was called.
+            On output, set to (current flop counter - start flop counter).
+    
+    @return flops, so you can sum up; see timer_stop().
+    
+    If ENABLE_TIMER and HAVE_PAPI are not both defined, returns 0.
+    
+    @ingroup magma_timer
+*******************************************************************************/
 static inline magma_flops_t flops_stop( magma_flops_t &flops )
 {
     #if defined(ENABLE_TIMER) && defined(HAVE_PAPI)
@@ -96,9 +124,12 @@ static inline magma_flops_t flops_stop( magma_flops_t &flops )
 }
 
 
-// ------------------------------------------------------------
-// If ENABLE_TIMER is defined, same as printf;
-// else does nothing (returns 0).
+/***************************************************************************//**
+    If ENABLE_TIMER is defined, same as printf;
+    else does nothing (returns 0).
+    
+    @ingroup magma_timer
+*******************************************************************************/
 static inline int timer_printf( const char* format, ... )
     __attribute__((format(printf,1,2)));
 
@@ -114,8 +145,13 @@ static inline int timer_printf( const char* format, ... )
     return len;
 }
 
-// If ENABLE_TIMER is defined, same as fprintf;
-// else does nothing (returns 0).
+
+/***************************************************************************//**
+    If ENABLE_TIMER is defined, same as fprintf;
+    else does nothing (returns 0).
+    
+    @ingroup magma_timer
+*******************************************************************************/
 static inline int timer_fprintf( FILE* stream, const char* format, ... )
     __attribute__((format(printf,2,3)));
 
@@ -131,8 +167,13 @@ static inline int timer_fprintf( FILE* stream, const char* format, ... )
     return len;
 }
 
-// If ENABLE_TIMER is defined, same as snprintf;
-// else does nothing (returns 0).
+
+/***************************************************************************//**
+    If ENABLE_TIMER is defined, same as snprintf;
+    else does nothing (returns 0).
+    
+    @ingroup magma_timer
+*******************************************************************************/
 static inline int timer_snprintf( char* str, size_t size, const char* format, ... )
     __attribute__((format(printf,3,4)));
 

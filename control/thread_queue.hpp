@@ -16,12 +16,16 @@
 #include "magma_internal.h"
 
 
-// ---------------------------------------------
+/******************************************************************************/
 extern "C"
 void* magma_thread_main( void* arg );
 
 
-// ---------------------------------------------
+/***************************************************************************//**
+    Super class for tasks used with \ref magma_thread_queue.
+    Each task should sub-class this and implement the run() method.
+    @ingroup magma_thread
+*******************************************************************************/
 class magma_task
 {
 public:
@@ -32,12 +36,7 @@ public:
 };
 
 
-// ---------------------------------------------
-// Thread pool with multi-producer, multi-consumer queue.
-//
-// This is similar to python's queue class, but also implements worker threads
-// and adds quit mechanism.
-// sync is like python's join. Threads do not exit, so I find join to be a misleading name.
+/******************************************************************************/
 class magma_thread_queue
 {
 public:
