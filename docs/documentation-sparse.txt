@@ -1,12 +1,12 @@
 /**
 
 ********************************************************************************
-@page sparse-iter Sparse-Iter
+@page sparse-iter Sparse Overview
 
 
 The MAGMA Sparse-Iter Package
 =================================
-The sparse-iter package recently added to the MAGMA software stack contains
+The sparse-iter package in the MAGMA software stack contains
 sparse BLAS routines as well as functions to handle the complete iterative
 solution process of a sparse linear system of equations.
 A typical application includes:
@@ -412,40 +412,40 @@ row/col/val, and the vector b is stored in valb. These entities are passed to
 MAGMA-sparse. In the end, we want the solution passed back to the application in 
 the vector valx.  
 
-// init MAGMA-sparse and create some LA objects
+    // initialize MAGMA-sparse and create some LA objects
     magma_dopts dopts;
     magma_queue_t queue;
     magma_queue_create( 0, &queue );
     magma_d_matrix A, A_d, x, x_d, b, b_d;
 
-// pass linear system to MAGMA-sparse
+    // pass linear system to MAGMA-sparse
     magma_dcsrset( m, n, row, col, val, &A, queue );
     magma_dvset( m, n, valb, &b, queue );
     
-// copy the linear system to the device
+    // copy the linear system to the device
     magma_d_vtransfer( b, &b_d, Magma_CPU, Magma_DEV, queue );    
     magma_d_mtransfer( A, &A_d, Magma_CPU, Magma_DEV, queue );    
-// allocate solution vector - on device
+    // allocate solution vector - on device
     magma_d_vinit( &x_d, Magma_DEV, A.num_cols, one, queue );
     
-// configure solver
+    // configure solver
     dopts.solver_par.solver = Magma_PGMRES; dopts.solver_par.restart = 30; 
     dopts.solver_par.rtol = 1e-10;
     magma_dsolverinfo_init( &dopts.solver_par, &dopts.precond_par, queue );
     
-// configure the preconditioner
+    // configure the preconditioner
     dopts.precond_par.solver = Magma_ILU; dopts.precond_par.levels = 0; 
     dopts.precond_par.trisolver = Magma_CUSOLVE;
     magma_d_precondsetup( A, b, &dopts.solver_par, &dopts.precond_par, queue );
 
-// solve the linear system
+    // solve the linear system
     magma_d_solver( B_d, b_d, &x_d, &dopts, queue );
 
-// copy the solution vector back to the host and pass it back to the application
+    // copy the solution vector back to the host and pass it back to the application
     magma_d_mtransfer( x_d, &x, Magma_DEV, Magma_CPU, queue );
     magma_dvget( x, &m, &n, &valx, queue );
     
-// clean up the memory
+    // clean up the memory
     magma_dsolverinfo_free( &dopts.solver_par, &dopts.precond_par, queue );
     magma_d_mfree(&A_d, queue );
     magma_d_mfree(&A, queue );
@@ -453,7 +453,7 @@ the vector valx.
     magma_d_mfree(&b_d, queue );
     magma_d_mfree(&b, queue );
 
-// finalize MAGMA
+    // finalize MAGMA
     magma_queue_destroy( queue );
     magma_finalize();
 

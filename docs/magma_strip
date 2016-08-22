@@ -2,8 +2,10 @@
 #
 # Used as INPUT_FILTER in Doxyfile to strips out "Arguments" and "Purpose"
 # from MAGMA docs, as doxygen provides its own sections.
+# Also strips trailing _q from v2 names (which are accessed through macros without the _q.)
 #
 # -0777 slurps whole files; see 'man perlrun'
 
 s/^ +Arguments *\n +[-=]{2,}$/\n/gm;
 s/^ +Purpose *\n +[-=]{2,}$/\n/gm;
+s/\b(magma\w+)_q\(/$1(/g;
