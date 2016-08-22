@@ -1,0 +1,974 @@
+/**
+------------------------------------------------------------
+@defgroup magma_init                Initialize/finalize
+
+@defgroup group_util                Utilities
+@{
+    @defgroup magma_malloc          Allocate GPU device memory
+    @defgroup magma_malloc_cpu      Allocate CPU host memory
+    @defgroup magma_malloc_pinned   Allocate pinned CPU host memory
+
+    @defgroup group_comm            Communication CPU <=> GPU
+    @{
+        @defgroup magma_copyvector  copyvector: GPU => GPU
+        @defgroup magma_getvector   getvector:  GPU => CPU
+        @defgroup magma_setvector   setvector:  CPU => GPU
+
+        @defgroup magma_copymatrix  copymatrix: GPU => GPU
+        @defgroup magma_getmatrix   getmatrix:  GPU => CPU
+        @defgroup magma_setmatrix   setmatrix:  CPU => GPU
+
+        @defgroup magma_getmatrix_transpose   getmatrix_transpose: GPU => CPU
+        @defgroup magma_setmatrix_transpose   setmatrix_transpose: CPU => GPU
+
+        @defgroup magma_getmatrix_bcyclic  getmatrix_bcyclic: multi-GPU => CPU
+        @defgroup magma_setmatrix_bcyclic  setmatrix_bcyclic: CPU => multi-GPU
+    @}
+
+    @defgroup magma_constants       Constants and converters
+    @brief                          Mappings between LAPACK string constants and
+                                    MAGMA, CBLAS, cuBLAS, and clBLAS symbolic constants
+
+    @defgroup magma_device          Device management
+    @defgroup magma_queue           Queue  management
+    @defgroup magma_event           Event  management
+    @defgroup magma_error           Error handling
+    @defgroup magma_util            Miscellaneous utilities
+    @{
+        @defgroup magma_make_lwork  make_lwork: Round lwork for float
+    @}
+
+    @defgroup magma_print           Print matrix
+    @defgroup magma_wtime           Timer
+    @defgroup magma_tuning          Tuning (get_nb, etc.)
+@}
+
+
+
+
+============================================================
+@defgroup group_internal            Internal routines
+@{
+    @defgroup magma_error_internal  Error handling
+    @defgroup magma_testing         Testing routines
+    @defgroup magma_thread          Thread management
+    @defgroup magma_timer           Timer utilities
+@}
+
+
+
+
+============================================================
+@defgroup dense                     Dense linear algebra
+@brief    Designed to operate on large, dense matrices.
+@{
+
+    ------------------------------------------------------------
+    @defgroup group_solvers             Linear system solvers
+    @brief    Solves \f$ Ax = b \f$
+    @{
+        @defgroup group_gesv            General matrices: LU
+        @brief    Solves \f$ Ax = b \f$ using LU factorization for general matrices
+        @{
+            @defgroup magma_gesv        gesv:  Solves Ax = b using LU factorization (driver)
+            @defgroup magma_getrf       getrf: LU factorization
+            @defgroup magma_getrs       getrs: LU forward and back solves
+            @defgroup magma_getri       getri: LU inverse
+            @defgroup group_gesv_aux    Auxiliary routines
+            @{
+                @defgroup magma_getf2   getf2: LU panel factorization
+                @defgroup magma_laswp   laswp: Swap rows
+            @}
+            @defgroup group_gesv_nopiv  No pivoting variant
+            @{
+                @defgroup magma_gesv_nopiv  gesv:  Solves Ax = b using LU factorization - no pivoting (driver)
+                @defgroup magma_getf2_nopiv getf2: LU panel factorization - no pivoting
+                @defgroup magma_getrf_nopiv getrf: LU factorization - no pivoting
+                @defgroup magma_getrs_nopiv getrs: LU forward and back solves - no pivoting
+                @defgroup magma_gerfs_nopiv gerfs: Refine solution - no pivoting
+            @}
+        @}
+
+        @defgroup group_gesv_rbt            General matrices: RBT + no pivoting LU
+        @brief    Solves \f$ Ax = b \f$ using RBT + no pivoting LU factorization for general matrices
+        @{
+            @defgroup magma_gesv_rbt        gesv_rbt: Solves Ax = b using RBT + LU factorization (driver)
+            @defgroup magma_gerbt           gerbt: Apply random butterfly transformation (RBT)
+            @defgroup group_gesv_rbt_aux    Auxiliary routines
+            @{
+                @defgroup magma_prbt        prbt
+                @defgroup magma_prbt_mv     prbt_mv
+                @defgroup magma_prbt_mtv    prbt_mtv
+            @}
+        @}
+
+        @defgroup group_gels            General matrices: least squares
+        @brief    Solves \f$ Ax \approx b \f$ where \f$ A \f$ is rectangular
+        @see group_orthogonal
+        @{
+            @defgroup magma_gels        gels: Least squares solves Ax = b using QR factorization (driver)
+            @defgroup magma_geqrsv      geqrsv: Solves Ax = b using QR factorization (driver)
+        @}
+
+        @defgroup group_posv            Symmetric/Hermitian positive definite: Cholesky
+        @brief    Solves \f$ Ax = b \f$ using Cholesky factorization for SPD/HPD matrices
+        @{
+            @defgroup magma_posv        posv:  Solves Ax = b using Cholesky factorization (driver)
+            @defgroup magma_potrf       potrf: Cholesky factorization
+            @defgroup magma_potrs       potrs: Cholesky forward and back solves
+            @defgroup magma_potri       potri: Cholesky inverse
+            @defgroup group_posv_aux    Auxiliary routines
+            @{
+                @defgroup magma_potf2   potf2: Cholesky panel factorization
+                @defgroup magma_lauum   lauum: Multiply triangular matrices; used in potri
+            @}
+        @}
+
+        @defgroup group_hesv            Symmetric/Hermitian indefinite
+        @brief    Solves \f$ Ax = b \f$ using indefinite factorization for Hermitian matrices
+        @{
+            @defgroup magma_hesv        sy/hesv:  Solves Ax = b using symmetric/Hermitian indefinite factorization (driver)
+            @defgroup magma_hetrf       sy/hetrf: symmetric/Hermitian indefinite factorization (Bunch-Kaufman pivoting)
+            @defgroup magma_hetrf_aasen sy/hetrf: symmetric/Hermitian indefinite factorization (Aasen)
+            @defgroup group_hesv_aux    Auxiliary routines
+            @{
+                @defgroup magma_lahef   lahef: Partial factorization; used by hetrf
+                @defgroup magma_laswp_sym   laswp_sym: Swap rows/cols
+            @}
+            @defgroup group_hesv_nopiv  No pivoting variant
+            @{
+                @defgroup magma_hesv_nopiv  sy/hesv:  Solves Ax = b using symmetric/Hermitian indefinite factorization - no pivoting (driver)
+                @defgroup magma_hetrf_nopiv sy/hetrf: symmetric/Hermitian indefinite factorization - no pivoting
+                @defgroup magma_hetrs_nopiv sy/hetrs: symmetric/Hermitian indefinite forward and back solves - no pivoting
+            @}
+        @}
+
+        @defgroup group_sysv            Symmetric indefinite
+        @brief    Solves \f$ Ax = b \f$ using indefinite factorization for symmetric matrices
+        @{
+            @defgroup group_sysv_nopiv  No pivoting variant
+            @{
+                @defgroup magma_sysv_nopiv  sysv:  Solves Ax = b using symmetric indefinite factorization - no pivoting (driver)
+                @defgroup magma_sytrf_nopiv sytrf: Symmetric indefinite factorization - no pivoting
+                @defgroup magma_sytrs_nopiv sytrs: Symmetric indefinite forward and back solves - no pivoting
+            @}
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup group_orthogonal          Orthogonal/unitary factorizations
+    @brief    Factor \f$ A \f$ using \f$ QR, RQ, QL, LQ \f$
+    @{
+        @defgroup group_qr              QR factorization
+        @brief    Factor \f$ A = QR \f$
+        @{
+            @defgroup magma_geqrf       geqrf: QR factorization
+            @defgroup magma_geqp3       geqp3: QR factorization with column pivoting
+            @defgroup magma_gegqr       gegqr: QR factorization and generate Q
+            @defgroup magma_unmqr       or/unmqr: Multiply by Q from QR factorization
+            @defgroup magma_ungqr       or/ungqr: Generate    Q from QR factorization
+            @defgroup magma_geqrs       geqrs:
+            @defgroup group_qr_aux      Auxiliary routines
+            @{
+                @defgroup magma_geqr2   geqr2: QR panel factorization
+                @defgroup magma_laqps   laqps: Partial factorization; used by geqp3
+                @defgroup magma_nrm2_adjust            nrm2_adjust:           auxiliary for geqp3
+                @defgroup magma_nrm2_check             nrm2_check:            auxiliary for geqp3
+                @defgroup magma_nrm2_cols              nrm2_cols:             auxiliary for geqp3
+                @defgroup magma_nrm2_row_check_adjust  nrm2_row_check_adjust: auxiliary for geqp3
+            @}
+        @}
+
+        @defgroup group_rq              RQ factorization
+        @brief    Factor \f$ A = RQ \f$
+        @{
+            @defgroup magma_gerqf       gerqf: RQ factorization
+            @defgroup magma_unmrq       or/unmrq: Multiply by Q from RQ factorization
+            @defgroup magma_ungrq       or/ungrq: Generate    Q from RQ factorization
+        @}
+
+        @defgroup group_ql              QL factorization
+        @brief    Factor \f$ A = QL \f$
+        @{
+            @defgroup magma_geqlf       geqlf: QL factorization
+            @defgroup magma_unmql       or/unmql: Multiply by Q from QL factorization
+            @defgroup magma_ungql       or/ungql: Generate    Q from QL factorization
+        @}
+
+        @defgroup group_lq              LQ factorization
+        @brief    Factor \f$ A = LQ \f$
+        @{
+            @defgroup magma_gelqf       gelqf: LQ factorization
+            @defgroup magma_unmlq       or/unmlq: Multiply by Q from LQ factorization
+            @defgroup magma_unglq       or/unglq: Generate    Q from LQ factorization
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup group_eigenvalue          Eigenvalues
+    @brief    Solves \f$ Ax = \lambda x \f$
+    @{
+        @defgroup group_geev            Non-symmetric eigenvalues
+        @brief    Solves \f$ Ax = \lambda x \f$ where \f$ A \f$ is general
+        @{
+            @defgroup magma_geev        geev:  Non-symmetric eigenvalues (driver)
+            @defgroup magma_gehrd       gehrd: Hessenberg reduction
+            @defgroup magma_unghr       or/unghr: Generate    Q from Hessenberg reduction
+            @defgroup group_geev_aux    Auxiliary routines
+            @{
+                @defgroup magma_lahr2   lahr2: Partial factorization; used by gehrd
+                @defgroup magma_lahru   lahru: Partial factorization; used by gehrd
+                @defgroup magma_trevc   trevc: Compute eigenvectors; used by geev
+                @defgroup magma_latrsd  latrsd:  Triangular solve with modified diagonal; used by trevc
+                @defgroup magma_laqtrsd  laqtrsd: Quasi-Triangular solve with modified diagonal; used by trevc
+                @defgroup magma_laln2   laln2:   Solve 2x2 system; used by trevc
+            @}
+        @}
+
+        @defgroup group_heev            Symmetric/Hermitian eigenvalues
+        @brief    Solves \f$ Ax = \lambda x \f$ where \f$ A \f$ is symmetric/Hermitian
+        @{
+            @defgroup magma_heevx       sy/heevx:  Solves using QR iteration (expert)
+            @defgroup magma_heevd       sy/heevd:  Solves using divide-and-conquer (driver)
+            @defgroup magma_heevdx      sy/heevdx: Solves using divide-and-conquer (expert)
+            @defgroup magma_heevr       sy/heevr:  Solves using MRRR (driver)
+
+            @defgroup magma_hetrd       sy/hetrd: Tridiagonal reduction
+            @defgroup magma_unmtr       or/unmtr: Multiply by Q from tridiagonal reduction
+            @defgroup magma_ungtr       or/ungtr: Generate    Q from tridiagonal reduction
+            @defgroup group_heev_aux    Auxiliary routines
+            @{
+                @defgroup magma_latrd   latrd: Partial factorization; used by hetrd
+                @defgroup magma_stedx   stedx: Eigenvalues & vectors of tridiagonal using D&C
+                @defgroup magma_laex0   laex0: Eigenvalues & vectors of tridiagonal using D&C
+                @defgroup magma_laex1   laex1: Updated eigensystem after rank-1 update.
+                @defgroup magma_laex3   laex3: Roots of secular equation.
+            @}
+            @defgroup group_heev_2stage 2-stage variant
+            @{
+                @defgroup magma_hetrd_he2hb   he2hb: 1st stage, full to band
+                @defgroup magma_hetrd_sy2sb   sy2sb: 1st stage, full to band
+                @defgroup magma_hetrd_hb2st   hb2st: 2nd stage, band to tridiagonal
+                @defgroup magma_hetrd_sb2st   sb2st: 2nd stage, band to tridiagonal
+                @defgroup magma_hbtype1cb     hbtype1cb
+                @defgroup magma_hbtype2cb     hbtype2cb
+                @defgroup magma_hbtype3cb     hbtype3cb
+            @}
+        @}
+
+        @defgroup group_hegv            Generalized Symmetric/Hermitian eigenvalues
+        @brief    Solves \f$ Ax  = \lambda B x \f$,
+                         \f$ ABx = \lambda   x \f$, or
+                         \f$ BAx = \lambda   x \f$
+                  where \f$ A, B \f$ are symmetric/Hermitian
+                  and \f$ B \f$ is positive definite.
+        @{
+            @defgroup magma_hegvx       sy/hegvx:  Solves using QR iteration (expert)
+            @defgroup magma_hegvd       sy/hegvd:  Solves using divide-and-conquer (driver)
+            @defgroup magma_hegvdx      sy/hegvdx: Solves using divide-and-conquer (expert)
+            @defgroup magma_hegvr       sy/hegvr:  Solves using MRRR (driver)
+            @defgroup group_hegv_aux    Auxiliary routines
+            @{
+                @defgroup magma_hegst   hegst:  Reduce generalized problem to standard problem.
+            @}
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup group_svd                 Singular Value Decomposition (SVD)
+    @brief    Factor \f$ A = U \Sigma V^T \f$
+    @{
+        @defgroup magma_gesvd           gesvd: SVD using QR iteration
+        @defgroup magma_gesdd           gesdd: SVD using divide-and-conquer
+        @defgroup magma_gebrd           gebrd: Bidiagonal reduction
+        @defgroup magma_unmbr           or/unmbr: Multiply by Q or P from bidiagonal reduction
+        @defgroup magma_ungbr           or/ungbr: Generate    Q or P from bidiagonal reduction
+        @defgroup group_gesvd_aux       Auxiliary routines
+        @{
+            @defgroup magma_labrd       labrd: Partial factorization; used by gebrd
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup group_blas                MAGMA BLAS and Auxiliary
+    @brief    BLAS and Auxiliary functions.
+              MAGMA BLAS functions that fit better in above categories
+              (solvers, etc.) are listed there.
+              Standard BLAS and LAPACK auxiliary routines are grouped by
+              amount of work into Level 1, 2, 3.
+    @{
+        @defgroup group_math            Math functions (sqrt, etc.), O(1) work
+        @{
+            @defgroup magma_ceildiv     ceil(a/b) and ceil(a/b)*b
+            @defgroup magma_sqrt        sqrt
+            @defgroup magma_nan_inf     NAN and INF checks
+        @}
+
+        @defgroup group_blas1           Level 1: vectors operations, O(n) work
+        @brief    Vector operations that perform \f$ O(n) \f$ work on \f$ O(n) \f$ data.
+                  These are memory bound, since every operation requires a memory read or write.
+        @{
+            @defgroup magma_asum        asum:  Sum vector
+            @brief    \f$ \sum_i |x_i| \f$
+
+            @defgroup magma_axpy        axpy:  Add vectors
+            @brief    \f$ y = \alpha x + y \f$
+
+            @defgroup magma_copy        copy:  Copy vector
+            @brief    \f$ y = x \f$
+
+            @defgroup magma__dot        dot:   Dot (inner) product
+            @brief    \f$ x^T y \f$
+                   or \f$ x^H y \f$
+
+            @defgroup magma_iamax       iamax: Find max element
+            @brief    \f$ \text{argmax}_i\; |x_i| \f$
+
+            @defgroup magma_iamin       iamin: Find min element
+            @brief    \f$ \text{argmin}_i\; |x_i| \f$
+
+            @defgroup magma_nrm2        nrm2:  Vector 2 norm
+            @brief    \f$ ||x||_2 \f$
+
+            @defgroup magma_rot         rot:   Apply Given's rotation
+
+            @defgroup magma_rotg        rotg:  Generate Given's rotation
+
+            @defgroup magma_rotm        rotm:  Apply modified Given's rotation
+
+            @defgroup magma_rotmg       rotmg: Generate modified Given's rotation
+
+            @defgroup magma_scal        scal:  Scale vector
+            @brief    \f$ x = \alpha x \f$
+
+            @defgroup magma_swap        swap:  Swap vectors
+            @brief    \f$ x <=> y \f$
+        @}
+
+        @defgroup group_blas2           Level 2: matrix-vector operations, O(n^2) work
+        @brief    Matrix operations that perform \f$ O(n^2) \f$ work on \f$ O(n^2) \f$ data.
+                  These are memory bound, since every operation requires a memory read or write.
+        @{
+            @defgroup magma_geadd       geadd:      Add matrices
+            @brief    \f$ B = \alpha A + \beta B \f$
+
+            @defgroup magma_gemv        gemv:       General matrix-vector multiply
+            @brief    \f$ y = \alpha Ax + \beta y \f$
+
+            @defgroup magma_ger         ger:        General matrix rank 1 update
+            @brief    \f$ A = \alpha xy^T + A \f$
+
+            @defgroup magma_hemv        hemv:       Hermitian matrix-vector multiply
+            @brief    \f$ y = \alpha Ax + \beta y \f$
+
+            @defgroup magma_her         her:        Hermitian rank 1 update
+            @brief    \f$ A = \alpha xx^T + A \f$
+
+            @defgroup magma_her2        her2:       Hermitian rank 2 update
+            @brief    \f$ A = \alpha xy^T + \alpha yx^T + A \f$
+
+            @defgroup magma_symv        symv:       Symmetric matrix-vector multiply
+            @brief    \f$ y = \alpha Ax + \beta y \f$
+
+            @defgroup magma_syr         syr:        Symmetric rank 1 update
+            @brief    \f$ A = \alpha xx^T + A \f$
+
+            @defgroup magma_syr2        syr2:       Symmetric rank 2 update
+            @brief    \f$ A = \alpha xy^T + \alpha yx^T + A \f$
+
+            @defgroup magma_trmv        trmv:       Triangular matrix-vector multiply
+            @brief    \f$ x = Ax \f$
+
+            @defgroup magma_trsv        trsv:       Triangular matrix-vector solve
+            @brief    \f$ x = op(A^{-1})\; b \f$
+
+            ----
+
+            @defgroup magma_swapblk     swapblk:    Swap several rows
+
+            @defgroup magma_swapdblk    swapdblk:   Swap diagonal blocks
+
+            @defgroup magma_symmetrize  symmetrize: Symmetrize matrix
+            @brief    \f$ \text{upper}(A) = \text{lower}(A)^T \f$
+                   or \f$ \text{lower}(A) = \text{upper}(A)^T \f$
+
+            @defgroup magma_transpose   transpose:  Transpose matrix
+            @brief    \f$ B = A^T \f$
+                   or \f$ B = A^H \f$
+
+            @defgroup magma_lacgv       lacgv:      Conjugate vector
+            @brief    \f$ x = conj(x) \f$
+
+            @defgroup magma_lacpy       lacpy:      Copy matrix
+            @brief    \f$ B = A \f$
+
+            @defgroup magma_lascl       lascl:      Scale matrix by scalar
+            @brief    \f$ A = \alpha A \f$
+
+            @defgroup magma_lascl_diag  lascl_diag: Scale matrix by diagonal
+            @brief    \f$ A = D A \f$
+
+            @defgroup magma_lascl_2x2   lascl_2x2:  Scale matrix by 2-by-2 pivot
+            @brief    \f$ A = D A \f$
+
+            @defgroup magma_laset       laset:      Set matrix to constants
+            @brief    \f$ A_{ij} = \f$ diag    if \f$ i=j \f$;
+                      \f$ A_{ij} = \f$ offdiag otherwise.
+
+            @defgroup magma_laset_band  laset_band: Set band of matrix to constants
+            @brief    \f$ A_{ij} = \f$ diag    if \f$ i=j \f$;
+                      \f$ A_{ij} = \f$ offdiag otherwise.
+        @}
+
+        @defgroup group_blas3           Level 3: matrix-matrix operations, O(n^3) work
+        @brief    Matrix-matrix operations that perform \f$ O(n^3) \f$ work on \f$ O(n^2) \f$ data.
+                  These benefit from cache reuse, since many operations can be
+                  performed for every read from main memory.
+        @{
+            @defgroup magma_gemm        gemm:  General matrix multiply: C = AB + C
+            @brief    \f$ C = \alpha \;op(A) \;op(B) + \beta C \f$
+
+            @defgroup magma_hemm        hemm:  Hermitian matrix multiply
+            @brief    \f$ C = \alpha A B + \beta C \f$
+                   or \f$ C = \alpha B A + \beta C \f$ where \f$ A \f$ is Hermitian
+
+            @defgroup magma_herk        herk:  Hermitian rank k update
+            @brief    \f$ C = \alpha A A^T + \beta C \f$ where \f$ C \f$ is Hermitian
+
+            @defgroup magma_her2k       her2k: Hermitian rank 2k update
+            @brief    \f$ C = \alpha A B^T + \alpha B A^T + \beta C \f$ where \f$ C \f$ is Hermitian
+
+            @defgroup magma_symm        symm:  Symmetric matrix multiply
+            @brief    \f$ C = \alpha A B + \beta C \f$
+                   or \f$ C = \alpha B A + \beta C \f$ where \f$ A \f$ is symmetric
+
+            @defgroup magma_syrk        syrk:  Symmetric rank k update
+            @brief    \f$ C = \alpha A A^T + \beta C \f$ where \f$ C \f$ is symmetric
+
+            @defgroup magma_syr2k       syr2k: Symmetric rank 2k update
+            @brief    \f$ C = \alpha A B^T + \alpha B A^T + \beta C \f$ where \f$ C \f$ is symmetric
+
+            @defgroup magma_trmm        trmm:  Triangular matrix multiply
+            @brief    \f$ B = \alpha \;op(A)\; B \f$
+                   or \f$ B = \alpha B \;op(A)   \f$ where \f$ A \f$ is triangular
+
+            @defgroup magma_trsm        trsm:  Triangular solve matrix
+            @brief    \f$ C = op(A)^{-1} B   \f$
+                   or \f$ C = B \;op(A)^{-1} \f$ where \f$ A \f$ is triangular
+
+            @defgroup magma_trtri       trtri: Triangular inverse; used in getri, potri
+            @brief    \f$ A = A^{-1} \f$ where \f$ A \f$ is triangular
+
+            @defgroup magma_trtri_diag  trtri_diag: Invert diagonal blocks of triangular matrix; used in trsm
+        @}
+
+        @defgroup group_larf            Householder reflectors
+        @{
+            @defgroup magma_larfy       larfy: Apply Householder reflector to symmetric/Hermitian matrix
+            @defgroup magma_larfg       larfg: Generate Householder reflector
+            @defgroup magma_larfb       larfb: Apply block of Householder reflectors (Level 3)
+        @}
+
+        @defgroup group_mixed           Precision conversion
+        @{
+            @defgroup magma_lag2        _lag2_: Converts general    matrix between single and double
+            @defgroup magma_lat2        _lat2_: Converts triangular matrix between single and double
+        @}
+
+        @defgroup group_norms           Matrix norms
+        @{
+            @defgroup magma_lange       lange:    General matrix norm
+            @brief 1, Frobenius, or Infinity norm; or largest element
+
+            @defgroup magma_lanhe       lansy/he: Symmetric/Hermitian matrix norm
+            @brief 1, Frobenius, or Infinity norm; or largest element
+        @}
+    @}
+@}
+
+
+
+
+============================================================
+@defgroup batched                   Batched
+@brief    Batched functions operate on a large set of small matrices
+          in parallel, for instance, 10000 matrices of size 100 x 100.
+@{
+
+    ------------------------------------------------------------
+    @defgroup group_solvers_batched     Linear system solvers
+    @brief    Solves \f$ Ax = b \f$.
+    @{
+        @defgroup group_gesv_batched    General matrices: LU
+        @brief    Solves \f$ Ax = b \f$ using LU factorization for general matrices
+        @{
+            @defgroup magma_gesv_batched        gesv:  Solves Ax = b using LU factorization (driver)
+            @defgroup magma_getrf_batched       getrf: LU factorization
+            @defgroup magma_getrs_batched       getrs: LU forward and back solves
+            @defgroup magma_getri_batched       getri: LU inverse
+            @defgroup magma_gerfs_batched       gerfs: Refine solution
+            @defgroup magma_gesv_aux_batched    Auxiliary routines
+            @{
+                @defgroup magma_getf2_batched   getf2: LU panel factorization
+                @defgroup magma_laswp_batched   laswp: Swap rows
+            @}
+            @defgroup group_gesv_nopiv_batched    No pivoting variant
+            @{
+                @defgroup magma_gesv_nopiv_batched    gesv:  Solves Ax = b using LU factorization - no pivoting (driver)
+                @defgroup magma_getf2_nopiv_batched   getf2: LU panel factorization - no pivoting
+                @defgroup magma_getrf_nopiv_batched   getrf: LU factorization - no pivoting
+                @defgroup magma_getrs_nopiv_batched   getrs: LU forward and back solves - no pivoting
+            @}
+        @}
+
+        @defgroup group_gesv_rbt_batched      General matrices: RBT + no pivoting LU
+        @brief    Solves \f$ Ax = b \f$ using RBT + no pivoting LU factorization for general matrices
+        @{
+            @defgroup magma_gesv_rbt_batched        gesv_rbt: Solves Ax = b using RBT + LU factorization (driver)
+            @defgroup magma_gesv_rbt_aux_batched    Auxiliary routines
+            @{
+                @defgroup magma_gerbt_batched       gerbt: Apply random butterfly transformation (RBT)
+                @defgroup magma_prbt_batched        prbt
+                @defgroup magma_prbt_mv_batched     prbt_mv
+                @defgroup magma_prbt_mtv_batched    prbt_mtv
+            @}
+        @}
+
+        @defgroup group_gels_batched      General matrices: least squares
+        @brief    Solves \f$ Ax \approx b \f$ where \f$ A \f$ is rectangular
+        @see group_orthogonal
+        @{
+            @defgroup magma_gels_batched        gels: Least squares solves Ax = b using QR factorization (driver)
+        @}
+
+        @defgroup group_posv_batched      Symmetric/Hermitian positive definite: Cholesky
+        @brief    Solves \f$ Ax = b \f$ using Cholesky factorization for SPD/HPD matrices
+        @{
+            @defgroup magma_posv_batched        posv:  Solves Ax = b using Cholesky factorization (driver)
+            @defgroup magma_potrf_batched       potrf: Cholesky factorization
+            @defgroup magma_potrs_batched       potrs: Cholesky forward and back solves
+            @defgroup magma_potri_batched       potri: Cholesky inverse
+            @defgroup magma_porfs_batched       porfs: Refine solution
+            @defgroup magma_posv_aux_batched    Auxiliary routines
+            @{
+                @defgroup magma_potf2_batched   potf2: Cholesky panel factorization
+                @defgroup magma_lauum_batched   lauum: Multiply triangular matrices; used in potri
+            @}
+        @}
+
+        @defgroup group_hesv_batched      Hermitian indefinite
+        @brief    Solves \f$ Ax = b \f$ using indefinite factorization for Hermitian matrices
+        @{
+            @defgroup magma_hesv_batched        hesv:  Solves Ax = b using symmetric indefinite factorization (driver)
+            @defgroup magma_hesv_nopiv_batched  hesv:  Solves Ax = b using symmetric indefinite factorization - no pivoting (driver)
+            @defgroup magma_hetrf_batched       hetrf: Symmetric indefinite factorization
+            @defgroup magma_hetrs_batched       hetrs: Symmetric indefinite forward and back solves
+            @defgroup magma_hetri_batched       hetri: Symmetric indefinite inverse
+            @defgroup magma_herfs_batched       herfs: Refine solution
+            @defgroup magma_hesv_aux_batched    Auxiliary routines
+            @{
+                @defgroup magma_lahef_batched   lahef: Partial factorization; used by hetrf
+            @}
+        @}
+
+        @defgroup group_sysv_batched      Symmetric indefinite
+        @brief    Solves \f$ Ax = b \f$ using indefinite factorization for symmetric matrices
+        @{
+            @defgroup magma_sysv_batched        sysv:  Solves Ax = b using symmetric indefinite factorization (driver)
+            @defgroup magma_sysv_nopiv_batched  sysv:  Solves Ax = b using symmetric indefinite factorization - no pivoting (driver)
+            @defgroup magma_sytrf_batched       sytrf: Symmetric indefinite factorization
+            @defgroup magma_sytrs_batched       sytrs: Symmetric indefinite forward and back solves
+            @defgroup magma_sytri_batched       sytri: Symmetric indefinite inverse
+            @defgroup magma_syrfs_batched       syrfs: Refine solution
+            @defgroup magma_sysv_aux_batched    Auxiliary routines
+            @{
+                @defgroup magma_lasyf_batched   lasyf: Partial factorization; used by sytrf
+            @}
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup group_orthogonal_batched    Orthogonal/unitary factorizations
+    @brief    Factor \f$ A \f$ using \f$ QR, RQ, QL, LQ \f$
+    @{
+        @defgroup group_qr_batched        QR factorization
+        @brief    Factor \f$ A = QR \f$
+        @{
+            @defgroup magma_geqrf_batched       geqrf: QR factorization
+            @defgroup magma_unmqr_batched       or/unmqr: Multiply by Q from QR factorization
+            @defgroup magma_ungqr_batched       or/ungqr: Generate    Q from QR factorization
+            @defgroup magma_qr_aux_batched      Auxiliary routines
+            @{
+                @defgroup magma_geqr2_batched   geqr2: QR panel factorization
+            @}
+        @}
+
+        @defgroup group_rq_batched        RQ factorization
+        @brief    Factor \f$ A = RQ \f$
+        @{
+            @defgroup magma_gerqf_batched       gerqf: RQ factorization
+            @defgroup magma_unmrq_batched       or/unmrq: Multiply by Q from RQ factorization
+            @defgroup magma_ungrq_batched       or/ungrq: Generate    Q from RQ factorization
+        @}
+
+        @defgroup group_ql_batched        QL factorization
+        @brief    Factor \f$ A = QL \f$
+        @{
+            @defgroup magma_geqlf_batched       geqlf: QL factorization
+            @defgroup magma_unmql_batched       or/unmql: Multiply by Q from QL factorization
+            @defgroup magma_ungql_batched       or/ungql: Generate    Q from QL factorization
+        @}
+
+        @defgroup group_lq_batched        LQ factorization
+        @brief    Factor \f$ A = LQ \f$
+        @{
+            @defgroup magma_gelqf_batched       gelqf: LQ factorization
+            @defgroup magma_unmlq_batched       or/unmlq: Multiply by Q from LQ factorization
+            @defgroup magma_unglq_batched       or/unglq: Generate    Q from LQ factorization
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup group_blas_batched                MAGMA BLAS and Auxiliary
+    @brief    Batched BLAS and Auxiliary functions.
+    @{
+        @defgroup group_blas1_batched           Level 1: vectors operations, O(n) work
+        @brief    Vector operations that perform \f$ O(n) \f$ work on \f$ O(n) \f$ data.
+        @{
+            @defgroup magma_asum_batched        asum:  Sum vector
+            @brief    \f$ \sum_i |x_i| \f$
+
+            @defgroup magma_axpy_batched        axpy:  Add vectors
+            @brief    \f$ y = \alpha x + y \f$
+
+            @defgroup magma_copy_batched        copy:  Copy vector
+            @brief    \f$ y = x \f$
+
+            @defgroup magma__dot_batched        dot:   Dot (inner) product
+            @brief    \f$ x^T y \f$
+                   or \f$ x^H y \f$
+
+            @defgroup magma_iamax_batched       iamax: Find max element
+            @brief    \f$ \text{argmax}_i\; |x_i| \f$
+
+            @defgroup magma_iamin_batched       iamin: Find min element
+            @brief    \f$ \text{argmin}_i\; |x_i| \f$
+
+            @defgroup magma_nrm2_batched        nrm2:  Vector 2 norm
+            @brief    \f$ ||x||_2 \f$
+
+            @defgroup magma_rot_batched         rot:   Apply Given's rotation
+
+            @defgroup magma_rotg_batched        rotg:  Generate Given's rotation
+
+            @defgroup magma_rotm_batched        rotm:  Apply modified Given's rotation
+
+            @defgroup magma_rotmg_batched       rotmg: Generate modified Given's rotation
+
+            @defgroup magma_scal_batched        scal:  Scale vector
+            @brief    \f$ x = \alpha x \f$
+
+            @defgroup magma_swap_batched        swap:  Swap vectors
+            @brief    \f$ x <=> y \f$
+        @}
+
+        @defgroup group_blas2_batched           Level 2: matrix-vector operations, O(n^2) work
+        @brief    Matrix operations that perform \f$ O(n^2) \f$ work on \f$ O(n^2) \f$ data.
+              These are memory bound, since every operation requires a memory read or write.
+        @{
+            @defgroup magma_geadd_batched       geadd:      Add matrices
+            @brief    \f$ B = \alpha A + \beta B \f$
+
+            @defgroup magma_gemv_batched        gemv:       General matrix-vector multiply
+            @brief    \f$ y = \alpha Ax + \beta y \f$
+
+            @defgroup magma_ger_batched         ger:        General matrix rank 1 update
+            @brief    \f$ A = \alpha xy^T + A \f$
+
+            @defgroup magma_hemv_batched        hemv:       Hermitian matrix-vector multiply
+            @brief    \f$ y = \alpha Ax + \beta y \f$
+
+            @defgroup magma_her_batched         her:        Hermitian rank 1 update
+            @brief    \f$ A = \alpha xx^T + A \f$
+
+            @defgroup magma_her2_batched        her2:       Hermitian rank 2 update
+            @brief    \f$ A = \alpha xy^T + \alpha yx^T + A \f$
+
+            @defgroup magma_symv_batched        symv:       Symmetric matrix-vector multiply
+            @brief    \f$ y = \alpha Ax + \beta y \f$
+
+            @defgroup magma_syr_batched         syr:        Symmetric rank 1 update
+            @brief    \f$ A = \alpha xx^T + A \f$
+
+            @defgroup magma_syr2_batched        syr2:       Symmetric rank 2 update
+            @brief    \f$ A = \alpha xy^T + \alpha yx^T + A \f$
+
+            @defgroup magma_trmv_batched        trmv:       Triangular matrix-vector multiply
+            @brief    \f$ x = Ax \f$
+
+            @defgroup magma_trsv_batched        trsv:       Triangular matrix-vector solve
+            @brief    \f$ x = op(A^{-1})\; b \f$
+
+            ----
+
+            @defgroup magma_swapblk_batched     swapblk:    Swap several rows
+
+            @defgroup magma_swapdblk_batched    swapdblk:   Swap diagonal blocks
+
+            @defgroup magma_symmetrize_batched  symmetrize: Symmetrize matrix
+            @brief    \f$ \text{upper}(A) = \text{lower}(A)^T \f$
+                   or \f$ \text{lower}(A) = \text{upper}(A)^T \f$
+
+            @defgroup magma_transpose_batched   transpose:  Transpose matrix
+            @brief    \f$ B = A^T \f$
+                   or \f$ B = A^H \f$
+
+            @defgroup magma_lacgv_batched       lacgv:      Conjugate vector
+            @brief    \f$ x = conj(x) \f$
+
+            @defgroup magma_lacpy_batched       lacpy:      Copy matrix
+            @brief    \f$ B = A \f$
+
+            @defgroup magma_lascl_batched       lascl:      Scale matrix by scalar
+            @brief    \f$ A = \alpha A \f$
+
+            @defgroup magma_lascl2_batched      lascl2:     Scale matrix by diagonal
+            @brief    \f$ A = D A \f$
+
+            @defgroup magma_laset_batched       laset:      Set matrix to constants
+            @brief    \f$ A_{ij} = \f$ diag    if \f$ i=j \f$;
+                      \f$ A_{ij} = \f$ offdiag otherwise.
+        @}
+
+        @defgroup group_blas3_batched           Level 3: matrix-matrix operations, O(n^3) work
+        @brief    Matrix-matrix operations that perform \f$ O(n^3) \f$ work on \f$ O(n^2) \f$ data.
+              These benefit from cache reuse, since many operations can be
+              performed for every read from main memory.
+        @{
+            @defgroup magma_gemm_batched        gemm:  General matrix multiply: C = AB + C
+            @brief    \f$ C = \alpha \;op(A) \;op(B) + \beta C \f$
+
+            @defgroup magma_hemm_batched        hemm:  Hermitian matrix multiply
+            @brief    \f$ C = \alpha A B + \beta C \f$
+                   or \f$ C = \alpha B A + \beta C \f$ where \f$ A \f$ is Hermitian
+
+            @defgroup magma_herk_batched        herk:  Hermitian rank k update
+            @brief    \f$ C = \alpha A A^T + \beta C \f$ where \f$ C \f$ is Hermitian
+
+            @defgroup magma_her2k_batched       her2k: Hermitian rank 2k update
+            @brief    \f$ C = \alpha A B^T + \alpha B A^T + \beta C \f$ where \f$ C \f$ is Hermitian
+
+            @defgroup magma_symm_batched        symm:  Symmetric matrix multiply
+            @brief    \f$ C = \alpha A B + \beta C \f$
+                   or \f$ C = \alpha B A + \beta C \f$ where \f$ A \f$ is symmetric
+
+            @defgroup magma_syrk_batched        syrk:  Symmetric rank k update
+            @brief    \f$ C = \alpha A A^T + \beta C \f$ where \f$ C \f$ is symmetric
+
+            @defgroup magma_syr2k_batched       syr2k: Symmetric rank 2k update
+            @brief    \f$ C = \alpha A B^T + \alpha B A^T + \beta C \f$ where \f$ C \f$ is symmetric
+
+            @defgroup magma_trmm_batched        trmm:  Triangular matrix multiply
+            @brief    \f$ B = \alpha \;op(A)\; B \f$
+                   or \f$ B = \alpha B \;op(A)   \f$ where \f$ A \f$ is triangular
+
+            @defgroup magma_trsm_batched        trsm:  Triangular solve matrix
+            @brief    \f$ C = op(A)^{-1} B   \f$
+                   or \f$ C = B \;op(A)^{-1} \f$ where \f$ A \f$ is triangular
+
+            @defgroup magma_trtri_batched       trtri: Triangular inverse; used in getri, potri
+            @brief    \f$ A = A^{-1} \f$ where \f$ A \f$ is triangular
+
+            @defgroup magma_trtri_diag_batched  trtri_diag: Invert diagonal blocks of triangular matrix; used in trsm
+        @}
+
+        @defgroup group_larf_batched            Householder reflectors
+        @{
+            @defgroup magma_larf_batched        larf:  Apply Householder reflector to general matrix
+            @defgroup magma_larfy_batched       larfy: Apply Householder reflector to symmetric/Hermitian matrix
+            @defgroup magma_larfg_batched       larfg: Generate Householder reflector
+            @defgroup magma_larfb_batched       larfb: Apply block of Householder reflectors (Level 3)
+            @defgroup magma_larft_batched       larft: Generate T matrix for block of Householder reflectors
+        @}
+
+        @defgroup group_mixed_batched           Precision conversion
+        @{
+            @defgroup magma_lag2_batched        _lag2_: Converts general    matrix between single and double
+            @defgroup magma_lat2_batched        _lat2_: Converts triangular matrix between single and double
+        @}
+
+        @defgroup group_norms_batched           Matrix norms
+        @{
+            @defgroup magma_lange_batched       lange:    General matrix norm
+            @brief 1, Frobenius, or Infinity norm; or largest element
+
+            @defgroup magma_lanhe_batched       lansy/he: Symmetric/Hermitian matrix norm
+            @brief 1, Frobenius, or Infinity norm; or largest element
+
+            @defgroup magma_lantr_batched       lantr:    Triangular matrix norm
+            @brief 1, Frobenius, or Infinity norm; or largest element
+        @}
+    @}
+@}
+
+
+
+
+============================================================
+@defgroup sparse  Sparse
+@brief    Routines for sparse linear algebra
+@{
+    ------------------------------------------------------------
+    @defgroup sparse_solvers       Sparse linear systems
+    @brief    Solve \f$ Ax = b \f$
+    @{
+        @defgroup sparse_gesv      General matrices
+        @brief    Solve \f$ Ax = b \f$, for general \f$ A \f$
+        @{
+            @defgroup magmasparse_sgesv single precision
+            @defgroup magmasparse_dgesv double precision
+            @defgroup magmasparse_cgesv single-complex precision
+            @defgroup magmasparse_zgesv double-complex precision
+        @}
+
+        @defgroup sparse_posv      Symmetric/Hermitian positive definite
+        @brief    Solve \f$ Ax = b \f$,
+                  for symmetric/Hermitian positive definite (SPD) \f$ A \f$
+        @{
+            @defgroup magmasparse_sposv single precision
+            @defgroup magmasparse_dposv double precision
+            @defgroup magmasparse_cposv single-complex precision
+            @defgroup magmasparse_zposv double-complex precision
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup sparse_eigenvalue    Sparse eigenvalues
+    @brief    Solve \f$ Ax = \lambda x \f$
+    @{
+        @defgroup sparse_heev      Symmetric/Hermitian eigenvalues
+        @brief    Solve \f$ Ax = \lambda x \f$ for symmetric/Hermitian \f$ A \f$
+        @{
+            @defgroup magmasparse_ssyev single precision
+            @defgroup magmasparse_dsyev double precision
+            @defgroup magmasparse_cheev single-complex precision
+            @defgroup magmasparse_zheev double-complex precision
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup sparse_precond       Sparse preconditioners
+    @brief    Preconditioner for solving \f$ Ax = \lambda x \f$
+    @{
+        @defgroup sparse_gepr      General matrix preconditioner
+        @brief    Preconditioners for non-symmetric \f$ A \f$
+        @{
+            @defgroup magmasparse_sgepr single precision
+            @defgroup magmasparse_dgepr double precision
+            @defgroup magmasparse_cgepr single-complex precision
+            @defgroup magmasparse_zgepr double-complex precision
+        @}
+
+        @defgroup sparse_hepr      Symmetric/Hermitian preconditioner
+        @brief    Preconditioners for symmetric/Hermitian \f$ A \f$
+        @{
+            @defgroup magmasparse_shepr single precision
+            @defgroup magmasparse_dhepr double precision
+            @defgroup magmasparse_chepr single-complex precision
+            @defgroup magmasparse_zhepr double-complex precision
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup sparse_gpukernels    GPU kernels for sparse LA
+    @{
+        @defgroup sparse_gegpuk    GPU kernels for non-symmetric sparse LA
+        @{
+            @defgroup magmasparse_sgegpuk single precision
+            @defgroup magmasparse_dgegpuk double precision
+            @defgroup magmasparse_cgegpuk single-complex precision
+            @defgroup magmasparse_zgegpuk double-complex precision
+        @}
+
+        @defgroup sparse_sygpuk    GPU kernels for symmetric/Hermitian sparse LA
+        @{
+            @defgroup magmasparse_ssygpuk single precision
+            @defgroup magmasparse_dsygpuk double precision
+            @defgroup magmasparse_csygpuk single-complex precision
+            @defgroup magmasparse_zsygpuk double-complex precision
+        @}
+    @}
+
+    ------------------------------------------------------------
+    @defgroup sparse_blas          Sparse BLAS
+    @{
+        @defgroup magmasparse_sblas single precision
+        @defgroup magmasparse_dblas double precision
+        @defgroup magmasparse_cblas single-complex precision
+        @defgroup magmasparse_zblas double-complex precision
+    @}
+
+    ------------------------------------------------------------
+    @defgroup sparse_aux           Sparse auxiliary
+    @{
+        @defgroup magmasparse_saux single precision
+        @defgroup magmasparse_daux double precision
+        @defgroup magmasparse_caux single-complex precision
+        @defgroup magmasparse_zaux double-complex precision
+    @}
+
+    ------------------------------------------------------------
+    @defgroup unfiled              Sparse ** unfiled **
+    @{
+        @defgroup magmasparse_s single precision
+        @defgroup magmasparse_d double precision
+        @defgroup magmasparse_c single-complex precision
+        @defgroup magmasparse_z double-complex precision
+    @}
+@}
+
+*/
+
+/**
+    @defgroup group_unused Unused
+    @brief Functions that LAPACK (or another package) have, which MAGMA does not have.
+    @{
+
+            @defgroup magma_gerfs       gerfs: Refine solution
+            @defgroup magma_porfs       porfs: Refine solution
+
+            @defgroup magma_hetrs       hetrs: symmetric/Hermitian indefinite forward and back solves
+            @defgroup magma_hetri       hetri: symmetric/Hermitian indefinite inverse
+            @defgroup magma_herfs       herfs: Refine solution
+
+            @defgroup magma_sysv        sysv:  Solves Ax = b using symmetric indefinite factorization (driver)
+            @defgroup magma_sytrf       sytrf: Symmetric indefinite factorization (Bunch-Kaufman pivoting)
+            @defgroup magma_sytrf_aasen sytrf: Symmetric indefinite factorization (Aasen)
+            @defgroup magma_sytrs       sytrs: Symmetric indefinite forward and back solves
+            @defgroup magma_sytri       sytri: Symmetric indefinite inverse
+            @defgroup magma_syrfs       syrfs: Refine solution
+                @defgroup magma_lasyf   lasyf: Partial factorization; used by sytrf
+
+            @defgroup magma_unmhr       or/unmhr: Multiply by Q from Hessenberg reduction
+                @defgroup magma_lahrd   lahrd: Partial factorization; used by gehrd
+            
+                @defgroup magma_laex2   laex2: Merge two sets of eigenvalues.
+                
+            @defgroup magma_larf        larf:  Apply Householder reflector to general matrix
+            @defgroup magma_larft       larft: Generate T matrix for block of Householder reflectors
+
+            @defgroup magma_lantr       lantr:    Triangular matrix norm
+            @brief 1, Frobenius, or Infinity norm; or largest element
+
+            @defgroup magma_heev        sy/heev:   Solves using QR iteration (driver)
+            @defgroup magma_heevrx      sy/heevrx: Solves using MRRR (expert)
+            
+            @defgroup magma_hegv        sy/hegv:   Solves using QR iteration (driver)
+            @defgroup magma_hegvrx      sy/hegvrx: Solves using MRRR (expert)
+
+    @defgroup QUARK                 QUARK
+    @defgroup QUARK_Depreciated     QUARK deprecated
+    @defgroup QUARK_Unsupported     QUARK unsupported
+
+    @}
+*/
