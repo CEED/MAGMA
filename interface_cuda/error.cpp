@@ -3,10 +3,27 @@
 #include "magma_internal.h"
 #include "error.h"
 
+/***************************************************************************//**
+    Prints error message to stderr.
+    C++ function overloaded for different error types (CUDA, CUresult drive,
+    cuBLAS, MAGMA errors). Note CUDA, CUresult, and cuBLAS errors are enums,
+    so can be differentiated.
+    Used by the check_error() and check_xerror() macros.
 
-// ----------------------------------------
-// C++ function is overloaded for different error types,
-// which depends on error types being enums to be differentiable.
+    @param[in]
+    err     Error code.
+
+    @param[in]
+    func    Function where error occurred; inserted by check_error().
+
+    @param[in]
+    file    File     where error occurred; inserted by check_error().
+
+    @param[in]
+    line    Line     where error occurred; inserted by check_error().
+
+    @ingroup magma_error_internal
+*******************************************************************************/
 void magma_xerror( cudaError_t err, const char* func, const char* file, int line )
 {
     if ( err != cudaSuccess ) {
@@ -16,7 +33,9 @@ void magma_xerror( cudaError_t err, const char* func, const char* file, int line
 }
 
 
-// --------------------
+/******************************************************************************/
+/// @see magma_xerror
+/// @ingroup magma_error_internal
 void magma_xerror( CUresult err, const char* func, const char* file, int line )
 {
     if ( err != CUDA_SUCCESS ) {
@@ -26,7 +45,9 @@ void magma_xerror( CUresult err, const char* func, const char* file, int line )
 }
 
 
-// --------------------
+/******************************************************************************/
+/// @see magma_xerror
+/// @ingroup magma_error_internal
 void magma_xerror( cublasStatus_t err, const char* func, const char* file, int line )
 {
     if ( err != CUBLAS_STATUS_SUCCESS ) {
@@ -36,7 +57,9 @@ void magma_xerror( cublasStatus_t err, const char* func, const char* file, int l
 }
 
 
-// --------------------
+/******************************************************************************/
+/// @see magma_xerror
+/// @ingroup magma_error_internal
 void magma_xerror( magma_int_t err, const char* func, const char* file, int line )
 {
     if ( err != MAGMA_SUCCESS ) {
@@ -46,12 +69,20 @@ void magma_xerror( magma_int_t err, const char* func, const char* file, int line
 }
 
 
-// ----------------------------------------
-// cuda provides cudaGetErrorString, but not cuGetErrorString.
+/***************************************************************************//**
+    @return String describing CUresult (CUDA driver errors).
+    CUDA 6.0 introduced cuGetErrorString, but with a different API.
+    Errors introduced in CUDA >= 6.0 are not included here.
+
+    @param[in]
+    err     Error code.
+
+    @ingroup magma_error_internal
+*******************************************************************************/
 extern "C"
-const char* magma_cuGetErrorString( CUresult error )
+const char* magma_cuGetErrorString( CUresult err )
 {
-    switch( error ) {
+    switch( err ) {
         case CUDA_SUCCESS:
             return "success";
         
@@ -130,6 +161,9 @@ const char* magma_cuGetErrorString( CUresult error )
         case CUDA_ERROR_CONTEXT_ALREADY_IN_USE:
             return "context already in use";
         
+        case CUDA_ERROR_PEER_ACCESS_UNSUPPORTED:
+            return "peer access unsupported";
+        
         case CUDA_ERROR_INVALID_SOURCE:
             return "invalid source";
         
@@ -178,6 +212,24 @@ const char* magma_cuGetErrorString( CUresult error )
         case CUDA_ERROR_CONTEXT_IS_DESTROYED:
             return "context is destroyed";
         
+        case CUDA_ERROR_ASSERT:
+            return "assert";
+
+        case CUDA_ERROR_TOO_MANY_PEERS:
+            return "too many peers";
+
+        case CUDA_ERROR_HOST_MEMORY_ALREADY_REGISTERED:
+            return "host memory already registered";
+
+        case CUDA_ERROR_HOST_MEMORY_NOT_REGISTERED:
+            return "host memory not registered";
+
+        case CUDA_ERROR_NOT_PERMITTED:
+            return "not permitted";
+
+        case CUDA_ERROR_NOT_SUPPORTED:
+            return "not supported";
+
         case CUDA_ERROR_UNKNOWN:
             return "unknown";
         
@@ -187,12 +239,19 @@ const char* magma_cuGetErrorString( CUresult error )
 }
 
 
-// ----------------------------------------
-// cuda provides cudaGetErrorString, but not cublasGetErrorString.
+/***************************************************************************//**
+    @return String describing cuBLAS errors (cublasStatus_t).
+    CUDA provides cudaGetErrorString, but not cublasGetErrorString.
+
+    @param[in]
+    err     Error code.
+
+    @ingroup magma_error_internal
+*******************************************************************************/
 extern "C"
-const char* magma_cublasGetErrorString( cublasStatus_t error )
+const char* magma_cublasGetErrorString( cublasStatus_t err )
 {
-    switch( error ) {
+    switch( err ) {
         case CUBLAS_STATUS_SUCCESS:
             return "success";
         
@@ -223,19 +282,26 @@ const char* magma_cublasGetErrorString( cublasStatus_t error )
 }
 
 
-// ----------------------------------------
+/***************************************************************************//**
+    @return String describing MAGMA errors (magma_int_t).
+
+    @param[in]
+    err     Error code.
+
+    @ingroup magma_error
+*******************************************************************************/
 extern "C"
-const char* magma_strerror( magma_int_t error )
+const char* magma_strerror( magma_int_t err )
 {
     // LAPACK-compliant errors
-    if ( error > 0 ) {
+    if ( err > 0 ) {
         return "function-specific error, see documentation";
     }
-    else if ( error < 0 && error > MAGMA_ERR ) {
+    else if ( err < 0 && err > MAGMA_ERR ) {
         return "invalid argument";
     }
     // MAGMA-specific errors
-    switch( error ) {
+    switch( err ) {
         case MAGMA_SUCCESS:
             return "success";
         
@@ -289,9 +355,12 @@ const char* magma_strerror( magma_int_t error )
         
         case MAGMA_ERR_UNKNOWN:
             return "unknown error";
-                        
+        
         case MAGMA_ERR_NOT_IMPLEMENTED:
             return "not implemented";
+        
+        case MAGMA_ERR_NAN:
+            return "NaN detected";
         
         // some sparse-iter errors
         case MAGMA_SLOW_CONVERGENCE:
@@ -299,7 +368,7 @@ const char* magma_strerror( magma_int_t error )
         
         case MAGMA_DIVERGENCE:
             return "divergence";
-            
+        
         case MAGMA_NOTCONVERGED :
             return "stopping criterion not reached within iterations";
         

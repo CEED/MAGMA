@@ -4,7 +4,7 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
- 
+
        @author Mark Gates
        @precisions normal z -> s d c
 */
@@ -15,29 +15,29 @@
 
 #ifdef HAVE_CUBLAS
 
-// ========================================
+// =============================================================================
 // Level 1 BLAS
 
-// --------------------
-/** Returns index of element of vector x having max. absolute value;
-    i.e., max (infinity) norm.
-    
+/***************************************************************************//**
+    @return Index of element of vector x having max. absolute value;
+            \f$ \text{argmax}_i\; |x_i| \f$.
+
     @param[in]
     n       Number of elements in vector x. n >= 0.
-            
+
     @param[in]
     dx      COMPLEX_16 array on GPU device.
             The n element vector x of dimension (1 + (n-1)*incx).
-            
+
     @param[in]
     incx    Stride between consecutive elements of dx. incx > 0.
-            
+
     @param[in]
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_iamax
+*******************************************************************************/
 extern "C" magma_int_t
 magma_izamax_q(
     magma_int_t n,
@@ -49,8 +49,10 @@ magma_izamax_q(
     return result;
 }
 
-// --------------------
-/** Returns index of element of vector x having min. absolute value.
+
+/***************************************************************************//**
+    @return Index of element of vector x having min. absolute value;
+            \f$ \text{argmax}_i\; |x_i| \f$.
 
     @param[in]
     n       Number of elements in vector x. n >= 0.
@@ -66,8 +68,8 @@ magma_izamax_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_iamin
+*******************************************************************************/
 extern "C" magma_int_t
 magma_izamin_q(
     magma_int_t n,
@@ -79,8 +81,9 @@ magma_izamin_q(
     return result;
 }
 
-// --------------------
-/** Returns the sum of absolute values of vector x; i.e., one norm.
+
+/***************************************************************************//**
+    @return Sum of absolute values of vector x; \f$ \sum_i |x_i| \f$.
 
     @param[in]
     n       Number of elements in vector x. n >= 0.
@@ -96,8 +99,8 @@ magma_izamin_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_asum
+*******************************************************************************/
 extern "C" double
 magma_dzasum_q(
     magma_int_t n,
@@ -109,8 +112,9 @@ magma_dzasum_q(
     return result;
 }
 
-// --------------------
-/** Constant times a vector plus a vector; \f$ y = \alpha x + y \f$.
+
+/***************************************************************************//**
+    Constant times a vector plus a vector; \f$ y = \alpha x + y \f$.
 
     @param[in]
     n       Number of elements in vectors x and y. n >= 0.
@@ -136,8 +140,8 @@ magma_dzasum_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_axpy
+*******************************************************************************/
 extern "C" void
 magma_zaxpy_q(
     magma_int_t n,
@@ -149,8 +153,9 @@ magma_zaxpy_q(
     cublasZaxpy( queue->cublas_handle(), int(n), &alpha, dx, int(incx), dy, int(incy) );
 }
 
-// --------------------
-/** Copy vector x to vector y; \f$ y = x \f$.
+
+/***************************************************************************//**
+    Copy vector x to vector y; \f$ y = x \f$.
 
     @param[in]
     n       Number of elements in vectors x and y. n >= 0.
@@ -173,8 +178,8 @@ magma_zaxpy_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_copy
+*******************************************************************************/
 extern "C" void
 magma_zcopy_q(
     magma_int_t n,
@@ -185,8 +190,10 @@ magma_zcopy_q(
     cublasZcopy( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy) );
 }
 
-// --------------------
-/** Returns dot product of vectors x and y; \f$ x^H y \f$.
+
+#ifdef COMPLEX
+/***************************************************************************//**
+    @return Dot product of vectors x and y; \f$ x^H y \f$.
 
     @param[in]
     n       Number of elements in vector x and y. n >= 0.
@@ -209,8 +216,8 @@ magma_zcopy_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma__dot
+*******************************************************************************/
 extern "C"
 magmaDoubleComplex magma_zdotc(
     magma_int_t n,
@@ -222,10 +229,11 @@ magmaDoubleComplex magma_zdotc(
     cublasZdotc( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), &result );
     return result;
 }
+#endif // COMPLEX
 
-#ifdef COMPLEX
-// --------------------
-/** Returns dot product (unconjugated) of vectors x and y; \f$ x^T y \f$.
+
+/***************************************************************************//**
+    @return Dot product (unconjugated) of vectors x and y; \f$ x^T y \f$.
 
     @param[in]
     n       Number of elements in vector x and y. n >= 0.
@@ -248,8 +256,8 @@ magmaDoubleComplex magma_zdotc(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma__dot
+*******************************************************************************/
 extern "C"
 magmaDoubleComplex magma_zdotu(
     magma_int_t n,
@@ -261,10 +269,11 @@ magmaDoubleComplex magma_zdotu(
     cublasZdotu( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), &result );
     return result;
 }
-#endif // COMPLEX
 
-// --------------------
-/** Returns 2-norm of vector x. Avoids unnecesary over/underflow.
+
+/***************************************************************************//**
+    @return 2-norm of vector x; \f$ \text{sqrt}( x^H x ) \f$.
+            Avoids unnecesary over/underflow.
 
     @param[in]
     n       Number of elements in vector x and y. n >= 0.
@@ -280,8 +289,8 @@ magmaDoubleComplex magma_zdotu(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_nrm2
+*******************************************************************************/
 extern "C" double
 magma_dznrm2_q(
     magma_int_t n,
@@ -293,8 +302,9 @@ magma_dznrm2_q(
     return result;
 }
 
-// --------------------
-/** Apply Givens plane rotation, where cos (c) is real and sin (s) is complex.
+
+/***************************************************************************//**
+    Apply Givens plane rotation, where cos (c) is real and sin (s) is complex.
 
     @param[in]
     n       Number of elements in vector x and y. n >= 0.
@@ -327,8 +337,8 @@ magma_dznrm2_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_rot
+*******************************************************************************/
 extern "C" void
 magma_zrot_q(
     magma_int_t n,
@@ -340,9 +350,10 @@ magma_zrot_q(
     cublasZrot( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), &c, &s );
 }
 
+
 #ifdef COMPLEX
-// --------------------
-/** Apply Givens plane rotation, where cos (c) and sin (s) are real.
+/***************************************************************************//**
+    Apply Givens plane rotation, where cos (c) and sin (s) are real.
 
     @param[in]
     n       Number of elements in vector x and y. n >= 0.
@@ -375,8 +386,8 @@ magma_zrot_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_rot
+*******************************************************************************/
 extern "C" void
 magma_zdrot_q(
     magma_int_t n,
@@ -389,12 +400,57 @@ magma_zdrot_q(
 }
 #endif // COMPLEX
 
-#ifdef REAL
-// --------------------
-/** Apply modified plane rotation.
 
-    @ingroup magma_zblas1
-*/
+/***************************************************************************//**
+    Generate a Givens plane rotation.
+    The rotation annihilates the second entry of the vector, such that:
+
+        (  c  s ) * ( a ) = ( r )
+        ( -s  c )   ( b )   ( 0 )
+
+    where \f$ c^2 + s^2 = 1 \f$ and \f$ r = a^2 + b^2 \f$.
+    Further, this computes z such that
+
+                { (sqrt(1 - z^2), z),    if |z| < 1,
+        (c,s) = { (0, 1),                if |z| = 1,
+                { (1/z, sqrt(1 - z^2)),  if |z| > 1.
+
+    @param[in]
+    a       On input, entry to be modified.
+            On output, updated to r by applying the rotation.
+
+    @param[in,out]
+    b       On input, entry to be annihilated.
+            On output, set to z.
+
+    @param[in]
+    c       On output, cosine of rotation.
+
+    @param[in,out]
+    s       On output, sine of rotation.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_rotg
+*******************************************************************************/
+extern "C" void
+magma_zrotg_q(
+    magmaDoubleComplex *a, magmaDoubleComplex *b,
+    double             *c, magmaDoubleComplex *s,
+    magma_queue_t queue )
+{
+    cublasZrotg( queue->cublas_handle(), a, b, c, s );
+}
+
+
+#ifdef REAL
+/***************************************************************************//**
+    Apply modified plane rotation.
+
+    @ingroup magma_rotm
+*******************************************************************************/
 extern "C" void
 magma_zrotm_q(
     magma_int_t n,
@@ -405,12 +461,15 @@ magma_zrotm_q(
 {
     cublasZrotm( queue->cublas_handle(), int(n), dx, int(incx), dy, int(incy), param );
 }
+#endif // REAL
 
-// --------------------
-/** Generate modified plane rotation.
 
-    @ingroup magma_zblas1
-*/
+#ifdef REAL
+/***************************************************************************//**
+    Generate modified plane rotation.
+
+    @ingroup magma_rotmg
+*******************************************************************************/
 extern "C" void
 magma_zrotmg_q(
     double *d1, double       *d2,
@@ -422,8 +481,9 @@ magma_zrotmg_q(
 }
 #endif // REAL
 
-// --------------------
-/** Scales a vector by a constant; \f$ x = \alpha x \f$.
+
+/***************************************************************************//**
+    Scales a vector by a constant; \f$ x = \alpha x \f$.
 
     @param[in]
     n       Number of elements in vector x. n >= 0.
@@ -442,8 +502,8 @@ magma_zrotmg_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_scal
+*******************************************************************************/
 extern "C" void
 magma_zscal_q(
     magma_int_t n,
@@ -454,9 +514,10 @@ magma_zscal_q(
     cublasZscal( queue->cublas_handle(), int(n), &alpha, dx, int(incx) );
 }
 
+
 #ifdef COMPLEX
-// --------------------
-/** Scales a vector by a real constant; \f$ x = \alpha x \f$.
+/***************************************************************************//**
+    Scales a vector by a real constant; \f$ x = \alpha x \f$.
 
     @param[in]
     n       Number of elements in vector x. n >= 0.
@@ -475,8 +536,8 @@ magma_zscal_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_scal
+*******************************************************************************/
 extern "C" void
 magma_zdscal_q(
     magma_int_t n,
@@ -488,8 +549,9 @@ magma_zdscal_q(
 }
 #endif // COMPLEX
 
-// --------------------
-/** Swap vector x and y; \f$ x <-> y \f$.
+
+/***************************************************************************//**
+    Swap vector x and y; \f$ x <-> y \f$.
 
     @param[in]
     n       Number of elements in vector x and y. n >= 0.
@@ -512,8 +574,8 @@ magma_zdscal_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-*/
+    @ingroup magma_swap
+*******************************************************************************/
 extern "C" void
 magma_zswap_q(
     magma_int_t n,
@@ -525,11 +587,11 @@ magma_zswap_q(
 }
 
 
-// ========================================
+// =============================================================================
 // Level 2 BLAS
 
-// --------------------
-/** Perform matrix-vector product.
+/***************************************************************************//**
+    Perform matrix-vector product.
         \f$ y = \alpha A   x + \beta y \f$  (transA == MagmaNoTrans), or \n
         \f$ y = \alpha A^T x + \beta y \f$  (transA == MagmaTrans),   or \n
         \f$ y = \alpha A^H x + \beta y \f$  (transA == MagmaConjTrans).
@@ -576,8 +638,8 @@ magma_zswap_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_gemv
+*******************************************************************************/
 extern "C" void
 magma_zgemv_q(
     magma_trans_t transA,
@@ -598,8 +660,10 @@ magma_zgemv_q(
         &beta,  dy, int(incy) );
 }
 
-// --------------------
-/** Perform rank-1 update, \f$ A = \alpha x y^H + A \f$.
+
+#ifdef COMPLEX
+/***************************************************************************//**
+    Perform rank-1 update, \f$ A = \alpha x y^H + A \f$.
 
     @param[in]
     m       Number of rows of A. m >= 0.
@@ -635,8 +699,8 @@ magma_zgemv_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_ger
+*******************************************************************************/
 extern "C" void
 magma_zgerc_q(
     magma_int_t m, magma_int_t n,
@@ -653,10 +717,11 @@ magma_zgerc_q(
                 dy, int(incy),
                 dA, int(ldda) );
 }
+#endif // COMPLEX
 
-#ifdef COMPLEX
-// --------------------
-/** Perform rank-1 update (unconjugated), \f$ A = \alpha x y^H + A \f$.
+
+/***************************************************************************//**
+    Perform rank-1 update (unconjugated), \f$ A = \alpha x y^T + A \f$.
 
     @param[in]
     m       Number of rows of A. m >= 0.
@@ -692,8 +757,8 @@ magma_zgerc_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_ger
+*******************************************************************************/
 extern "C" void
 magma_zgeru_q(
     magma_int_t m, magma_int_t n,
@@ -710,10 +775,12 @@ magma_zgeru_q(
                 dy, int(incy),
                 dA, int(ldda) );
 }
-#endif // COMPLEX
 
-// --------------------
-/** Perform Hermitian matrix-vector product, \f$ y = \alpha A x + \beta y \f$.
+
+#ifdef COMPLEX
+/***************************************************************************//**
+    Perform Hermitian matrix-vector product, \f$ y = \alpha A x + \beta y, \f$
+    where \f$ A \f$ is Hermitian.
 
     @param[in]
     uplo    Whether the upper or lower triangle of A is referenced.
@@ -752,8 +819,8 @@ magma_zgeru_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_hemv
+*******************************************************************************/
 extern "C" void
 magma_zhemv_q(
     magma_uplo_t uplo,
@@ -773,12 +840,16 @@ magma_zhemv_q(
                 dx, int(incx),
         &beta,  dy, int(incy) );
 }
+#endif // COMPLEX
 
-// --------------------
-/** Perform Hermitian rank-1 update, \f$ A = \alpha x x^H + A \f$.
+
+#ifdef COMPLEX
+/***************************************************************************//**
+    Perform Hermitian rank-1 update, \f$ A = \alpha x x^H + A, \f$
+    where \f$ A \f$ is Hermitian.
 
     @param[in]
-    uplo    Whether the upper or lower triangle of A is referenced. 
+    uplo    Whether the upper or lower triangle of A is referenced.
 
     @param[in]
     n       Number of rows and columns of A. n >= 0.
@@ -804,8 +875,8 @@ magma_zhemv_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_her
+*******************************************************************************/
 extern "C" void
 magma_zher_q(
     magma_uplo_t uplo,
@@ -822,12 +893,16 @@ magma_zher_q(
         &alpha, dx, int(incx),
                 dA, int(ldda) );
 }
+#endif // COMPLEX
 
-// --------------------
-/** Perform Hermitian rank-2 update, \f$ A = \alpha x y^H + conj(\alpha) y x^H + A \f$.
+
+#ifdef COMPLEX
+/***************************************************************************//**
+    Perform Hermitian rank-2 update, \f$ A = \alpha x y^H + conj(\alpha) y x^H + A, \f$
+    where \f$ A \f$ is Hermitian.
 
     @param[in]
-    uplo    Whether the upper or lower triangle of A is referenced. 
+    uplo    Whether the upper or lower triangle of A is referenced.
 
     @param[in]
     n       Number of rows and columns of A. n >= 0.
@@ -860,8 +935,8 @@ magma_zher_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_her2
+*******************************************************************************/
 extern "C" void
 magma_zher2_q(
     magma_uplo_t uplo,
@@ -880,15 +955,192 @@ magma_zher2_q(
                 dy, int(incy),
                 dA, int(ldda) );
 }
+#endif // COMPLEX
 
-// --------------------
-/** Perform triangular matrix-vector product.
+
+/***************************************************************************//**
+    Perform symmetric matrix-vector product, \f$ y = \alpha A x + \beta y, \f$
+    where \f$ A \f$ is symmetric.
+
+    @param[in]
+    uplo    Whether the upper or lower triangle of A is referenced.
+
+    @param[in]
+    n       Number of rows and columns of A. n >= 0.
+
+    @param[in]
+    alpha   Scalar \f$ \alpha \f$
+
+    @param[in]
+    dA      COMPLEX_16 array of dimension (ldda,n), ldda >= max(1,n).
+            The n-by-n matrix A, on GPU device.
+
+    @param[in]
+    ldda    Leading dimension of dA.
+
+    @param[in]
+    dx      COMPLEX_16 array on GPU device.
+            The m element vector x of dimension (1 + (m-1)*incx).
+
+    @param[in]
+    incx    Stride between consecutive elements of dx. incx != 0.
+
+    @param[in]
+    beta    Scalar \f$ \beta \f$
+
+    @param[in,out]
+    dy      COMPLEX_16 array on GPU device.
+            The n element vector y of dimension (1 + (n-1)*incy).
+
+    @param[in]
+    incy    Stride between consecutive elements of dy. incy != 0.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_symv
+*******************************************************************************/
+extern "C" void
+magma_zsymv_q(
+    magma_uplo_t uplo,
+    magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dy, magma_int_t incy,
+    magma_queue_t queue )
+{
+    cublasZsymv(
+        queue->cublas_handle(),
+        cublas_uplo_const( uplo ),
+        int(n),
+        &alpha, dA, int(ldda),
+                dx, int(incx),
+        &beta,  dy, int(incy) );
+}
+
+
+/***************************************************************************//**
+    Perform symmetric rank-1 update, \f$ A = \alpha x x^T + A, \f$
+    where \f$ A \f$ is symmetric.
+
+    @param[in]
+    uplo    Whether the upper or lower triangle of A is referenced.
+
+    @param[in]
+    n       Number of rows and columns of A. n >= 0.
+
+    @param[in]
+    alpha   Scalar \f$ \alpha \f$
+
+    @param[in]
+    dx      COMPLEX_16 array on GPU device.
+            The n element vector x of dimension (1 + (n-1)*incx).
+
+    @param[in]
+    incx    Stride between consecutive elements of dx. incx != 0.
+
+    @param[in,out]
+    dA      COMPLEX_16 array of dimension (ldda,n), ldda >= max(1,n).
+            The n-by-n matrix A, on GPU device.
+
+    @param[in]
+    ldda    Leading dimension of dA.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_syr
+*******************************************************************************/
+extern "C" void
+magma_zsyr_q(
+    magma_uplo_t uplo,
+    magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
+    magmaDoubleComplex_ptr       dA, magma_int_t ldda,
+    magma_queue_t queue )
+{
+    cublasZsyr(
+        queue->cublas_handle(),
+        cublas_uplo_const( uplo ),
+        int(n),
+        &alpha, dx, int(incx),
+                dA, int(ldda) );
+}
+
+
+/***************************************************************************//**
+    Perform symmetric rank-2 update, \f$ A = \alpha x y^T + \alpha y x^T + A, \f$
+    where \f$ A \f$ is symmetric.
+
+    @param[in]
+    uplo    Whether the upper or lower triangle of A is referenced.
+
+    @param[in]
+    n       Number of rows and columns of A. n >= 0.
+
+    @param[in]
+    alpha   Scalar \f$ \alpha \f$
+
+    @param[in]
+    dx      COMPLEX_16 array on GPU device.
+            The n element vector x of dimension (1 + (n-1)*incx).
+
+    @param[in]
+    incx    Stride between consecutive elements of dx. incx != 0.
+
+    @param[in]
+    dy      COMPLEX_16 array on GPU device.
+            The n element vector y of dimension (1 + (n-1)*incy).
+
+    @param[in]
+    incy    Stride between consecutive elements of dy. incy != 0.
+
+    @param[in,out]
+    dA      COMPLEX_16 array of dimension (ldda,n), ldda >= max(1,n).
+            The n-by-n matrix A, on GPU device.
+
+    @param[in]
+    ldda    Leading dimension of dA.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_syr2
+*******************************************************************************/
+extern "C" void
+magma_zsyr2_q(
+    magma_uplo_t uplo,
+    magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
+    magmaDoubleComplex_const_ptr dy, magma_int_t incy,
+    magmaDoubleComplex_ptr       dA, magma_int_t ldda,
+    magma_queue_t queue )
+{
+    cublasZsyr2(
+        queue->cublas_handle(),
+        cublas_uplo_const( uplo ),
+        int(n),
+        &alpha, dx, int(incx),
+                dy, int(incy),
+                dA, int(ldda) );
+}
+
+
+/***************************************************************************//**
+    Perform triangular matrix-vector product.
         \f$ x = A   x \f$  (trans == MagmaNoTrans), or \n
         \f$ x = A^T x \f$  (trans == MagmaTrans),   or \n
         \f$ x = A^H x \f$  (trans == MagmaConjTrans).
 
     @param[in]
-    uplo    Whether the upper or lower triangle of A is referenced. 
+    uplo    Whether the upper or lower triangle of A is referenced.
 
     @param[in]
     trans   Operation to perform on A.
@@ -917,8 +1169,8 @@ magma_zher2_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_trmv
+*******************************************************************************/
 extern "C" void
 magma_ztrmv_q(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
@@ -937,14 +1189,15 @@ magma_ztrmv_q(
         dx, int(incx) );
 }
 
-// --------------------
-/** Solve triangular matrix-vector system (one right-hand side).
+
+/***************************************************************************//**
+    Solve triangular matrix-vector system (one right-hand side).
         \f$ A   x = b \f$  (trans == MagmaNoTrans), or \n
         \f$ A^T x = b \f$  (trans == MagmaTrans),   or \n
         \f$ A^H x = b \f$  (trans == MagmaConjTrans).
 
     @param[in]
-    uplo    Whether the upper or lower triangle of A is referenced. 
+    uplo    Whether the upper or lower triangle of A is referenced.
 
     @param[in]
     trans   Operation to perform on A.
@@ -974,8 +1227,8 @@ magma_ztrmv_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas2
-*/
+    @ingroup magma_trsv
+*******************************************************************************/
 extern "C" void
 magma_ztrsv_q(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
@@ -994,11 +1247,12 @@ magma_ztrsv_q(
         dx, int(incx) );
 }
 
-// ========================================
+
+// =============================================================================
 // Level 3 BLAS
 
-// --------------------
-/** Perform matrix-matrix product, \f$ C = \alpha op(A) op(B) + \beta C \f$.
+/***************************************************************************//**
+    Perform matrix-matrix product, \f$ C = \alpha op(A) op(B) + \beta C \f$.
 
     @param[in]
     transA  Operation op(A) to perform on matrix A.
@@ -1048,8 +1302,8 @@ magma_ztrsv_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-*/
+    @ingroup magma_gemm
+*******************************************************************************/
 extern "C" void
 magma_zgemm_q(
     magma_trans_t transA, magma_trans_t transB,
@@ -1071,223 +1325,13 @@ magma_zgemm_q(
         &beta,  dC, int(lddc) );
 }
 
-// --------------------
-/** Perform symmetric matrix-matrix product.
-        \f$ C = \alpha A B + \beta C \f$ (side == MagmaLeft), or \n
-        \f$ C = \alpha B A + \beta C \f$ (side == MagmaRight),   \n
-        where \f$ A \f$ is symmetric.
-
-    @param[in]
-    side    Whether A is on the left or right.
-
-    @param[in]
-    uplo    Whether the upper or lower triangle of A is referenced.
-
-    @param[in]
-    m       Number of rows of C. m >= 0.
-
-    @param[in]
-    n       Number of columns of C. n >= 0.
-
-    @param[in]
-    alpha   Scalar \f$ \alpha \f$
-
-    @param[in]
-    dA      COMPLEX_16 array on GPU device.
-            If side == MagmaLeft, the m-by-m symmetric matrix A of dimension (ldda,m), ldda >= max(1,m); \n
-            otherwise,            the n-by-n symmetric matrix A of dimension (ldda,n), ldda >= max(1,n).
-
-    @param[in]
-    ldda    Leading dimension of dA.
-
-    @param[in]
-    dB      COMPLEX_16 array on GPU device.
-            The m-by-n matrix B of dimension (lddb,n), lddb >= max(1,m).
-
-    @param[in]
-    lddb    Leading dimension of dB.
-
-    @param[in]
-    beta    Scalar \f$ \beta \f$
-
-    @param[in,out]
-    dC      COMPLEX_16 array on GPU device.
-            The m-by-n matrix C of dimension (lddc,n), lddc >= max(1,m).
-
-    @param[in]
-    lddc    Leading dimension of dC.
-
-    @param[in]
-    queue   magma_queue_t
-            Queue to execute in.
-
-    @ingroup magma_zblas3
-*/
-extern "C" void
-magma_zsymm_q(
-    magma_side_t side, magma_uplo_t uplo,
-    magma_int_t m, magma_int_t n,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
-    magma_queue_t queue )
-{
-    cublasZsymm(
-        queue->cublas_handle(),
-        cublas_side_const( side ),
-        cublas_uplo_const( uplo ),
-        int(m), int(n),
-        &alpha, dA, int(ldda),
-                dB, int(lddb),
-        &beta,  dC, int(lddc) );
-}
-
-// --------------------
-/** Perform symmetric rank-k update.
-        \f$ C = \alpha A A^T + \beta C \f$ (trans == MagmaNoTrans), or \n
-        \f$ C = \alpha A^T A + \beta C \f$ (trans == MagmaTrans),      \n
-        where \f$ C \f$ is symmetric.
-
-    @param[in]
-    uplo    Whether the upper or lower triangle of C is referenced.
-
-    @param[in]
-    trans   Operation to perform on A.
-
-    @param[in]
-    n       Number of rows and columns of C. n >= 0.
-
-    @param[in]
-    k       Number of columns of A (for MagmaNoTrans) or rows of A (for MagmaTrans). k >= 0.
-
-    @param[in]
-    alpha   Scalar \f$ \alpha \f$
-
-    @param[in]
-    dA      COMPLEX_16 array on GPU device.
-            If trans == MagmaNoTrans, the n-by-k matrix A of dimension (ldda,k), ldda >= max(1,n); \n
-            otherwise,                the k-by-n matrix A of dimension (ldda,n), ldda >= max(1,k).
-
-    @param[in]
-    ldda    Leading dimension of dA.
-
-    @param[in]
-    beta    Scalar \f$ \beta \f$
-
-    @param[in,out]
-    dC      COMPLEX_16 array on GPU device.
-            The n-by-n symmetric matrix C of dimension (lddc,n), lddc >= max(1,n).
-
-    @param[in]
-    lddc    Leading dimension of dC.
-
-    @param[in]
-    queue   magma_queue_t
-            Queue to execute in.
-
-    @ingroup magma_zblas3
-*/
-extern "C" void
-magma_zsyrk_q(
-    magma_uplo_t uplo, magma_trans_t trans,
-    magma_int_t n, magma_int_t k,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
-    magma_queue_t queue )
-{
-    cublasZsyrk(
-        queue->cublas_handle(),
-        cublas_uplo_const( uplo ),
-        cublas_trans_const( trans ),
-        int(n), int(k),
-        &alpha, dA, int(ldda),
-        &beta,  dC, int(lddc) );
-}
-
-// --------------------
-/** Perform symmetric rank-2k update.
-        \f$ C = \alpha A B^T + \alpha B A^T \beta C \f$ (trans == MagmaNoTrans), or \n
-        \f$ C = \alpha A^T B + \alpha B^T A \beta C \f$ (trans == MagmaTrans),      \n
-        where \f$ C \f$ is symmetric.
-
-    @param[in]
-    uplo    Whether the upper or lower triangle of C is referenced.
-
-    @param[in]
-    trans   Operation to perform on A and B.
-
-    @param[in]
-    n       Number of rows and columns of C. n >= 0.
-
-    @param[in]
-    k       Number of columns of A and B (for MagmaNoTrans) or rows of A and B (for MagmaTrans). k >= 0.
-
-    @param[in]
-    alpha   Scalar \f$ \alpha \f$
-
-    @param[in]
-    dA      COMPLEX_16 array on GPU device.
-            If trans == MagmaNoTrans, the n-by-k matrix A of dimension (ldda,k), ldda >= max(1,n); \n
-            otherwise,                the k-by-n matrix A of dimension (ldda,n), ldda >= max(1,k).
-
-    @param[in]
-    ldda    Leading dimension of dA.
-
-    @param[in]
-    dB      COMPLEX_16 array on GPU device.
-            If trans == MagmaNoTrans, the n-by-k matrix B of dimension (lddb,k), lddb >= max(1,n); \n
-            otherwise,                the k-by-n matrix B of dimension (lddb,n), lddb >= max(1,k).
-
-    @param[in]
-    lddb    Leading dimension of dB.
-
-    @param[in]
-    beta    Scalar \f$ \beta \f$
-
-    @param[in,out]
-    dC      COMPLEX_16 array on GPU device.
-            The n-by-n symmetric matrix C of dimension (lddc,n), lddc >= max(1,n).
-
-    @param[in]
-    lddc    Leading dimension of dC.
-
-    @param[in]
-    queue   magma_queue_t
-            Queue to execute in.
-
-    @ingroup magma_zblas3
-*/
-extern "C" void
-magma_zsyr2k_q(
-    magma_uplo_t uplo, magma_trans_t trans,
-    magma_int_t n, magma_int_t k,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
-    magma_queue_t queue )
-{
-    cublasZsyr2k(
-        queue->cublas_handle(),
-        cublas_uplo_const( uplo ),
-        cublas_trans_const( trans ),
-        int(n), int(k),
-        &alpha, dA, int(ldda),
-                dB, int(lddb),
-        &beta,  dC, int(lddc) );
-}
 
 #ifdef COMPLEX
-// --------------------
-/** Perform Hermitian matrix-matrix product.
+/***************************************************************************//**
+    Perform Hermitian matrix-matrix product.
         \f$ C = \alpha A B + \beta C \f$ (side == MagmaLeft), or \n
         \f$ C = \alpha B A + \beta C \f$ (side == MagmaRight),   \n
-        where \f$ A \f$ is Hermitian.
+    where \f$ A \f$ is Hermitian.
 
     @param[in]
     side    Whether A is on the left or right.
@@ -1333,8 +1377,8 @@ magma_zsyr2k_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-*/
+    @ingroup magma_hemm
+*******************************************************************************/
 extern "C" void
 magma_zhemm_q(
     magma_side_t side, magma_uplo_t uplo,
@@ -1355,12 +1399,15 @@ magma_zhemm_q(
                 dB, int(lddb),
         &beta,  dC, int(lddc) );
 }
+#endif // COMPLEX
 
-// --------------------
-/** Perform Hermitian rank-k update.
-        \f$ C = \alpha A A^T + \beta C \f$ (trans == MagmaNoTrans), or \n
-        \f$ C = \alpha A^T A + \beta C \f$ (trans == MagmaTrans),      \n
-        where \f$ C \f$ is Hermitian.
+
+#ifdef COMPLEX
+/***************************************************************************//**
+    Perform Hermitian rank-k update.
+        \f$ C = \alpha A A^H + \beta C \f$ (trans == MagmaNoTrans), or \n
+        \f$ C = \alpha A^H A + \beta C \f$ (trans == MagmaConjTrans), \n
+    where \f$ C \f$ is Hermitian.
 
     @param[in]
     uplo    Whether the upper or lower triangle of C is referenced.
@@ -1372,7 +1419,8 @@ magma_zhemm_q(
     n       Number of rows and columns of C. n >= 0.
 
     @param[in]
-    k       Number of columns of A (for MagmaNoTrans) or rows of A (for MagmaTrans). k >= 0.
+    k       Number of columns of A (for MagmaNoTrans)
+            or rows of A (for MagmaConjTrans). k >= 0.
 
     @param[in]
     alpha   Scalar \f$ \alpha \f$
@@ -1399,8 +1447,8 @@ magma_zhemm_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-*/
+    @ingroup magma_herk
+*******************************************************************************/
 extern "C" void
 magma_zherk_q(
     magma_uplo_t uplo, magma_trans_t trans,
@@ -1419,12 +1467,15 @@ magma_zherk_q(
         &alpha, dA, int(ldda),
         &beta,  dC, int(lddc) );
 }
+#endif // COMPLEX
 
-// --------------------
-/** Perform Hermitian rank-2k update.
-        \f$ C = \alpha A B^T + \alpha B A^T \beta C \f$ (trans == MagmaNoTrans), or \n
-        \f$ C = \alpha A^T B + \alpha B^T A \beta C \f$ (trans == MagmaTrans),      \n
-        where \f$ C \f$ is Hermitian.
+
+#ifdef COMPLEX
+/***************************************************************************//**
+    Perform Hermitian rank-2k update.
+        \f$ C = \alpha A B^H + \alpha B A^H \beta C \f$ (trans == MagmaNoTrans), or \n
+        \f$ C = \alpha A^H B + \alpha B^H A \beta C \f$ (trans == MagmaConjTrans), \n
+    where \f$ C \f$ is Hermitian.
 
     @param[in]
     uplo    Whether the upper or lower triangle of C is referenced.
@@ -1436,7 +1487,8 @@ magma_zherk_q(
     n       Number of rows and columns of C. n >= 0.
 
     @param[in]
-    k       Number of columns of A and B (for MagmaNoTrans) or rows of A and B (for MagmaTrans). k >= 0.
+    k       Number of columns of A and B (for MagmaNoTrans)
+            or rows of A and B (for MagmaConjTrans). k >= 0.
 
     @param[in]
     alpha   Scalar \f$ \alpha \f$
@@ -1471,8 +1523,8 @@ magma_zherk_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-*/
+    @ingroup magma_her2k
+*******************************************************************************/
 extern "C" void
 magma_zher2k_q(
     magma_uplo_t uplo, magma_trans_t trans,
@@ -1495,11 +1547,228 @@ magma_zher2k_q(
 }
 #endif // COMPLEX
 
-// --------------------
-/** Perform triangular matrix-matrix product.
+
+/***************************************************************************//**
+    Perform symmetric matrix-matrix product.
+        \f$ C = \alpha A B + \beta C \f$ (side == MagmaLeft), or \n
+        \f$ C = \alpha B A + \beta C \f$ (side == MagmaRight),   \n
+    where \f$ A \f$ is symmetric.
+
+    @param[in]
+    side    Whether A is on the left or right.
+
+    @param[in]
+    uplo    Whether the upper or lower triangle of A is referenced.
+
+    @param[in]
+    m       Number of rows of C. m >= 0.
+
+    @param[in]
+    n       Number of columns of C. n >= 0.
+
+    @param[in]
+    alpha   Scalar \f$ \alpha \f$
+
+    @param[in]
+    dA      COMPLEX_16 array on GPU device.
+            If side == MagmaLeft, the m-by-m symmetric matrix A of dimension (ldda,m), ldda >= max(1,m); \n
+            otherwise,            the n-by-n symmetric matrix A of dimension (ldda,n), ldda >= max(1,n).
+
+    @param[in]
+    ldda    Leading dimension of dA.
+
+    @param[in]
+    dB      COMPLEX_16 array on GPU device.
+            The m-by-n matrix B of dimension (lddb,n), lddb >= max(1,m).
+
+    @param[in]
+    lddb    Leading dimension of dB.
+
+    @param[in]
+    beta    Scalar \f$ \beta \f$
+
+    @param[in,out]
+    dC      COMPLEX_16 array on GPU device.
+            The m-by-n matrix C of dimension (lddc,n), lddc >= max(1,m).
+
+    @param[in]
+    lddc    Leading dimension of dC.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_symm
+*******************************************************************************/
+extern "C" void
+magma_zsymm_q(
+    magma_side_t side, magma_uplo_t uplo,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
+    magma_queue_t queue )
+{
+    cublasZsymm(
+        queue->cublas_handle(),
+        cublas_side_const( side ),
+        cublas_uplo_const( uplo ),
+        int(m), int(n),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+        &beta,  dC, int(lddc) );
+}
+
+
+/***************************************************************************//**
+    Perform symmetric rank-k update.
+        \f$ C = \alpha A A^T + \beta C \f$ (trans == MagmaNoTrans), or \n
+        \f$ C = \alpha A^T A + \beta C \f$ (trans == MagmaTrans),      \n
+    where \f$ C \f$ is symmetric.
+
+    @param[in]
+    uplo    Whether the upper or lower triangle of C is referenced.
+
+    @param[in]
+    trans   Operation to perform on A.
+
+    @param[in]
+    n       Number of rows and columns of C. n >= 0.
+
+    @param[in]
+    k       Number of columns of A (for MagmaNoTrans)
+            or rows of A (for MagmaTrans). k >= 0.
+
+    @param[in]
+    alpha   Scalar \f$ \alpha \f$
+
+    @param[in]
+    dA      COMPLEX_16 array on GPU device.
+            If trans == MagmaNoTrans, the n-by-k matrix A of dimension (ldda,k), ldda >= max(1,n); \n
+            otherwise,                the k-by-n matrix A of dimension (ldda,n), ldda >= max(1,k).
+
+    @param[in]
+    ldda    Leading dimension of dA.
+
+    @param[in]
+    beta    Scalar \f$ \beta \f$
+
+    @param[in,out]
+    dC      COMPLEX_16 array on GPU device.
+            The n-by-n symmetric matrix C of dimension (lddc,n), lddc >= max(1,n).
+
+    @param[in]
+    lddc    Leading dimension of dC.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_syrk
+*******************************************************************************/
+extern "C" void
+magma_zsyrk_q(
+    magma_uplo_t uplo, magma_trans_t trans,
+    magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
+    magma_queue_t queue )
+{
+    cublasZsyrk(
+        queue->cublas_handle(),
+        cublas_uplo_const( uplo ),
+        cublas_trans_const( trans ),
+        int(n), int(k),
+        &alpha, dA, int(ldda),
+        &beta,  dC, int(lddc) );
+}
+
+
+/***************************************************************************//**
+    Perform symmetric rank-2k update.
+        \f$ C = \alpha A B^T + \alpha B A^T \beta C \f$ (trans == MagmaNoTrans), or \n
+        \f$ C = \alpha A^T B + \alpha B^T A \beta C \f$ (trans == MagmaTrans),      \n
+    where \f$ C \f$ is symmetric.
+
+    @param[in]
+    uplo    Whether the upper or lower triangle of C is referenced.
+
+    @param[in]
+    trans   Operation to perform on A and B.
+
+    @param[in]
+    n       Number of rows and columns of C. n >= 0.
+
+    @param[in]
+    k       Number of columns of A and B (for MagmaNoTrans)
+            or rows of A and B (for MagmaTrans). k >= 0.
+
+    @param[in]
+    alpha   Scalar \f$ \alpha \f$
+
+    @param[in]
+    dA      COMPLEX_16 array on GPU device.
+            If trans == MagmaNoTrans, the n-by-k matrix A of dimension (ldda,k), ldda >= max(1,n); \n
+            otherwise,                the k-by-n matrix A of dimension (ldda,n), ldda >= max(1,k).
+
+    @param[in]
+    ldda    Leading dimension of dA.
+
+    @param[in]
+    dB      COMPLEX_16 array on GPU device.
+            If trans == MagmaNoTrans, the n-by-k matrix B of dimension (lddb,k), lddb >= max(1,n); \n
+            otherwise,                the k-by-n matrix B of dimension (lddb,n), lddb >= max(1,k).
+
+    @param[in]
+    lddb    Leading dimension of dB.
+
+    @param[in]
+    beta    Scalar \f$ \beta \f$
+
+    @param[in,out]
+    dC      COMPLEX_16 array on GPU device.
+            The n-by-n symmetric matrix C of dimension (lddc,n), lddc >= max(1,n).
+
+    @param[in]
+    lddc    Leading dimension of dC.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_syr2k
+*******************************************************************************/
+extern "C" void
+magma_zsyr2k_q(
+    magma_uplo_t uplo, magma_trans_t trans,
+    magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
+    magma_queue_t queue )
+{
+    cublasZsyr2k(
+        queue->cublas_handle(),
+        cublas_uplo_const( uplo ),
+        cublas_trans_const( trans ),
+        int(n), int(k),
+        &alpha, dA, int(ldda),
+                dB, int(lddb),
+        &beta,  dC, int(lddc) );
+}
+
+
+/***************************************************************************//**
+    Perform triangular matrix-matrix product.
         \f$ B = \alpha op(A) B \f$ (side == MagmaLeft), or \n
         \f$ B = \alpha B op(A) \f$ (side == MagmaRight),   \n
-        where \f$ A \f$ is triangular.
+    where \f$ A \f$ is triangular.
 
     @param[in]
     side    Whether A is on the left or right.
@@ -1541,8 +1810,8 @@ magma_zher2k_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-*/
+    @ingroup magma_trmm
+*******************************************************************************/
 extern "C" void
 magma_ztrmm_q(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
@@ -1564,11 +1833,12 @@ magma_ztrmm_q(
                 dB, int(lddb) );  /* C same as B; less efficient */
 }
 
-// --------------------
-/** Solve triangular matrix-matrix system (multiple right-hand sides).
+
+/***************************************************************************//**
+    Solve triangular matrix-matrix system (multiple right-hand sides).
         \f$ op(A) X = \alpha B \f$ (side == MagmaLeft), or \n
         \f$ X op(A) = \alpha B \f$ (side == MagmaRight),   \n
-        where \f$ A \f$ is triangular.
+    where \f$ A \f$ is triangular.
 
     @param[in]
     side    Whether A is on the left or right.
@@ -1611,8 +1881,8 @@ magma_ztrmm_q(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-*/
+    @ingroup magma_trsm
+*******************************************************************************/
 extern "C" void
 magma_ztrsm_q(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,

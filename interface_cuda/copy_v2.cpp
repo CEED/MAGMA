@@ -4,7 +4,7 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
- 
+
        @author Mark Gates
 */
 #include <cuda_runtime.h>
@@ -14,11 +14,43 @@
 
 #ifdef HAVE_CUBLAS
 
-// generic, type-independent routines to copy data.
-// type-safe versions which avoid the user needing sizeof(...) are in headers
+// Generic, type-independent routines to copy data.
+// Type-safe versions which avoid the user needing sizeof(...) are in headers;
+// see magma_{s,d,c,z,i,index_}{set,get,copy}{matrix,vector}
 
-// ========================================
-// copying vectors
+/***************************************************************************//**
+    @fn magma_setvector( n, elemSize, hx_src, incx, dy_dst, incy, queue )
+
+    Copy vector hx_src on CPU host to dy_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version synchronizes the queue after the transfer.
+    See magma_setvector_async() for an asynchronous version.
+
+    @param[in]
+    n           Number of elements in vector.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    hx_src      Source array of dimension (1 + (n-1))*incx, on CPU host.
+
+    @param[in]
+    incx        Increment between elements of hx_src. incx > 0.
+
+    @param[out]
+    dy_dst      Destination array of dimension (1 + (n-1))*incy, on GPU device.
+
+    @param[in]
+    incy        Increment between elements of dy_dst. incy > 0.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_setvector
+*******************************************************************************/
 extern "C" void
 magma_setvector_q_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -37,8 +69,41 @@ magma_setvector_q_internal(
     check_xerror( status, func, file, line );
 }
 
-// --------------------
-// for backwards compatability, accepts NULL queue to mean NULL stream.
+
+/***************************************************************************//**
+    @fn magma_setvector_async( n, elemSize, hx_src, incx, dy_dst, incy, queue )
+
+    Copy vector hx_src on CPU host to dy_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version is asynchronous: it may return before the transfer finishes,
+    if hx_src is pinned CPU memory.
+    See magma_setvector() for a synchronous version.
+
+    @param[in]
+    n           Number of elements in vector.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    hx_src      Source array of dimension (1 + (n-1))*incx, on CPU host.
+
+    @param[in]
+    incx        Increment between elements of hx_src. incx > 0.
+
+    @param[out]
+    dy_dst      Destination array of dimension (1 + (n-1))*incy, on GPU device.
+
+    @param[in]
+    incy        Increment between elements of dy_dst. incy > 0.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_setvector
+*******************************************************************************/
 extern "C" void
 magma_setvector_async_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -47,6 +112,7 @@ magma_setvector_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    // for backwards compatability, accepts NULL queue to mean NULL stream.
     cudaStream_t stream = NULL;
     if ( queue != NULL ) {
         stream = queue->cuda_stream();
@@ -62,7 +128,40 @@ magma_setvector_async_internal(
     check_xerror( status, func, file, line );
 }
 
-// --------------------
+
+/***************************************************************************//**
+    @fn magma_getvector( n, elemSize, dx_src, incx, hy_dst, incy, queue )
+
+    Copy vector dx_src on GPU device to hy_dst on CPU host.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version synchronizes the queue after the transfer.
+    See magma_getvector_async() for an asynchronous version.
+
+    @param[in]
+    n           Number of elements in vector.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dx_src      Source array of dimension (1 + (n-1))*incx, on GPU device.
+
+    @param[in]
+    incx        Increment between elements of hx_src. incx > 0.
+
+    @param[out]
+    hy_dst      Destination array of dimension (1 + (n-1))*incy, on CPU host.
+
+    @param[in]
+    incy        Increment between elements of dy_dst. incy > 0.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_getvector
+*******************************************************************************/
 extern "C" void
 magma_getvector_q_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -80,8 +179,41 @@ magma_getvector_q_internal(
     check_xerror( status, func, file, line );
 }
 
-// --------------------
-// for backwards compatability, accepts NULL queue to mean NULL stream.
+
+/***************************************************************************//**
+    @fn magma_getvector_async( n, elemSize, dx_src, incx, hy_dst, incy, queue )
+
+    Copy vector dx_src on GPU device to hy_dst on CPU host.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version is asynchronous: it may return before the transfer finishes,
+    if hy_dst is pinned CPU memory.
+    See magma_getvector() for a synchronous version.
+
+    @param[in]
+    n           Number of elements in vector.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dx_src      Source array of dimension (1 + (n-1))*incx, on GPU device.
+
+    @param[in]
+    incx        Increment between elements of hx_src. incx > 0.
+
+    @param[out]
+    hy_dst      Destination array of dimension (1 + (n-1))*incy, on CPU host.
+
+    @param[in]
+    incy        Increment between elements of dy_dst. incy > 0.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_getvector
+*******************************************************************************/
 extern "C" void
 magma_getvector_async_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -90,6 +222,7 @@ magma_getvector_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    // for backwards compatability, accepts NULL queue to mean NULL stream.
     cudaStream_t stream = NULL;
     if ( queue != NULL ) {
         stream = queue->cuda_stream();
@@ -105,7 +238,41 @@ magma_getvector_async_internal(
     check_xerror( status, func, file, line );
 }
 
-// --------------------
+
+/***************************************************************************//**
+    @fn magma_copyvector( n, elemSize, dx_src, incx, dy_dst, incy, queue )
+
+    Copy vector dx_src on GPU device to dy_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+    With CUDA unified addressing, dx and dy can be on different GPUs.
+
+    This version synchronizes the queue after the transfer.
+    See magma_copyvector_async() for an asynchronous version.
+
+    @param[in]
+    n           Number of elements in vector.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dx_src      Source array of dimension (1 + (n-1))*incx, on GPU device.
+
+    @param[in]
+    incx        Increment between elements of hx_src. incx > 0.
+
+    @param[out]
+    dy_dst      Destination array of dimension (1 + (n-1))*incy, on GPU device.
+
+    @param[in]
+    incy        Increment between elements of dy_dst. incy > 0.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_copyvector
+*******************************************************************************/
 // TODO compare performance with cublasZcopy BLAS function.
 // But this implementation can handle any element size, not just [sdcz] precisions.
 extern "C" void
@@ -132,8 +299,41 @@ magma_copyvector_q_internal(
     }
 }
 
-// --------------------
-// for backwards compatability, accepts NULL queue to mean NULL stream.
+
+/***************************************************************************//**
+    @fn magma_copyvector_async( n, elemSize, dx_src, incx, dy_dst, incy, queue )
+
+    Copy vector dx_src on GPU device to dy_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+    With CUDA unified addressing, dx and dy can be on different GPUs.
+
+    This version is asynchronous: it may return before the transfer finishes.
+    See magma_copyvector() for a synchronous version.
+
+    @param[in]
+    n           Number of elements in vector.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dx_src      Source array of dimension (1 + (n-1))*incx, on GPU device.
+
+    @param[in]
+    incx        Increment between elements of hx_src. incx > 0.
+
+    @param[out]
+    dy_dst      Destination array of dimension (1 + (n-1))*incy, on GPU device.
+
+    @param[in]
+    incy        Increment between elements of dy_dst. incy > 0.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_copyvector
+*******************************************************************************/
 extern "C" void
 magma_copyvector_async_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -142,6 +342,7 @@ magma_copyvector_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    // for backwards compatability, accepts NULL queue to mean NULL stream.
     cudaStream_t stream = NULL;
     if ( queue != NULL ) {
         stream = queue->cuda_stream();
@@ -164,12 +365,46 @@ magma_copyvector_async_internal(
 }
 
 
-// ========================================
-// copying sub-matrices (contiguous columns)
+/***************************************************************************//**
+    @fn magma_setmatrix( m, n, elemSize, hA_src, lda, dB_dst, lddb, queue )
+
+    Copy all or part of matrix hA_src on CPU host to dB_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version synchronizes the queue after the transfer.
+    See magma_setmatrix_async() for an asynchronous version.
+
+    @param[in]
+    m           Number of rows of matrix A. m >= 0.
+
+    @param[in]
+    n           Number of columns of matrix A. n >= 0.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    hA_src      Source array of dimension (lda,n), on CPU host.
+
+    @param[in]
+    lda         Leading dimension of matrix A. lda >= m.
+
+    @param[out]
+    dB_dst      Destination array of dimension (lddb,n), on GPU device.
+
+    @param[in]
+    lddb        Leading dimension of matrix B. lddb >= m.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_setmatrix
+*******************************************************************************/
 extern "C" void
 magma_setmatrix_q_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
-    void const* hA_src, magma_int_t ldha,
+    void const* hA_src, magma_int_t lda,
     magma_ptr   dB_dst, magma_int_t lddb,
     magma_queue_t queue,
     const char* func, const char* file, int line )
@@ -178,22 +413,59 @@ magma_setmatrix_q_internal(
     cublasStatus_t status;
     status = cublasSetMatrixAsync(
         int(m), int(n), int(elemSize),
-        hA_src, int(ldha),
+        hA_src, int(lda),
         dB_dst, int(lddb), queue->cuda_stream() );
     cudaStreamSynchronize( queue->cuda_stream() );
     check_xerror( status, func, file, line );
 }
 
-// --------------------
-// for backwards compatability, accepts NULL queue to mean NULL stream.
+
+/***************************************************************************//**
+    @fn magma_setmatrix_async( m, n, elemSize, hA_src, lda, dB_dst, lddb, queue )
+
+    Copy all or part of matrix hA_src on CPU host to dB_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version is asynchronous: it may return before the transfer finishes,
+    if hA_src is pinned CPU memory.
+    See magma_setmatrix() for a synchronous version.
+
+    @param[in]
+    m           Number of rows of matrix A. m >= 0.
+
+    @param[in]
+    n           Number of columns of matrix A. n >= 0.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    hA_src      Source array of dimension (lda,n), on CPU host.
+
+    @param[in]
+    lda         Leading dimension of matrix A. lda >= m.
+
+    @param[out]
+    dB_dst      Destination array of dimension (lddb,n), on GPU device.
+
+    @param[in]
+    lddb        Leading dimension of matrix B. lddb >= m.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_setmatrix
+*******************************************************************************/
 extern "C" void
 magma_setmatrix_async_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
-    void const* hA_src, magma_int_t ldha,
+    void const* hA_src, magma_int_t lda,
     magma_ptr   dB_dst, magma_int_t lddb,
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    // for backwards compatability, accepts NULL queue to mean NULL stream.
     cudaStream_t stream = NULL;
     if ( queue != NULL ) {
         stream = queue->cuda_stream();
@@ -204,17 +476,53 @@ magma_setmatrix_async_internal(
     cublasStatus_t status;
     status = cublasSetMatrixAsync(
         int(m), int(n), int(elemSize),
-        hA_src, int(ldha),
+        hA_src, int(lda),
         dB_dst, int(lddb), stream );
     check_xerror( status, func, file, line );
 }
 
-// --------------------
+
+/***************************************************************************//**
+    @fn magma_getmatrix( m, n, elemSize, dA_src, ldda, hB_dst, ldb, queue )
+
+    Copy all or part of matrix dA_src on GPU device to hB_dst on CPU host.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version synchronizes the queue after the transfer.
+    See magma_getmatrix_async() for an asynchronous version.
+
+    @param[in]
+    m           Number of rows of matrix A. m >= 0.
+
+    @param[in]
+    n           Number of columns of matrix A. n >= 0.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dA_src      Source array of dimension (ldda,n), on GPU device.
+
+    @param[in]
+    ldda        Leading dimension of matrix A. ldda >= m.
+
+    @param[out]
+    hB_dst      Destination array of dimension (ldb,n), on CPU host.
+
+    @param[in]
+    ldb         Leading dimension of matrix B. ldb >= m.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_getmatrix
+*******************************************************************************/
 extern "C" void
 magma_getmatrix_q_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
     magma_const_ptr dA_src, magma_int_t ldda,
-    void*           hB_dst, magma_int_t ldhb,
+    void*           hB_dst, magma_int_t ldb,
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
@@ -223,17 +531,54 @@ magma_getmatrix_q_internal(
     status = cublasGetMatrixAsync(
         int(m), int(n), int(elemSize),
         dA_src, int(ldda),
-        hB_dst, int(ldhb), queue->cuda_stream() );
+        hB_dst, int(ldb), queue->cuda_stream() );
     cudaStreamSynchronize( queue->cuda_stream() );
     check_xerror( status, func, file, line );
 }
 
-// --------------------
+
+/***************************************************************************//**
+    @fn magma_getmatrix_async( m, n, elemSize, dA_src, ldda, hB_dst, ldb, queue )
+
+    Copy all or part of matrix dA_src on GPU device to hB_dst on CPU host.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+
+    This version is asynchronous: it may return before the transfer finishes,
+    if hB_dst is pinned CPU memory.
+    See magma_getmatrix() for a synchronous version.
+
+    @param[in]
+    m           Number of rows of matrix A. m >= 0.
+
+    @param[in]
+    n           Number of columns of matrix A. n >= 0.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dA_src      Source array of dimension (ldda,n), on GPU device.
+
+    @param[in]
+    ldda        Leading dimension of matrix A. ldda >= m.
+
+    @param[out]
+    hB_dst      Destination array of dimension (ldb,n), on CPU host.
+
+    @param[in]
+    ldb         Leading dimension of matrix B. ldb >= m.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_getmatrix
+*******************************************************************************/
 extern "C" void
 magma_getmatrix_async_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
     magma_const_ptr dA_src, magma_int_t ldda,
-    void*           hB_dst, magma_int_t ldhb,
+    void*           hB_dst, magma_int_t ldb,
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
@@ -248,11 +593,48 @@ magma_getmatrix_async_internal(
     status = cublasGetMatrixAsync(
         int(m), int(n), int(elemSize),
         dA_src, int(ldda),
-        hB_dst, int(ldhb), stream );
+        hB_dst, int(ldb), stream );
     check_xerror( status, func, file, line );
 }
 
-// --------------------
+
+/***************************************************************************//**
+    @fn magma_copymatrix( m, n, elemSize, dA_src, ldda, dB_dst, lddb, queue )
+
+    Copy all or part of matrix dA_src on GPU device to dB_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+    With CUDA unified addressing, dA and dB can be on different GPUs.
+
+    This version synchronizes the queue after the transfer.
+    See magma_copymatrix_async() for an asynchronous version.
+
+    @param[in]
+    m           Number of rows of matrix A. m >= 0.
+
+    @param[in]
+    n           Number of columns of matrix A. n >= 0.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dA_src      Source array of dimension (ldda,n).
+
+    @param[in]
+    ldda        Leading dimension of matrix A. ldda >= m.
+
+    @param[out]
+    dB_dst      Destination array of dimension (lddb,n), on GPU device.
+
+    @param[in]
+    lddb        Leading dimension of matrix B. lddb >= m.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_copymatrix
+*******************************************************************************/
 extern "C" void
 magma_copymatrix_q_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
@@ -271,8 +653,44 @@ magma_copymatrix_q_internal(
     check_xerror( status, func, file, line );
 }
 
-// --------------------
-// for backwards compatability, accepts NULL queue to mean NULL stream.
+
+/***************************************************************************//**
+    @fn magma_copymatrix_async( m, n, elemSize, dA_src, ldda, dB_dst, lddb, queue )
+
+    Copy all or part of matrix dA_src on GPU device to dB_dst on GPU device.
+    Elements may be arbitrary size.
+    Type-safe versions set elemSize appropriately.
+    With CUDA unified addressing, dA and dB can be on different GPUs.
+
+    This version is asynchronous: it may return before the transfer finishes.
+    See magma_copyvector() for a synchronous version.
+
+    @param[in]
+    m           Number of rows of matrix A. m >= 0.
+
+    @param[in]
+    n           Number of columns of matrix A. n >= 0.
+
+    @param[in]
+    elemSize    Size of each element, e.g., sizeof(double).
+
+    @param[in]
+    dA_src      Source array of dimension (ldda,n), on GPU device.
+
+    @param[in]
+    ldda        Leading dimension of matrix A. ldda >= m.
+
+    @param[out]
+    dB_dst      Destination array of dimension (lddb,n), on GPU device.
+
+    @param[in]
+    lddb        Leading dimension of matrix B. lddb >= m.
+
+    @param[in]
+    queue       Queue to execute in.
+
+    @ingroup magma_copymatrix
+*******************************************************************************/
 extern "C" void
 magma_copymatrix_async_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
@@ -281,6 +699,7 @@ magma_copymatrix_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    // for backwards compatability, accepts NULL queue to mean NULL stream.
     cudaStream_t stream = NULL;
     if ( queue != NULL ) {
         stream = queue->cuda_stream();

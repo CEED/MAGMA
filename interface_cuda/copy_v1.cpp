@@ -4,7 +4,7 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
- 
+
        @author Mark Gates
 */
 #ifndef MAGMA_NO_V1
@@ -14,11 +14,14 @@
 
 #ifdef HAVE_CUBLAS
 
-// generic, type-independent routines to copy data.
-// type-safe versions which avoid the user needing sizeof(...) are in [sdcz]set_get.cpp
+// These MAGMA v1 routines are all deprecated.
+// See copy_v2.cpp for documentation.
 
-// ========================================
-// copying vectors
+// Generic, type-independent routines to copy data.
+// Type-safe versions which avoid the user needing sizeof(...) are in headers;
+// see magma_{s,d,c,z,i,index_}{set,get,copy}{matrix,vector}
+
+/******************************************************************************/
 extern "C" void
 magma_setvector_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -34,7 +37,8 @@ magma_setvector_internal(
         func, file, line );
 }
 
-// --------------------
+
+/******************************************************************************/
 extern "C" void
 magma_getvector_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -50,7 +54,8 @@ magma_getvector_internal(
         func, file, line );
 }
 
-// --------------------
+
+/******************************************************************************/
 extern "C" void
 magma_copyvector_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -67,40 +72,41 @@ magma_copyvector_internal(
 }
 
 
-// ========================================
-// copying sub-matrices (contiguous columns)
+/******************************************************************************/
 extern "C" void
 magma_setmatrix_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
-    void const* hA_src, magma_int_t ldha,
+    void const* hA_src, magma_int_t lda,
     magma_ptr   dB_dst, magma_int_t lddb,
     const char* func, const char* file, int line )
 {
     cublasStatus_t status;
     status = cublasSetMatrix(
         int(m), int(n), int(elemSize),
-        hA_src, int(ldha),
+        hA_src, int(lda),
         dB_dst, int(lddb) );
     check_xerror( status, func, file, line );
 }
 
-// --------------------
+
+/******************************************************************************/
 extern "C" void
 magma_getmatrix_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
     magma_const_ptr dA_src, magma_int_t ldda,
-    void*           hB_dst, magma_int_t ldhb,
+    void*           hB_dst, magma_int_t ldb,
     const char* func, const char* file, int line )
 {
     cublasStatus_t status;
     status = cublasGetMatrix(
         int(m), int(n), int(elemSize),
         dA_src, int(ldda),
-        hB_dst, int(ldhb) );
+        hB_dst, int(ldb) );
     check_xerror( status, func, file, line );
 }
 
-// --------------------
+
+/******************************************************************************/
 extern "C" void
 magma_copymatrix_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,

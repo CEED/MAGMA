@@ -31,8 +31,42 @@ const char* magma_cublasGetErrorString( cublasStatus_t error );
 #define check_error( err )                     ((void)0)
 #define check_xerror( err, func, file, line )  ((void)0)
 #else
-#define check_error( err )                     magma_xerror( err, __func__, __FILE__, __LINE__ )
-#define check_xerror( err, func, file, line )  magma_xerror( err, func, file, line )
-#endif
+
+/***************************************************************************//**
+    Checks if err is not success, and prints an error message.
+    Similar to assert(), if NDEBUG is defined, this does nothing.
+    This version adds the current func, file, and line to the error message.
+
+    @param[in]
+    err     Error code.
+
+    @ingroup magma_error_internal
+*******************************************************************************/
+#define check_error( err ) \
+        magma_xerror( err, __func__, __FILE__, __LINE__ )
+
+/***************************************************************************//**
+    Checks if err is not success, and prints an error message.
+    Similar to assert(), if NDEBUG is defined, this does nothing.
+    This version takes func, file, and line as arguments to add to error message.
+
+    @param[in]
+    err     Error code.
+
+    @param[in]
+    func    Function where error occurred.
+
+    @param[in]
+    file    File     where error occurred.
+
+    @param[in]
+    line    Line     where error occurred.
+
+    @ingroup magma_error_internal
+*******************************************************************************/
+#define check_xerror( err, func, file, line ) \
+        magma_xerror( err, func, file, line )
+
+#endif  // not NDEBUG
 
 #endif        //  #ifndef ERROR_H
