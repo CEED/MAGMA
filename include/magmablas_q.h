@@ -21,14 +21,14 @@ extern "C" {
 #endif
 
 
-// ========================================
+// =============================================================================
 // queue support
 // new magma_queue_create adds device
-#define magma_queue_create_v2( device, queue_ptr ) \
+#define magma_queue_create_v2(          device, queue_ptr ) \
         magma_queue_create_v2_internal( device, queue_ptr, __func__, __FILE__, __LINE__ )
 
-#define magma_queue_create_from_cuda( device, stream, cublas, cusparse, queue_ptr ) \
-        magma_queue_create_from_cuda_internal( device, stream, cublas, cusparse, queue_ptr, __func__, __FILE__, __LINE__ )
+#define magma_queue_create_from_cuda(          device, cuda_stream, cublas_handle, cusparse_handle, queue_ptr ) \
+        magma_queue_create_from_cuda_internal( device, cuda_stream, cublas_handle, cusparse_handle, queue_ptr, __func__, __FILE__, __LINE__ )
 
 #define magma_queue_destroy( queue ) \
         magma_queue_destroy_internal( queue, __func__, __FILE__, __LINE__ )

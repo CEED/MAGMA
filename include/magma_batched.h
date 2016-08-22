@@ -6,8 +6,9 @@
        @date
 */
 
-#ifndef MAGMABATCHED_H
-#define MAGMABATCHED_H
+#ifndef MAGMA_BATCHED_H
+#define MAGMA_BATCHED_H
+
 #include "magma_types.h"
 
 /* ------------------------------------------------------------
@@ -56,4 +57,4 @@ void magma_iset_pointer(
 #endif
 
 
-#endif /* MAGMABATCHED_H */
+#endif /* MAGMA_BATCHED_H */

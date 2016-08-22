@@ -6,13 +6,14 @@
        @date
 */
 
-#ifndef MAGMAVBATCHED_H
-#define MAGMAVBATCHED_H
+#ifndef MAGMA_VBATCHED_H
+#define MAGMA_VBATCHED_H
+
 #include "magma_types.h"
 
-/* ------------------------------------------------------------
- * MAGMA VBATCHED functions
- * --------------------------------------------------------- */
+// =============================================================================
+// MAGMA VBATCHED functions
+
 #include "magma_zvbatched.h"
 #include "magma_cvbatched.h"
 #include "magma_dvbatched.h"
@@ -213,4 +214,4 @@ magma_imax_size_3(magma_int_t *m, magma_int_t *n, magma_int_t *k, magma_int_t l,
 #endif
 
 
-#endif /* MAGMAVBATCHED_H */
+#endif /* MAGMA_VBATCHED_H */
