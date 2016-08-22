@@ -118,7 +118,6 @@ libmagma_src += \
 	$(cdir)/sgemv_batched_core.cu		\
 	$(cdir)/zgemv_batched_core.cu		\
 	$(cdir)/zgeqr2_batched.cu		\
-	$(cdir)/zgeqr2_kernels.cu		\
 	$(cdir)/zgerbt_func_batched.cu		\
 	$(cdir)/zgetf2_kernels.cu		\
 	$(cdir)/getrf_setup_pivinfo.cu		\
@@ -138,7 +137,7 @@ libmagma_src += \
 	$(cdir)/ztrtri_diag_batched.cu		\
 	$(cdir)/zher2k_batched.cpp		\
 	$(cdir)/zsyr2k_batched.cpp		\
-	
+
 # vbatched files
 libmagma_src += \
 	$(cdir)/zgemm_vbatched_core.cu	\
