@@ -25,9 +25,15 @@
         @defgroup magma_setmatrix_bcyclic  setmatrix_bcyclic: CPU => multi-GPU
     @}
 
-    @defgroup magma_constants       Constants and converters
-    @brief                          Mappings between LAPACK string constants and
-                                    MAGMA, CBLAS, cuBLAS, and clBLAS symbolic constants
+    @defgroup group_constants       Constants and converters
+    @brief                          Mappings between LAPACK, MAGMA, CBLAS, cuBLAS, and clBLAS constants
+    @{
+        @defgroup magma_const       Map LAPACK => MAGMA
+        @defgroup lapack_const      Map MAGMA  => LAPACK
+        @defgroup cblas_const       Map CBLAS  => MAGMA
+        @defgroup clblas_const      Map clBLAS => MAGMA
+        @defgroup cublas_const      Map cuBLAS => MAGMA
+    @}
 
     @defgroup magma_device          Device management
     @defgroup magma_queue           Queue  management
