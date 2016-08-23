@@ -67,7 +67,7 @@ zlascl_upper(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLASCL multiplies the M by N complex matrix A by the real scalar
@@ -130,8 +130,8 @@ zlascl_upper(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux2
-    ********************************************************************/
+    @ingroup magma_lascl
+*******************************************************************************/
 extern "C" void
 magmablas_zlascl_q(
     magma_type_t type, magma_int_t kl, magma_int_t ku,

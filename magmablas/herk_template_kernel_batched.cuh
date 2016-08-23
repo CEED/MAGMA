@@ -9,16 +9,14 @@
        @author Azzam Haidar
        @author Ahmad Abdelfattah
 */
-
 #ifndef HERK_TEMPLATE_KERNEL_BATCHED_CUH
 #define HERK_TEMPLATE_KERNEL_BATCHED_CUH
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "gemm_template_device_defs.cuh"
 #include "gemm_template_device.cuh"
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -46,7 +44,7 @@ void herk_template_batched_nt_kernel(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -74,11 +72,9 @@ void herk_template_batched_tn_kernel(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 // kernel wrappers
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // NT, NC 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -99,9 +95,8 @@ void herk_template_batched_nt(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 // TN, CN 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>

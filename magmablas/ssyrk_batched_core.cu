@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal d
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -26,6 +24,7 @@
 
 #define version(s,v) s ## _V_ ## v
 
+/******************************************************************************/
 extern "C" void
 magmablas_ssyrk_internal_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -73,8 +72,9 @@ magmablas_ssyrk_internal_batched(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     SSYRK performs one of the symmetric rank k operations
@@ -183,8 +183,8 @@ magmablas_ssyrk_internal_batched(
     queue   magma_queue_t
             Queue to execute in.
     
-    @ingroup magma_sblas3
-    ********************************************************************/
+    @ingroup magma_syrk_batched
+*******************************************************************************/
 extern "C" void
 magmablas_ssyrk_batched(
     magma_uplo_t uplo, magma_trans_t trans, 

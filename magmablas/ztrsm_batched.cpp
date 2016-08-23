@@ -16,7 +16,7 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ztrsm_outofplace solves one of the matrix equations on gpu
@@ -163,8 +163,8 @@
     queue   magma_queue_t
             Queue to execute in.
     
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_trsm_batched
+*******************************************************************************/
 extern "C"
 void magmablas_ztrsm_outofplace_batched(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
@@ -481,7 +481,7 @@ void magmablas_ztrsm_outofplace_batched(
     }
 }
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ztrsm_work solves one of the matrix equations on gpu
@@ -631,8 +631,8 @@ void magmablas_ztrsm_outofplace_batched(
     queue   magma_queue_t
             Queue to execute in.
     
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_trsm_batched
+*******************************************************************************/
 extern "C"
 void magmablas_ztrsm_work_batched(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
@@ -689,7 +689,7 @@ void magmablas_ztrsm_work_batched(
     magmablas_zlacpy_batched( MagmaFull, m, n, dX_displ, lddx, dB_displ, lddb, batchCount, queue );
 }
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ztrsm solves one of the matrix equations on gpu
@@ -796,8 +796,8 @@ void magmablas_ztrsm_work_batched(
     queue   magma_queue_t
             Queue to execute in.
     
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_trsm_batched
+*******************************************************************************/
 extern "C"
 void magmablas_ztrsm_batched(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,

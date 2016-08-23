@@ -19,8 +19,7 @@
 
 #define PRECISION_z
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+/***************************************************************************//**
     Purpose
     -------
    ZHER2K  performs one of the Hermitian rank 2k operations
@@ -139,8 +138,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_her2k_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zher2k_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
@@ -192,5 +191,3 @@ magmablas_zher2k_batched(
         magmablas_zherk_internal_batched(uplo, Magma_ConjTrans, n, k, MAGMA_Z_CONJ(alpha), dB_array, lddb, dA_array, ldda, c_one, dC_array, lddc, batchCount, queue );
     }
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////

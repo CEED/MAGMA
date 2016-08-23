@@ -9,14 +9,13 @@
        @author Azzam Haidar
 
 */
+#ifndef GEMV_TEMPLATE_KERNEL_VBATCHED_CUH
+#define GEMV_TEMPLATE_KERNEL_VBATCHED_CUH
 
-
-#ifndef GEMV_TEMPLATE_KERNEL_BATCHED_CUH
-#define GEMV_TEMPLATE_KERNEL_BATCHED_CUH
-
-#include "gemm_template_device_defs.cuh"// use make_FloatingPoint
+#include "gemm_template_device_defs.cuh" // use make_FloatingPoint
 #include "gemv_template_device.cuh"
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************************/
 template<typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE> 
 __global__ void
 gemvn_kernel_vbatched(
@@ -33,7 +32,9 @@ gemvn_kernel_vbatched(
     gemvn_template_device<T, DIM_X, DIM_Y, TILE_SIZE>
         ( my_m, (int)n[batchid], alpha, A_array[batchid], (int)lda[batchid], x_array[batchid], (int)incx[batchid], beta, y_array[batchid], (int)incy[batchid]);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void gemvn_template_vbatched(
     magma_int_t* m, magma_int_t* n, T alpha,
@@ -50,7 +51,9 @@ void gemvn_template_vbatched(
         <<< grid, threads, 0, queue->cuda_stream() >>>                    
         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 template<typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE, magma_trans_t trans> 
 __global__ void
 gemvc_kernel_vbatched(
@@ -67,7 +70,9 @@ gemvc_kernel_vbatched(
     gemvc_template_device<T, DIM_X, DIM_Y, TILE_SIZE, trans>
         ( (int)m[batchid], (int)n[batchid], alpha, A_array[batchid], (int)lda[batchid], x_array[batchid], (int)incx[batchid], beta, y_array[batchid], (int)incy[batchid]);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void gemvc_template_vbatched(
     magma_trans_t trans, magma_int_t* m, magma_int_t* n, T alpha,
@@ -93,5 +98,5 @@ void gemvc_template_vbatched(
             ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );       
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-#endif
+
+#endif  // GEMV_TEMPLATE_KERNEL_VBATCHED_CUH

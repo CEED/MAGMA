@@ -14,14 +14,14 @@
 #include "magma_internal.h"
 #include "trace.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     This zherk_mgpu is internal routine used by zpotrf_mgpu_right.
     It has specific assumption on the block diagonal.
     
-    @ingroup magma_zblas3_internal
-    ********************************************************************/
+    @ingroup magma_herk
+*******************************************************************************/
 extern "C" void
 magma_zherk_mgpu(
     magma_int_t ngpu,
@@ -118,7 +118,7 @@ magma_zherk_mgpu(
 #undef STREAM_ID
 
 
-// ----------------------------------------------------------------------
+/******************************************************************************/
 extern "C" void
 magma_zherk_mgpu2(
     magma_int_t ngpu,

@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal d
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -15,7 +13,9 @@
        
 */
 #include "common_magma.h"
+
 #define PRECISION_s
+
 #include "herk_template_kernel_vbatched.cuh"
 
 #include "gemm_config/sgemm_param_nn.h"
@@ -25,6 +25,7 @@
 
 #define version(s,v) s ## _V_ ## v
 
+/******************************************************************************/
 extern "C" void
 magmablas_ssyrk_internal_vbatched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -70,7 +71,9 @@ magmablas_ssyrk_internal_vbatched(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_ssyrk_vbatched_max_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, 

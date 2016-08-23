@@ -15,7 +15,8 @@
 #include "commonblas_z.h"
 
 #define PRECISION_z
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************************/
 extern "C" void
 magmablas_zgemv_vbatched_max(
     magma_trans_t trans, magma_int_t* m, magma_int_t* n, 
@@ -44,7 +45,9 @@ magmablas_zgemv_vbatched_max(
             beta,  dy_array, incy, 
             batchCount, max_m, max_n, queue);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zgemv_vbatched_nocheck(
     magma_trans_t trans, magma_int_t* m, magma_int_t* n, 
@@ -69,8 +72,9 @@ magmablas_zgemv_vbatched_nocheck(
             beta,  dy_array, incy, 
             batchCount, max_m, max_n, queue);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     ZGEMV performs one of the matrix-vector operations
@@ -152,8 +156,8 @@ magmablas_zgemv_vbatched_nocheck(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_dblas2
-    ********************************************************************/
+    @ingroup magma_gemv_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zgemv_vbatched(
     magma_trans_t trans, magma_int_t* m, magma_int_t* n, 
@@ -187,4 +191,3 @@ magmablas_zgemv_vbatched(
             beta,  dy_array, incy, 
             batchCount, max_m, max_n, queue);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

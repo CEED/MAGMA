@@ -17,9 +17,9 @@
 #include "magma_internal.h"
 #include "commonblas_z.h"
 
-#define PRECISION_z
+#define COMPLEX
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 extern "C" void
 magmablas_zher2k_vbatched_max_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -41,7 +41,9 @@ magmablas_zher2k_vbatched_max_nocheck(
         magmablas_zherk_internal_vbatched(uplo, Magma_ConjTrans, n, k, MAGMA_Z_CONJ(alpha), dB_array, lddb, dA_array, ldda, c_one, dC_array, lddc, max_n, max_k, batchCount, queue );
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zher2k_vbatched_max(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -53,7 +55,7 @@ magmablas_zher2k_vbatched_max(
     magma_int_t max_n, magma_int_t max_k, magma_queue_t queue )
 {
     magma_int_t info = 0;
-    #if defined(PRECISION_c) || defined(PRECISION_z)
+    #ifdef COMPLEX
     info =  magma_her2k_vbatched_checker(    uplo, trans, n, k, ldda, lddb, lddc, batchCount, queue );
     #else
     info =  magma_syr2k_vbatched_checker( 0, uplo, trans, n, k, ldda, lddb, lddc, batchCount, queue );
@@ -71,7 +73,9 @@ magmablas_zher2k_vbatched_max(
             beta,  dC_array, lddc, 
             batchCount, max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zher2k_vbatched_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -95,8 +99,9 @@ magmablas_zher2k_vbatched_nocheck(
             beta,  dC_array, lddc, 
             batchCount, max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
    ZHER2K  performs one of the Hermitian rank 2k operations
@@ -218,8 +223,8 @@ magmablas_zher2k_vbatched_nocheck(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_her2k_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zher2k_vbatched(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -230,7 +235,7 @@ magmablas_zher2k_vbatched(
     magma_int_t batchCount, magma_queue_t queue )
 {
     magma_int_t info = 0;
-    #if defined(PRECISION_c) || defined(PRECISION_z)
+    #ifdef COMPLEX
     info =  magma_her2k_vbatched_checker(    uplo, trans, n, k, ldda, lddb, lddc, batchCount, queue );
     #else
     info =  magma_syr2k_vbatched_checker( 0, uplo, trans, n, k, ldda, lddb, lddc, batchCount, queue );
@@ -254,4 +259,3 @@ magmablas_zher2k_vbatched(
             beta,  dC_array, lddc, 
             batchCount, max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal s
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -26,7 +24,7 @@
 
 #define version(s,v) s ## _V_ ## v
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     SGEMM performs one of the matrix-matrix operations
@@ -141,8 +139,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_sblas3
-    ********************************************************************/
+    @ingroup magma_gemm_batched
+*******************************************************************************/
 void
 magmablas_sgemm_batched_core(
     magma_trans_t transA, magma_trans_t transB, 
@@ -152,7 +150,9 @@ magmablas_sgemm_batched_core(
     float const * const * dB_array, magma_int_t lddb,
     float beta,
     float **dC_array, magma_int_t lddc, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -352,4 +352,3 @@ magmablas_sgemm_batched_core(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

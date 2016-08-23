@@ -22,7 +22,7 @@
 #include "ztrtri.cuh"
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZTRTRI_DIAG inverts the NB x NB diagonal blocks of a triangular matrix.
@@ -86,8 +86,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_trtri_diag_batched
+*******************************************************************************/
 extern "C" void
 magmablas_ztrtri_diag_batched(
     magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,

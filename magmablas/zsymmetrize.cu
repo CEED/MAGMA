@@ -58,7 +58,7 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     
@@ -90,8 +90,8 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux2
-    ********************************************************************/
+    @ingroup magma_symmetrize
+*******************************************************************************/
 extern "C" void
 magmablas_zsymmetrize_q(
     magma_uplo_t uplo, magma_int_t m,

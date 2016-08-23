@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -27,6 +25,7 @@
 
 #define version(s,v) s ## _V_ ## v
 
+/******************************************************************************/
 // template to support zherk and zsyrk
 template<int CONJ>
 void
@@ -76,7 +75,9 @@ magmablas_zsyrkherk_batched(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void 
 magmablas_zsyrk_internal_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -90,7 +91,9 @@ magmablas_zsyrk_internal_batched(
 {
     magmablas_zsyrkherk_batched<0>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zherk_internal_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -104,8 +107,9 @@ magmablas_zherk_internal_batched(
 {
     magmablas_zsyrkherk_batched<1>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     ZSYRK performs one of the symmetric rank k operations
@@ -214,8 +218,8 @@ magmablas_zherk_internal_batched(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_syrk_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zsyrk_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -258,8 +262,9 @@ magmablas_zsyrk_batched(
 
     magmablas_zsyrk_internal_batched(uplo, trans, n, k, alpha, dA_array, ldda, dA_array, ldda, beta, dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     ZHERK performs one of the Hermitian rank k operations
@@ -368,8 +373,8 @@ magmablas_zsyrk_batched(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_herk_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zherk_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -412,4 +417,3 @@ magmablas_zherk_batched(
 
     magmablas_zherk_internal_batched(uplo, trans, n, k, MAGMA_Z_MAKE(alpha, 0.), dA_array, ldda, dA_array, ldda, MAGMA_Z_MAKE(beta, 0.), dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

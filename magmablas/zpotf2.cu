@@ -22,7 +22,7 @@ void magmablas_zlacgv( magma_int_t n, magmaDoubleComplex *x, magma_int_t incx, m
 
 
 // TODO: this function could be in .cpp file -- it has no CUDA code in it.
-/**
+/***************************************************************************//**
     Purpose
     -------
 
@@ -79,8 +79,8 @@ void magmablas_zlacgv( magma_int_t n, magmaDoubleComplex *x, magma_int_t incx, m
                  positive definite, and the factorization could not be
                  completed.
 
-    @ingroup magma_zposv_aux
-    ********************************************************************/
+    @ingroup magma_potf2
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zpotf2_gpu(
     magma_uplo_t uplo, magma_int_t n,
@@ -286,7 +286,7 @@ __global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
 
@@ -312,8 +312,8 @@ __global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux1
-    ********************************************************************/
+    @ingroup magma_lacgv
+*******************************************************************************/
 void magmablas_zlacgv(
     magma_int_t n, magmaDoubleComplex *x, magma_int_t incx,
     magma_queue_t queue )

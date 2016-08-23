@@ -7,16 +7,12 @@
 
        @author Ahmad Abdelfattah
 */
-
-#ifndef VBATCHED_CHECK_HDR
-#define VBATCHED_CHECK_HDR
-
 #include "magma_internal.h"
 
 #define CHECKER_TX    (128)
 
-// ---------------------------------------------------------------------------------------
-// GEMM chekcer
+/******************************************************************************/
+// GEMM checker
 // ------------
 __global__ void 
 gemm_vbatched_checker( 
@@ -44,6 +40,9 @@ gemm_vbatched_checker(
     if( transB == MagmaNoTrans ? local_lddb < local_k : local_lddb < local_n ) lddb[batchCount] = -1;
     if( local_lddc < local_m ) lddc[batchCount] = -1;
 }
+
+
+/******************************************************************************/
 // driver
 extern "C" magma_int_t 
 magma_gemm_vbatched_checker(
@@ -100,8 +99,10 @@ magma_gemm_vbatched_checker(
     
     return info;
 }
-//----------------------------------------------------------------------------------------
-// TRSM chekcer
+
+
+/******************************************************************************/
+// TRSM checker
 // ------------
 __global__ void 
 trsm_vbatched_checker( 
@@ -125,6 +126,9 @@ trsm_vbatched_checker(
     if( local_ldda < max(1, nrowA) ) ldda[batchCount] = -1;
     if( local_lddb < max(1, local_m) ) lddb[batchCount] = -1;
 }
+
+
+/******************************************************************************/
 // driver 
 extern "C" magma_int_t 
 magma_trsm_vbatched_checker( 
@@ -176,8 +180,10 @@ magma_trsm_vbatched_checker(
 
     return info;
 }
-// ---------------------------------------------------------------------------------------
-// SYRK/HERK chekcer
+
+
+/******************************************************************************/
+// SYRK/HERK checker
 // ------------
 __global__ void 
 herk_vbatched_checker(
@@ -202,6 +208,9 @@ herk_vbatched_checker(
     if( local_ldda < nrowA  ) ldda[batchCount] = -1;
     if( local_lddc < local_n) lddc[batchCount] = -1;
 }
+
+
+/******************************************************************************/
 // driver - ssyrk, dsyrk, csyrk, zsyrk
 extern "C" magma_int_t 
 magma_syrk_vbatched_checker(
@@ -252,6 +261,9 @@ magma_syrk_vbatched_checker(
 
     return info;    
 }
+
+
+/******************************************************************************/
 // driver - cherk, zherk
 extern "C" magma_int_t 
 magma_herk_vbatched_checker( 
@@ -298,8 +310,10 @@ magma_herk_vbatched_checker(
 
     return info;    
 }
-// ---------------------------------------------------------------------------------------
-// SYR2K/HER2K chekcer
+
+
+/******************************************************************************/
+// SYR2K/HER2K checker
 // ------------
 __global__ void 
 her2k_vbatched_checker(
@@ -326,6 +340,9 @@ her2k_vbatched_checker(
     if( local_lddb < max(1, nrowAB ) ) lddb[batchCount] = -1;
     if( local_lddc < max(1, local_n) ) lddc[batchCount] = -1;
 }
+
+
+/******************************************************************************/
 // driver - ssyr2k, dsyr2k, csyr2k, zsyr2k
 extern "C" magma_int_t 
 magma_syr2k_vbatched_checker(
@@ -380,6 +397,9 @@ magma_syr2k_vbatched_checker(
 
     return info;    
 }
+
+
+/******************************************************************************/
 // driver - cher2k, zher2k
 extern "C" magma_int_t 
 magma_her2k_vbatched_checker( 
@@ -431,8 +451,10 @@ magma_her2k_vbatched_checker(
 
     return info;    
 }
-// ---------------------------------------------------------------------------------------
-// GEMV chekcer
+
+
+/******************************************************************************/
+// GEMV checker
 // ------------
 __global__ void 
 gemv_vbatched_checker( 
@@ -458,6 +480,9 @@ gemv_vbatched_checker(
     if( local_incx == 0 ) incx[batchCount] = -1;
     if( local_incy == 0 ) incy[batchCount] = -1;
 }
+
+
+/******************************************************************************/
 // driver
 extern "C" magma_int_t 
 magma_gemv_vbatched_checker(
@@ -508,8 +533,10 @@ magma_gemv_vbatched_checker(
 
     return info;
 }
-// ---------------------------------------------------------------------------------------
-// AXPY chekcer
+
+
+/******************************************************************************/
+// AXPY checker
 // ------------
 __global__ void 
 axpy_vbatched_checker(
@@ -529,6 +556,9 @@ axpy_vbatched_checker(
     if( local_incx == 0 ) incx[batchCount] = -1; 
     if( local_incy == 0 ) incy[batchCount] = -1; 
 }
+
+
+/******************************************************************************/
 // driver
 extern "C" magma_int_t 
 magma_axpy_vbatched_checker( 
@@ -565,8 +595,10 @@ magma_axpy_vbatched_checker(
     
     return info;
 }
-// ---------------------------------------------------------------------------------------
-// TRMM chekcer
+
+
+/******************************************************************************/
+// TRMM checker
 // ------------
 __global__ void 
 trmm_vbatched_checker( 
@@ -590,6 +622,9 @@ trmm_vbatched_checker(
     if( local_ldda < max(1, nrowA) ) ldda[batchCount] = -1;
     if( local_lddb < max(1, local_m) ) lddb[batchCount] = -1;
 }
+
+
+/******************************************************************************/
 // driver
 extern "C" magma_int_t 
 magma_trmm_vbatched_checker(
@@ -643,5 +678,3 @@ magma_trmm_vbatched_checker(
     
     return info;
 }
-//----------------------------------------------------------------------------------------
-#endif // VBATCHED_CHECK_HDR

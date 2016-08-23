@@ -17,7 +17,7 @@
 #ifndef GEMM_TEMPLATE_DEVICE_CUH
 #define GEMM_TEMPLATE_DEVICE_CUH
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 // op<trans>( x ) returns x or conj(x).
 template< const int conjugate, typename T >
 __host__ __device__ static inline
@@ -31,7 +31,7 @@ T op( T& x )
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
@@ -214,7 +214,7 @@ void gemm_template_device_nn(
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
@@ -401,7 +401,7 @@ void gemm_template_device_nt(
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
@@ -591,7 +591,7 @@ void gemm_template_device_tn(
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
@@ -780,6 +780,5 @@ void gemm_template_device_tt(
     }
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif //GEMM_TEMPLATE_DEVICE_CUH

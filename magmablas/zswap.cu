@@ -35,7 +35,7 @@ __global__ void zswap_kernel(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose:
     =============
     Swap vector x and y; \f$ x <-> y \f$.
@@ -61,8 +61,8 @@ __global__ void zswap_kernel(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas1
-    ********************************************************************/
+    @ingroup magma_swap
+*******************************************************************************/
 extern "C" void 
 magmablas_zswap_q(
     magma_int_t n,

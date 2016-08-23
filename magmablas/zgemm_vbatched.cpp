@@ -16,7 +16,7 @@
 
 #define PRECISION_z
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 extern "C" void
 magmablas_zgemm_vbatched_max_nocheck(
     magma_trans_t transA, magma_trans_t transB, 
@@ -41,7 +41,9 @@ magmablas_zgemm_vbatched_max_nocheck(
             0, 0, 0,          // specific m, n, k values (ignored if <= 0)
             batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zgemm_vbatched_max(
     magma_trans_t transA, magma_trans_t transB, 
@@ -74,7 +76,9 @@ magmablas_zgemm_vbatched_max(
             max_m, max_n, max_k, 
             queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zgemm_vbatched_nocheck(
     magma_trans_t transA, magma_trans_t transB, 
@@ -103,8 +107,9 @@ magmablas_zgemm_vbatched_nocheck(
             max_m, max_n, max_k, 
             queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     ZGEMM performs one of the matrix-matrix operations
@@ -225,8 +230,8 @@ magmablas_zgemm_vbatched_nocheck(
     queue   magma_queue_t
             Queue to execute in.
     
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_gemm_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zgemm_vbatched(
     magma_trans_t transA, magma_trans_t transB, 
@@ -265,4 +270,3 @@ magmablas_zgemm_vbatched(
             max_m, max_n, max_k, 
             queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

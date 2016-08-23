@@ -18,7 +18,7 @@
 #define NB 512
 
 
-// ----------------------------------------
+/******************************************************************************/
 // kernel for magma_zlarfg.
 // Uses one block of NB (currently 512) threads.
 // Each thread sums dx[ tx + k*NB ]^2 for k = 0, 1, ...,
@@ -109,7 +109,7 @@ zlarfg_kernel(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLARFG generates a complex elementary reflector (Householder matrix)
@@ -160,8 +160,8 @@ zlarfg_kernel(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux1
-    ********************************************************************/
+    @ingroup magma_larfg
+*******************************************************************************/
 extern "C"
 void magmablas_zlarfg_q(
     magma_int_t n,

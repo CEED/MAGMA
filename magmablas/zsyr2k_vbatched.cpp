@@ -17,9 +17,9 @@
 #include "magma_internal.h"
 #include "commonblas_z.h"
 
-#define PRECISION_z
+#define COMPLEX
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 extern "C" void
 magmablas_zsyr2k_vbatched_max_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -47,7 +47,9 @@ magmablas_zsyr2k_vbatched_max_nocheck(
         magmablas_zsyrk_internal_vbatched(uplo, MagmaTrans, n, k, alpha, dB_array, lddb, dA_array, ldda, c_one, dC_array, lddc, max_n, max_k, batchCount, queue );
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zsyr2k_vbatched_max(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -74,7 +76,9 @@ magmablas_zsyr2k_vbatched_max(
             beta,  dC_array, lddc, 
             batchCount, max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zsyr2k_vbatched_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -105,8 +109,9 @@ magmablas_zsyr2k_vbatched_nocheck(
             beta,  dC_array, lddc, 
             batchCount, max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
    ZSYR2K  performs one of the symmetric rank 2k operations
@@ -228,8 +233,8 @@ magmablas_zsyr2k_vbatched_nocheck(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_syr2k_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zsyr2k_vbatched(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t* n, magma_int_t* k,
@@ -267,4 +272,3 @@ magmablas_zsyr2k_vbatched(
             beta,  dC_array, lddc, 
             batchCount, max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

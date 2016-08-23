@@ -52,7 +52,7 @@ void zgeadd_full(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEADD adds two matrices, dB = alpha*dA + dB.
@@ -92,8 +92,8 @@ void zgeadd_full(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux2
-    ********************************************************************/
+    @ingroup magma_geadd
+*******************************************************************************/
 extern "C" void
 magmablas_zgeadd_q(
     magma_int_t m, magma_int_t n,

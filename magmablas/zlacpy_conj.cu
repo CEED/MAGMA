@@ -12,6 +12,7 @@
 
 #define BLOCK_SIZE 64
 
+/******************************************************************************/
 // copy & conjugate a single vector of length n.
 // TODO: this was modeled on the old zswap routine. Update to new zlacpy code for 2D matrix?
 
@@ -30,6 +31,7 @@ __global__ void zlacpy_conj_kernel(
 }
 
 
+/******************************************************************************/
 extern "C" void 
 magmablas_zlacpy_conj_q(
     magma_int_t n,

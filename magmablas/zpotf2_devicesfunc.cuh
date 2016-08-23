@@ -18,7 +18,8 @@
 
 
 extern __shared__ magmaDoubleComplex shared_data[];
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************************/
 static inline __device__ void zpotf2_sminout_anywidth_device(const int m, const int n, magmaDoubleComplex *A, const int lda)
 {
     const int tx = threadIdx.x;
@@ -65,8 +66,9 @@ static inline __device__ void zpotf2_sminout_anywidth_device(const int m, const 
         __syncthreads();
     }// end of iter
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 static inline __device__ void zpotf2_sminout_fixsize_device(const int m, magmaDoubleComplex *A, const int lda)
 {
     const int tx = threadIdx.x;
@@ -121,11 +123,9 @@ static inline __device__ void zpotf2_sminout_fixsize_device(const int m, magmaDo
         __syncthreads();
     }// end of iter
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
         const magmaDoubleComplex* __restrict__ A0, const int lda,
         magmaDoubleComplex *sC, magmaDoubleComplex  *sB)
@@ -235,8 +235,9 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
     #endif
     __syncthreads();
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
         const magmaDoubleComplex* __restrict__ A0, int lda,
         magmaDoubleComplex *sC, magmaDoubleComplex  *sB)
@@ -348,14 +349,9 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
     #endif
     __syncthreads();
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 static inline __device__ void zpotf2_smlpout_fixwidth_device(const int m,  
         magmaDoubleComplex *A0, magmaDoubleComplex *A, int lda,
         const int localstep, const int gbstep,
@@ -427,7 +423,9 @@ static inline __device__ void zpotf2_smlpout_fixwidth_device(const int m,
     }
     #endif
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 static inline __device__ void zpotf2_smlpout_anywidth_device(const int m, const int n,
         magmaDoubleComplex *A0, magmaDoubleComplex *A, int lda,
         const int localstep, const int gbstep,
@@ -497,8 +495,5 @@ static inline __device__ void zpotf2_smlpout_anywidth_device(const int m, const 
     }
     #endif        
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 #endif  /* MAGMABLAS_ZPOTF2_DEVICES_Z_H */

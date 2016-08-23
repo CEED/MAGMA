@@ -62,7 +62,7 @@ zlascl_2x2_upper(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLASCL_2x2 scales the M by M complex matrix A by the 2-by-2 pivot.
@@ -107,8 +107,8 @@ zlascl_2x2_upper(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux2
-    ********************************************************************/
+    @ingroup magma_lascl_2x2
+*******************************************************************************/
 extern "C" void
 magmablas_zlascl_2x2_q(
     magma_type_t type, magma_int_t m,

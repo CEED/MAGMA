@@ -12,6 +12,8 @@
 
 #define NB 64
 
+
+/******************************************************************************/
 // adds   x += r (including conversion to double)  --and--
 // copies w = b
 // each thread does one index, x[i] and w[i]
@@ -32,9 +34,10 @@ zcaxpycp_kernel(
 }
 
 
-// ----------------------------------------------------------------------
-// adds   x += r (including conversion to double)  --and--
-// copies w = b
+/***************************************************************************//**
+    adds   x += r (including conversion to double)  --and--
+    copies w = b
+*******************************************************************************/
 extern "C" void
 magmablas_zcaxpycp_q(
     magma_int_t m,

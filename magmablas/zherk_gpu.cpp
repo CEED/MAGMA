@@ -10,6 +10,7 @@
 */
 #include "magma_internal.h"
 
+/******************************************************************************/
 extern "C"
 void magmablas_zherk_gpu(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k, magma_int_t nb,

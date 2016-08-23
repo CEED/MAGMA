@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal s
-       
        @author Tingxing Dong
        @author Azzam Haidar
        @author Ahmad Abdelfattah
@@ -23,6 +21,7 @@
 
 #define version(s,v) s ## _V_ ## v
 
+/******************************************************************************/
 extern "C" void
 magmablas_sgemv_vbatched_max_nocheck(
     magma_trans_t trans, magma_int_t* m, magma_int_t* n, 
@@ -150,4 +149,3 @@ magmablas_sgemv_vbatched_max_nocheck(
         }        
     }                   
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

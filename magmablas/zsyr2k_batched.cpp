@@ -19,21 +19,20 @@
 
 #define PRECISION_z
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+/***************************************************************************//**
     Purpose
     -------
-   ZSYR2K  performs one of the symmetric rank 2k operations
-   
-      C := alpha*A*B**H + conjg( alpha )*B*A**H + beta*C,
-   
-   or
-   
-      C := alpha*A**H*B + conjg( alpha )*B**H*A + beta*C,
-   
-   where  alpha and beta  are scalars with  beta  real,  C is an  n by n
-   symmetric matrix and  A and B  are  n by k matrices in the first case
-   and  k by n  matrices in the second case.
+    ZSYR2K  performs one of the symmetric rank 2k operations
+    
+        C := alpha*A*B**H + conjg( alpha )*B*A**H + beta*C,
+    
+    or
+    
+        C := alpha*A**H*B + conjg( alpha )*B**H*A + beta*C,
+    
+    where  alpha and beta  are scalars with  beta  real,  C is an  n by n
+    symmetric matrix and  A and B  are  n by k matrices in the first case
+    and  k by n  matrices in the second case.
     
     Parameters
     ----------
@@ -139,8 +138,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_syr2k_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zsyr2k_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
@@ -180,8 +179,10 @@ magmablas_zsyr2k_batched(
     // Quick return if possible
     if( ( n == 0 ) || 
         ( (alpha == 0 || k == 0) && (beta == 1) ) || 
-        ( batchCount == 0 )
-      ) return;
+        ( batchCount == 0 ))
+    {
+        return;
+    }
     
     if( trans == MagmaNoTrans){
         magmablas_zsyrk_internal_batched(uplo, MagmaNoTrans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, batchCount, queue );
@@ -191,5 +192,3 @@ magmablas_zsyr2k_batched(
         magmablas_zsyrk_internal_batched(uplo, MagmaTrans, n, k, alpha, dB_array, lddb, dA_array, ldda, c_one, dC_array, lddc, batchCount, queue );
     }
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////

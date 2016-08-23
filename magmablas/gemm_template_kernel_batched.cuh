@@ -13,13 +13,13 @@
 #ifndef GEMM_TEMPLATE_KERNEL_BATCHED_CUH
 #define GEMM_TEMPLATE_KERNEL_BATCHED_CUH
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "gemm_template_device_defs.cuh"
 #include "gemm_template_device.cuh"
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+/******************************************************************************/
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -29,7 +29,9 @@ void gemm_template_batched_nn_kernel(
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC )
 {
     const int batchid = blockIdx.z;
     
@@ -43,8 +45,9 @@ void gemm_template_batched_nn_kernel(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+/******************************************************************************/
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -54,7 +57,9 @@ void gemm_template_batched_nt_kernel(
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC )
 {
     const int batchid = blockIdx.z;
     
@@ -68,8 +73,9 @@ void gemm_template_batched_nt_kernel(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+/******************************************************************************/
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -79,7 +85,9 @@ void gemm_template_batched_tn_kernel(
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC )
 {
     const int batchid = blockIdx.z;
     
@@ -93,8 +101,9 @@ void gemm_template_batched_tn_kernel(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+/******************************************************************************/
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -104,7 +113,9 @@ void gemm_template_batched_tt_kernel(
     T const * const * Barray, int LDB,
     T**       Carray, int LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC )
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC )
 {
     const int batchid = blockIdx.z;
     
@@ -116,12 +127,13 @@ void gemm_template_batched_tt_kernel(
           Carray[batchid] + LDC *  coffC + roffC, LDC, 
           alpha, beta );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 // kernel wrappers
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // NN 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,  
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,  
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void gemm_template_batched_nn(
@@ -130,7 +142,9 @@ void gemm_template_batched_nn(
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -142,10 +156,10 @@ void gemm_template_batched_nn(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 // NT, NC 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void gemm_template_batched_nt(
@@ -154,7 +168,9 @@ void gemm_template_batched_nt(
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta,
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -166,10 +182,10 @@ void gemm_template_batched_nt(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 // TN, CN 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void gemm_template_batched_tn(
@@ -178,7 +194,9 @@ void gemm_template_batched_tn(
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);
@@ -190,10 +208,10 @@ void gemm_template_batched_tn(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 // TT, TC, CT, CC
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,
+template <typename T, const int DIM_X, const int DIM_Y,
+         const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void gemm_template_batched_tt(
@@ -202,7 +220,9 @@ void gemm_template_batched_tt(
     T const * const * dB_array, magma_int_t lddb,
     T**       dC_array, magma_int_t lddc,
     T alpha, T beta,
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 dimBlock(DIM_X, DIM_Y);

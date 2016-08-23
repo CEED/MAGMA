@@ -9,14 +9,13 @@
        @author Azzam Haidar
        @author Ahmad Abdelfattah
 */
-
 #ifndef GEMM_TEMPLATE_KERNEL_VBATCHED_CUH
 #define GEMM_TEMPLATE_KERNEL_VBATCHED_CUH
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "gemm_template_device_defs.cuh"
 #include "gemm_template_device.cuh"
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -27,7 +26,9 @@ void gemm_template_vbatched_nn_kernel(
     T const * const * Barray, magma_int_t* LDB,
     T**       Carray, magma_int_t* LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC, 
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC, 
     int specM, int specN, int specK)
 {
     const int batchid = blockIdx.z;
@@ -59,7 +60,9 @@ void gemm_template_vbatched_nn_kernel(
       Carray[batchid] + (int)LDC[batchid] * coffC + roffC, (int)LDC[batchid], 
       alpha, beta );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -70,7 +73,9 @@ void gemm_template_vbatched_nt_kernel(
     T const * const * Barray, magma_int_t* LDB,
     T**       Carray, magma_int_t* LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC, 
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC, 
     int specM, int specN, int specK)
 {
     const int batchid = blockIdx.z;
@@ -102,7 +107,9 @@ void gemm_template_vbatched_nt_kernel(
       Carray[batchid] + (int)LDC[batchid] * coffC + roffC, (int)LDC[batchid], 
       alpha, beta );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -113,7 +120,9 @@ void gemm_template_vbatched_tn_kernel(
     T const * const * Barray, magma_int_t* LDB,
     T**       Carray, magma_int_t* LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC, 
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC, 
     int specM, int specN, int specK)
 {
     const int batchid = blockIdx.z;
@@ -145,7 +154,9 @@ void gemm_template_vbatched_tn_kernel(
       Carray[batchid] + (int)LDC[batchid] * coffC + roffC, (int)LDC[batchid], 
       alpha, beta );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -156,7 +167,9 @@ void gemm_template_vbatched_tt_kernel(
     T const * const * Barray, magma_int_t* LDB,
     T**       Carray, magma_int_t* LDC,
     T alpha, T beta, 
-    int roffA, int coffA, int roffB, int coffB, int roffC, int coffC, 
+    int roffA, int coffA,
+    int roffB, int coffB,
+    int roffC, int coffC, 
     int specM, int specN, int specK)
 {
     const int batchid = blockIdx.z;
@@ -188,11 +201,11 @@ void gemm_template_vbatched_tt_kernel(
       Carray[batchid] + (int)LDC[batchid] * coffC + roffC, (int)LDC[batchid], 
       alpha, beta );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 // kernel wrappers
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // NN 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,  
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -203,7 +216,9 @@ void gemm_template_vbatched_nn(
     T**       dC_array, magma_int_t* lddc,
     T alpha, T beta,
     magma_int_t max_m, magma_int_t max_n, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t specM, magma_int_t specN, magma_int_t specK, 
     magma_int_t batchCount, magma_queue_t queue)
 {
@@ -212,9 +227,10 @@ void gemm_template_vbatched_nn(
     gemm_template_vbatched_nn_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue->cuda_stream()>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC, specM, specN, specK);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 // NT, NC 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -225,7 +241,9 @@ void gemm_template_vbatched_nt(
     T**       dC_array, magma_int_t* lddc,
     T alpha, T beta,
     magma_int_t max_m, magma_int_t max_n, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t specM, magma_int_t specN, magma_int_t specK, 
     magma_int_t batchCount, magma_queue_t queue)
 {
@@ -234,9 +252,10 @@ void gemm_template_vbatched_nt(
     gemm_template_vbatched_nt_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue->cuda_stream()>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC, specM, specN, specK);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 // TN, CN 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -247,7 +266,9 @@ void gemm_template_vbatched_tn(
     T**       dC_array, magma_int_t* lddc,
     T alpha, T beta,
     magma_int_t max_m, magma_int_t max_n, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t specM, magma_int_t specN, magma_int_t specK, 
     magma_int_t batchCount, magma_queue_t queue)
 {
@@ -256,9 +277,10 @@ void gemm_template_vbatched_tn(
     gemm_template_vbatched_tn_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue->cuda_stream()>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC, specM, specN, specK);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 // TT, TC, CT, CC
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec,
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -269,7 +291,9 @@ void gemm_template_vbatched_tt(
     T**       dC_array, magma_int_t* lddc,
     T alpha, T beta,
     magma_int_t max_m, magma_int_t max_n, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC, 
     magma_int_t specM, magma_int_t specN, magma_int_t specK, 
     magma_int_t batchCount, magma_queue_t queue)
 {
@@ -278,5 +302,5 @@ void gemm_template_vbatched_tt(
     gemm_template_vbatched_tt_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue->cuda_stream()>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, roffA, coffA, roffB, coffB, roffC, coffC, specM, specN, specK);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #endif //GEMM_TEMPLATE_KERNEL_VBATCHED_CUH

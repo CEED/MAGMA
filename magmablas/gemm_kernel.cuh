@@ -11,7 +11,7 @@
        See [zcds]gemm_fermi.cu for description of related files.
 */
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 extern "C" static __global__
 void gemm_kernel_name(precision)(
     int M, int N, int K,

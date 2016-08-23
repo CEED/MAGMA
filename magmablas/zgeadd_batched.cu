@@ -12,7 +12,8 @@
 
 #define NB 64
 
-/* =====================================================================
+/******************************************************************************/
+/*
     Batches zlacpy of multiple arrays;
     y-dimension of grid is different arrays,
     x-dimension of grid is blocks for each array.
@@ -49,8 +50,7 @@ zgeadd_batched_kernel(
 }
 
 
-/* ===================================================================== */
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEADD adds two sets of matrices, dAarray[i] = alpha*dAarray[i] + dBarray[i],
@@ -98,8 +98,8 @@ zgeadd_batched_kernel(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux2
-    ********************************************************************/
+    @ingroup magma_geadd_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zgeadd_batched(
     magma_int_t m, magma_int_t n,

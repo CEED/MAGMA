@@ -28,8 +28,7 @@
 
 #define PRECISION_z
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEMM performs one of the matrix-matrix operations
@@ -144,9 +143,8 @@
     queue   magma_queue_t
             Queue to execute in.
     
-    @ingroup magma_zblas3
-    ********************************************************************/
-///////////////////////////////////////////////////////////////////////////////////////////////////
+    @ingroup magma_gemm_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zgemm_batched( magma_trans_t transA, magma_trans_t transB, 
                      magma_int_t m, magma_int_t n, magma_int_t k,
@@ -165,7 +163,9 @@ magmablas_zgemm_batched( magma_trans_t transA, magma_trans_t transB,
                 0, 0, 0, 0, 0, 0, 
                 batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magma_zgemm_batched( magma_trans_t transA, magma_trans_t transB, 
                      magma_int_t m, magma_int_t n, magma_int_t k,
@@ -195,4 +195,3 @@ magma_zgemm_batched( magma_trans_t transA, magma_trans_t transB,
                 batchCount, queue );
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

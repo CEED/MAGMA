@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -26,7 +24,7 @@
 
 #define version(s,v) s ## _V_ ## v
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEMM performs one of the matrix-matrix operations
@@ -82,7 +80,7 @@
             On entry, ALPHA specifies the scalar alpha.
     
     @param[in]
-    dA_array      Array of pointers, dimension (batchCount). 
+    dA_array      Array of pointers, dimension (batchCount).
              Each is a COMPLEX_16 array A of DIMENSION ( ldda, ka ), where ka is
              k  when  transA = MagmaNoTrans,  and is  m  otherwise.
              Before entry with  transA = MagmaNoTrans,  the leading  m by k
@@ -141,18 +139,20 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_gemm_batched
+*******************************************************************************/
 void
 magmablas_zgemm_batched_core(
-    magma_trans_t transA, magma_trans_t transB, 
+    magma_trans_t transA, magma_trans_t transB,
     magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
     magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
     magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
     magmaDoubleComplex beta,
-    magmaDoubleComplex **dC_array, magma_int_t lddc, 
-    magma_int_t roffA, magma_int_t coffA, magma_int_t roffB, magma_int_t coffB, magma_int_t roffC, magma_int_t coffC, 
+    magmaDoubleComplex **dC_array, magma_int_t lddc,
+    magma_int_t roffA, magma_int_t coffA,
+    magma_int_t roffB, magma_int_t coffB,
+    magma_int_t roffC, magma_int_t coffC,
     magma_int_t batchCount, magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -283,4 +283,3 @@ magmablas_zgemm_batched_core(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

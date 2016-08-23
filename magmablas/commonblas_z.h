@@ -15,9 +15,8 @@
 extern "C" {
 #endif
 
-/* ======================================================================
- * Internal prototypes
- */
+// =============================================================================
+// Internal prototypes
 
 // Tesla GEMM kernels
 #define MAGMABLAS_ZGEMM( name ) \

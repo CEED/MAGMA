@@ -64,7 +64,7 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLASCL2 scales the M by N complex matrix A by the real diagonal matrix dD.
@@ -110,8 +110,9 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux2
-    ********************************************************************/
+    @see magma_zlascl_diag 
+    @ingroup magma_lascl_diag
+*******************************************************************************/
 extern "C" void
 magmablas_zlascl2_q(
     magma_type_t type, magma_int_t m, magma_int_t n,

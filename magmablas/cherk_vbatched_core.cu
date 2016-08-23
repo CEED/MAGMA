@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -28,6 +26,7 @@
 
 #define version(s,v) s ## _V_ ## v
 
+/******************************************************************************/
 template<int CONJ>
 void
 magmablas_csyrkherk_vbatched(
@@ -90,7 +89,9 @@ magmablas_csyrkherk_vbatched(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_csyrk_internal_vbatched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -105,7 +106,9 @@ magmablas_csyrk_internal_vbatched(
 {
     magmablas_csyrkherk_vbatched<0>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_cherk_internal_vbatched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -120,19 +123,20 @@ magmablas_cherk_internal_vbatched(
 {
     magmablas_csyrkherk_vbatched<1>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
-    CHERK performs one of the Hermitian rank k operations
+    CSYRK performs one of the symmetric rank k operations
 
-    C := alpha*A*A**H + beta*C,
+    C := alpha*A*A^T + beta*C,
 
     or
 
-    C := alpha*A**H*A + beta*C,
+    C := alpha*A^T*A + beta*C,
 
-    where alpha and beta are real scalars, C is an n by n Hermitian
+    where alpha and beta are real scalars, C is an n by n symmetric
     matrix and A is an n by k matrix in the first case and a k by n
     matrix in the second case.
     
@@ -141,24 +145,24 @@ magmablas_cherk_internal_vbatched(
 
     @param[in]
     uplo    magma_uplo_t.
-           On entry, uplo specifies whether the upper or lower
-           triangular part of the array C is to be referenced as
-           follows:
-
-           uplo = MagmaUpper Only the upper triangular part of C
-           is to be referenced.
-
-           uplo = MagmaLower Only the lower triangular part of C
-           is to be referenced.
+            On entry, uplo specifies whether the upper or lower
+            triangular part of the array C is to be referenced as
+            follows:
+            
+            uplo = MagmaUpper Only the upper triangular part of C
+            is to be referenced.
+            
+            uplo = MagmaLower Only the lower triangular part of C
+            is to be referenced.
     
     @param[in]
     trans   magma_trans_t.
             On entry, trans specifies the operation to be performed as
             follows:
 
-            trans = MagmaNoTrans C := alpha*A*A**H + beta*C.
+            trans = MagmaNoTrans,   C := alpha*A*A^T + beta*C.
 
-            trans = MagmaConjTrans C := alpha*A**H*A + beta*C.
+            trans = MagmaConjTrans, C := alpha*A^T*A + beta*C.
 
     @param[in]
     n       INTEGER.
@@ -173,7 +177,7 @@ magmablas_cherk_internal_vbatched(
             matrix A. K must be at least zero.
 
     @param[in]
-    alpha   REAL
+    alpha   REAL  
             On entry, ALPHA specifies the scalar alpha.
     
     @param[in]
@@ -200,13 +204,13 @@ magmablas_cherk_internal_vbatched(
     dC      COMPLEX array of DIMENSION ( lddc, n ).
             Before entry with uplo = MagmaUpper, the leading n by n
             upper triangular part of the array C must contain the upper
-            triangular part of the Hermitian matrix and the strictly
+            triangular part of the symmetric matrix and the strictly
             lower triangular part of C is not referenced. On exit, the
             upper triangular part of the array C is overwritten by the
             upper triangular part of the updated matrix.
             Before entry with uplo = MagmaLower, the leading n by n
             lower triangular part of the array C must contain the lower
-            triangular part of the Hermitian matrix and the strictly
+            triangular part of the symmetric matrix and the strictly
             upper triangular part of C is not referenced. On exit, the
             lower triangular part of the array C is overwritten by the
             lower triangular part of the updated matrix.
@@ -219,8 +223,17 @@ magmablas_cherk_internal_vbatched(
             On entry, lddc specifies the first dimension of dC as declared
             in  the  calling  (sub)  program.   lddc  must  be  at  least
             max( 1, m ).
-    @ingroup magma_cblas3
-    ********************************************************************/
+
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_syrk_batched
+*******************************************************************************/
 extern "C" void
 magmablas_csyrk_vbatched_max_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -234,7 +247,9 @@ magmablas_csyrk_vbatched_max_nocheck(
 {
     magmablas_csyrk_internal_vbatched(uplo, trans, n, k, alpha, dA_array, ldda, dA_array, ldda, beta, dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_cherk_vbatched_max_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -248,4 +263,3 @@ magmablas_cherk_vbatched_max_nocheck(
 {
     magmablas_cherk_internal_vbatched(uplo, trans, n, k, MAGMA_C_MAKE(alpha, 0.), dA_array, ldda, dA_array, ldda, MAGMA_C_MAKE(beta, 0.), dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -27,6 +25,8 @@
 
 #define version(s,v) s ## _V_ ## v
 
+
+/******************************************************************************/
 // template to support cherk and csyrk
 template<int CONJ>
 void
@@ -89,7 +89,9 @@ magmablas_csyrkherk_batched(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_csyrk_internal_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -103,7 +105,9 @@ magmablas_csyrk_internal_batched(
 {
     magmablas_csyrkherk_batched<0>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_cherk_internal_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -117,8 +121,9 @@ magmablas_cherk_internal_batched(
 {
     magmablas_csyrkherk_batched<1>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     CHERK performs one of the Hermitian rank k operations
@@ -227,8 +232,8 @@ magmablas_cherk_internal_batched(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_cblas3
-    ********************************************************************/
+    @ingroup magma_syrk_batched
+*******************************************************************************/
 extern "C" void
 magmablas_csyrk_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -271,7 +276,9 @@ magmablas_csyrk_batched(
 
     magmablas_csyrk_internal_batched(uplo, trans, n, k, alpha, dA_array, ldda, dA_array, ldda, beta, dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_cherk_batched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -314,4 +321,3 @@ magmablas_cherk_batched(
 
     magmablas_cherk_internal_batched(uplo, trans, n, k, MAGMA_C_MAKE(alpha, 0.), dA_array, ldda, dA_array, ldda, MAGMA_C_MAKE(beta, 0.), dC_array, lddc, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,8 +17,7 @@
 #define COMPLEX
 
 
-//==============================================================================
-
+/******************************************************************************/
 __global__
 void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex* dx,
                                magmaDoubleComplex *dtau, double *dxnorm,
@@ -92,9 +91,8 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
     }
 }
 
-//==============================================================================
 
-/*
+/***************************************************************************//**
     Generates Householder elementary reflector H = I - tau v v^T to reduce
         H [ dx0 ] = [ beta ]
           [ dx  ]   [ 0    ]
@@ -105,7 +103,7 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
     
     The difference with LAPACK's zlarfg is that the norm of dx, and hance beta,
     are computed outside the routine and passed to it in dxnorm (array on the GPU).
-*/
+*******************************************************************************/
 extern "C" void
 magma_zlarfgx_gpu_q(
     magma_int_t n,
@@ -125,9 +123,7 @@ magma_zlarfgx_gpu_q(
 }
 
 
-//==============================================================================
-
-/*
+/***************************************************************************//**
     Generates Householder elementary reflector H = I - tau v v^T to reduce
         H [ dx0 ] = [ beta ]
           [ dx  ]   [ 0    ]
@@ -138,7 +134,7 @@ magma_zlarfgx_gpu_q(
     
     The difference with LAPACK's zlarfg is that the norm of dx, and hance beta,
     are computed outside the routine and passed to it in dxnorm (array on the GPU).
-*/
+*******************************************************************************/
 extern "C" void
 magma_zlarfgtx_gpu_q(
     magma_int_t n,
@@ -171,4 +167,3 @@ magma_zlarfgtx_gpu_q(
             ( T, ldt, dwork, T+iter*ldt, dtau );
     }
 }
-//==============================================================================

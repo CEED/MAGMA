@@ -15,7 +15,7 @@
 #include "magma_bulge.h"
 //#include "trace.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEMM performs one of the matrix-matrix operations
@@ -129,8 +129,8 @@
             On entry, LDDC specifies the first dimension of C as declared
             in the calling (sub) program. LDDC >= max( 1, m ).
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_hemm
+*******************************************************************************/
 extern "C"
 void magmablas_zhemm_mgpu(
     magma_side_t side, magma_uplo_t uplo, magma_int_t m, magma_int_t n,

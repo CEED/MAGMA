@@ -9,14 +9,13 @@
        @author Azzam Haidar
        @author Ahmad Abdelfattah
 */
-
 #ifndef HERK_TEMPLATE_KERNEL_VBATCHED_CUH
 #define HERK_TEMPLATE_KERNEL_VBATCHED_CUH
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "gemm_template_device_defs.cuh"
 #include "gemm_template_device.cuh"
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -44,7 +43,9 @@ void herk_template_vbatched_nt_kernel(
     gemm_template_device_nt<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
     ( my_N, my_N, (int)K[batchid], Aarray[batchid], (int)LDA[batchid], Barray[batchid], (int)LDB[batchid], Carray[batchid], (int)LDC[batchid], alpha, beta );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -71,11 +72,11 @@ void herk_template_vbatched_tn_kernel(
     gemm_template_device_tn<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
     ( my_N, my_N, (int)K[batchid], Aarray[batchid], (int)LDA[batchid], Barray[batchid], (int)LDB[batchid], Carray[batchid], (int)LDC[batchid], alpha, beta );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 // kernel wrappers
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // NT, NC 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -93,9 +94,10 @@ void herk_template_vbatched_nt(
     herk_template_vbatched_nt_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue->cuda_stream()>>>(uplo, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 // TN, CN 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
@@ -113,6 +115,5 @@ void herk_template_vbatched_tn(
     herk_template_vbatched_tn_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue->cuda_stream()>>>(uplo, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc);
 }
-
 
 #endif //HERK_TEMPLATE_KERNEL_VBATCHED_CUH

@@ -10,7 +10,8 @@
 
        See [zcds]zherk_fermi_batched.cu for description of related files.
 */
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************************/
 extern "C" static  __global__
 void batched_herk_kernel_name(precision)(
     magma_uplo_t uplo, int N, int K,

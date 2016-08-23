@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -26,6 +24,7 @@
 #include "gemm_config/zgemm_param_tn.h"
 #include "gemm_config/zgemm_param_tt.h"
 
+/******************************************************************************/
 #define version(s,v) s ## _V_ ## v
 template<int CONJ>
 void
@@ -76,7 +75,9 @@ magmablas_zsyrkherk_vbatched(
         default:; // propose something
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zherk_internal_vbatched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -91,7 +92,9 @@ magmablas_zherk_internal_vbatched(
 {
     magmablas_zsyrkherk_vbatched<1>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zsyrk_internal_vbatched(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -106,7 +109,9 @@ magmablas_zsyrk_internal_vbatched(
 {
     magmablas_zsyrkherk_vbatched<0>(uplo, trans, n, k, alpha, dA_array, ldda, dB_array, lddb, beta, dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void 
 magmablas_zsyrk_vbatched_max_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -120,7 +125,9 @@ magmablas_zsyrk_vbatched_max_nocheck(
 {
     magmablas_zsyrk_internal_vbatched(uplo, trans, n, k, alpha, dA_array, ldda, dA_array, ldda, beta, dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void 
 magmablas_zherk_vbatched_max_nocheck(
     magma_uplo_t uplo, magma_trans_t trans, 
@@ -134,4 +141,3 @@ magmablas_zherk_vbatched_max_nocheck(
 {
     magmablas_zherk_internal_vbatched(uplo, trans, n, k, MAGMA_Z_MAKE(alpha, 0.), dA_array, ldda, dA_array, ldda, MAGMA_Z_MAKE(beta, 0.), dC_array, lddc, max_n, max_k, batchCount, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -65,7 +65,7 @@ zclaswp_inv_kernel(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     Row i of  A is cast to single precision in row ipiv[i] of SA (incx > 0), or
@@ -111,8 +111,8 @@ zclaswp_inv_kernel(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zaux2
-    ********************************************************************/
+    @ingroup magma_laswp
+*******************************************************************************/
 extern "C" void
 magmablas_zclaswp_q(
     magma_int_t n,

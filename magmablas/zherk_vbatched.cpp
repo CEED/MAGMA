@@ -14,8 +14,9 @@
 #include "magma_internal.h"
 #include "commonblas_z.h"
 
-#define PRECISION_z
+#define COMPLEX
 
+/******************************************************************************/
 extern "C" void
 magmablas_zherk_vbatched_max(
         magma_uplo_t uplo, magma_trans_t trans, 
@@ -29,7 +30,7 @@ magmablas_zherk_vbatched_max(
 {
     magma_int_t info = 0;
     
-    #if defined(PRECISION_c) || defined(PRECISION_z)
+    #ifdef COMPLEX
     info =  magma_herk_vbatched_checker(    uplo, trans, n, k, ldda, lddc, batchCount, queue );
     #else
     info =  magma_syrk_vbatched_checker( 0, uplo, trans, n, k, ldda, lddc, batchCount, queue );
@@ -47,7 +48,9 @@ magmablas_zherk_vbatched_max(
             batchCount, 
             max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zherk_vbatched_nocheck(
         magma_uplo_t uplo, magma_trans_t trans, 
@@ -72,8 +75,9 @@ magmablas_zherk_vbatched_nocheck(
             batchCount, 
             max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     ZHERK performs one of the Hermitian rank k operations
@@ -187,8 +191,8 @@ magmablas_zherk_vbatched_nocheck(
     queue   magma_queue_t
             Queue to execute in.
     
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_herk_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zherk_vbatched(
         magma_uplo_t uplo, magma_trans_t trans, 
@@ -201,7 +205,7 @@ magmablas_zherk_vbatched(
 {
     magma_int_t info = 0;
     
-    #if defined(PRECISION_c) || defined(PRECISION_z)
+    #ifdef COMPLEX
     info =  magma_herk_vbatched_checker(    uplo, trans, n, k, ldda, lddc, batchCount, queue );
     #else
     info =  magma_syrk_vbatched_checker( 0, uplo, trans, n, k, ldda, lddc, batchCount, queue );
@@ -225,4 +229,3 @@ magmablas_zherk_vbatched(
             batchCount, 
             max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////

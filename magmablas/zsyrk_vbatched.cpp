@@ -9,15 +9,11 @@
        
        @author Ahmad Abdelfattah
 */
-
-#define PRECISION_z
-
-#if defined(PRECISION_z) || defined(PRECISION_c)
 #include "cublas_v2.h"
 #include "magma_internal.h"
 #include "commonblas_z.h"
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 extern "C" void
 magmablas_zsyrk_vbatched_max(
         magma_uplo_t uplo, magma_trans_t trans, 
@@ -45,7 +41,9 @@ magmablas_zsyrk_vbatched_max(
             batchCount, 
             max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" void
 magmablas_zsyrk_vbatched_nocheck(
         magma_uplo_t uplo, magma_trans_t trans, 
@@ -70,8 +68,9 @@ magmablas_zsyrk_vbatched_nocheck(
             batchCount, 
             max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
+
+
+/***************************************************************************//**
     Purpose
     -------
     ZSYRK  performs one of the symmetric rank k operations
@@ -85,20 +84,8 @@ magmablas_zsyrk_vbatched_nocheck(
     and  A  is an  n by k  matrix in the first case and a  k by n  matrix
     in the second case.
     
-    UPLO is CHARACTER*1
-           On  entry,   UPLO  specifies  whether  the  upper  or  lower
-           triangular  part  of the  array  C  is to be  referenced  as
-           follows:
-
-              UPLO = MagmaUpper   Only the  upper triangular part of  C
-                                  is to be referenced.
-
-              UPLO = MagmaLower   Only the  lower triangular part of  C
-                                  is to be referenced.
-    
     Parameters
     ----------
-
     @param[in]
     uplo    magma_uplo_t.
            On entry, uplo specifies whether the upper or lower
@@ -195,8 +182,8 @@ magmablas_zsyrk_vbatched_nocheck(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_syrk_batched
+*******************************************************************************/
 extern "C" void
 magmablas_zsyrk_vbatched(
         magma_uplo_t uplo, magma_trans_t trans, 
@@ -229,5 +216,3 @@ magmablas_zsyrk_vbatched(
             batchCount, 
             max_n, max_k, queue );
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
-#endif // defined(PRECISION_z) || defined(PRECISION_c)
