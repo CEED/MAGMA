@@ -20,7 +20,7 @@
 
 /***************************************************************************//**
     @return Index of element of vector x having max. absolute value;
-            \f$ \text{argmax}_i\; |x_i| \f$.
+            \f$ \text{argmax}_i\; | real(x_i) | + | imag(x_i) | \f$.
 
     @param[in]
     n       Number of elements in vector x. n >= 0.
@@ -52,7 +52,7 @@ magma_izamax_q(
 
 /***************************************************************************//**
     @return Index of element of vector x having min. absolute value;
-            \f$ \text{argmax}_i\; |x_i| \f$.
+            \f$ \text{argmax}_i\; | real(x_i) | + | imag(x_i) | \f$.
 
     @param[in]
     n       Number of elements in vector x. n >= 0.
@@ -83,7 +83,8 @@ magma_izamin_q(
 
 
 /***************************************************************************//**
-    @return Sum of absolute values of vector x; \f$ \sum_i |x_i| \f$.
+    @return Sum of absolute values of vector x;
+            \f$ \sum_i | real(x_i) | + | imag(x_i) | \f$.
 
     @param[in]
     n       Number of elements in vector x. n >= 0.
