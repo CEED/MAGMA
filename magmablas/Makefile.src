@@ -129,7 +129,6 @@ libmagma_src += \
 	$(cdir)/zpotf2_kernels_old.cu		\
 	$(cdir)/set_pointer.cu			\
 	$(cdir)/zset_pointer.cu			\
-	$(cdir)/zswapdblk_batched.cu		\
 	$(cdir)/dsyrk_batched_core.cu		\
 	$(cdir)/ssyrk_batched_core.cu		\
 	$(cdir)/ztrsm_batched.cpp		\
