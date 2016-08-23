@@ -205,11 +205,7 @@ libmagma_src += \
 
 # symmetric eigenvalues 2-stage
 libmagma_src += \
-	$(cdir)/dbulge_aux.cpp		\
 	$(cdir)/zbulge_applyQ_v2.cpp	\
-	$(cdir)/zbulge_aux.cpp		\
-	$(cdir)/zbulge_kernel.cpp	\
-	$(cdir)/zbulge_kernel_v2.cpp	\
 	$(cdir)/zhetrd_he2hb.cpp	\
 	$(cdir)/zhetrd_hb2st.cpp	\
 	$(cdir)/zbulge_back.cpp		\
