@@ -39,6 +39,10 @@
     @defgroup magma_queue           Queue  management
     @defgroup magma_event           Event  management
     @defgroup magma_error           Error handling
+    @{
+        @defgroup magma_error_codes MAGMA error codes
+    @}
+
     @defgroup magma_util            Miscellaneous utilities
     @{
         @defgroup magma_make_lwork  make_lwork: Round lwork for float
@@ -60,6 +64,7 @@
     @defgroup magma_thread          Thread management
     @defgroup magma_timer           Timer utilities
     @defgroup magma_panel2q         QR panel to q, q to panel
+    @defgroup magma_kernel          GPU Kernels
 @}
 
 
@@ -306,9 +311,10 @@
     @{
         @defgroup group_math            Math functions (sqrt, etc.), O(1) work
         @{
-            @defgroup magma_ceildiv     ceil(a/b) and ceil(a/b)*b
+            @defgroup magma_ceildiv     ceil(x/y) and ceil(x/y)*y
             @defgroup magma_sqrt        sqrt
             @defgroup magma_nan_inf     NAN and INF checks
+            @defgroup magma_complex     complex number support
         @}
 
         @defgroup group_blas1           Level 1: vectors operations, O(n) work
@@ -958,9 +964,9 @@
 
             @defgroup magma_unmhr       or/unmhr: Multiply by Q from Hessenberg reduction
                 @defgroup magma_lahrd   lahrd: Partial factorization; used by gehrd
-            
+
                 @defgroup magma_laex2   laex2: Merge two sets of eigenvalues.
-                
+
             @defgroup magma_larf        larf:  Apply Householder reflector to general matrix
             @defgroup magma_larft       larft: Generate T matrix for block of Householder reflectors
 
@@ -969,7 +975,7 @@
 
             @defgroup magma_heev        sy/heev:   Solves using QR iteration (driver)
             @defgroup magma_heevrx      sy/heevrx: Solves using MRRR (expert)
-            
+
             @defgroup magma_hegv        sy/hegv:   Solves using QR iteration (driver)
             @defgroup magma_hegvrx      sy/hegvrx: Solves using MRRR (expert)
 

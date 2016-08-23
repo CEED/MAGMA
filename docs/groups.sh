@@ -10,8 +10,8 @@
 
 cd .. && make generate && cd docs
 
-grep -h '@ingroup' ../*/*.{h,c,cu,cpp} ../sparse-iter/*/*.{h,cu,cpp} | \
-	perl -pe 's/^ *\*//;  s/^ +//;  s/\@ingroup/\@group/;' | \
+egrep -h '@(addto|in)group' ../*/*.{h,c,cu,cpp} ../sparse-iter/*/*.{h,cu,cpp} | \
+	perl -pe 's#/// +##;  s/^ *\*//;  s/^ +//;  s/\@(addto|in)group/\@group/;' | \
 	sort --unique > ingroup
 
 egrep -h '^ *@defgroup' groups.dox | \
