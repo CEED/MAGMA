@@ -70,8 +70,16 @@
             Note: unlike the CPU interface of this routine, the GPU interface
             does not support a workspace query.
 
+*/
+#ifdef COMPLEX
+/**
+
     @param
     rwork   (workspace, for [cz]geqp3 only) DOUBLE PRECISION array, dimension (2*N)
+
+*/
+#endif // COMPLEX
+/**
 
     @param[out]
     info    INTEGER

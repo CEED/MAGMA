@@ -121,6 +121,10 @@
             the WORK, RWORK and IWORK arrays, and no error message
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
+*/
+#ifdef COMPLEX
+/**
+
     @param[out]
     rwork   (workspace) DOUBLE PRECISION array,
                                            dimension (LRWORK)
@@ -138,6 +142,10 @@
             and IWORK arrays, returns these values as the first entries
             of the WORK, RWORK and IWORK arrays, and no error message
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
+
+*/
+#endif
+/**
 
     @param[out]
     iwork   (workspace) INTEGER array, dimension (MAX(1,LIWORK))

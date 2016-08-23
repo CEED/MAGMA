@@ -74,8 +74,16 @@
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
 
+*/
+#ifdef COMPLEX
+/**
+
     @param
     rwork   (workspace, for [cz]geqp3 only) DOUBLE PRECISION array, dimension (2*N)
+
+*/
+#endif
+/**
 
     @param[out]
     info    INTEGER
