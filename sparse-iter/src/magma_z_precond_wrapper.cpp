@@ -163,8 +163,9 @@ magma_z_precondsetup(
     }
     // ILU and related
     else if ( precond->solver == Magma_ILU ) {
-        if( precond->trisolver == Magma_ISAI 
-                        || precond->trisolver == Magma_JACOBI ){
+        if ( precond->trisolver == Magma_ISAI ||
+             precond->trisolver == Magma_JACOBI )
+        {
             info = magma_zcumilusetup( A, precond, queue );
             info = magma_ziluisaisetup( A, b, precond, queue );
         } else {
@@ -173,16 +174,18 @@ magma_z_precondsetup(
     }
     else if ( precond->solver == Magma_PARILU ) {
         info = magma_ziterilusetup( A, b, precond, queue );
-        if( precond->trisolver == Magma_ISAI 
-                    || precond->trisolver == Magma_JACOBI ){
+        if ( precond->trisolver == Magma_ISAI ||
+             precond->trisolver == Magma_JACOBI )
+        {
             info = magma_ziluisaisetup( A, b, precond, queue );
         }
     }
     else if ( precond->solver == Magma_PARILUT ) {
         #ifdef _OPENMP
             info = magma_zparilutsetup( A, b, precond, queue );
-            if( precond->trisolver == Magma_ISAI 
-                        || precond->trisolver == Magma_JACOBI ){
+            if ( precond->trisolver == Magma_ISAI  ||
+                 precond->trisolver == Magma_JACOBI )
+            {
                 info = magma_ziluisaisetup( A, b, precond, queue );
             }
             precond->solver = Magma_PARILU; // handle as PARILU
@@ -197,8 +200,9 @@ magma_z_precondsetup(
     }
     // symmetric: Cholesky variant
     else if ( precond->solver == Magma_ICC ) {
-        if( precond->trisolver == Magma_ISAI 
-                        || precond->trisolver == Magma_JACOBI ){
+        if ( precond->trisolver == Magma_ISAI  ||
+             precond->trisolver == Magma_JACOBI )
+        {
             info = magma_zicisaisetup( A, b, precond, queue );
         } else {
             info = magma_zcumiccsetup( A, precond, queue );
@@ -241,8 +245,9 @@ magma_z_precondsetup(
             precond->solver == Magma_PARIC ) ) {  // also prepare the transpose
         info = magma_zcumilusetup_transpose( A, precond, queue );
         if( info == 0 && 
-            ( precond->trisolver == Magma_ISAI 
-                || precond->trisolver == Magma_JACOBI ) ){
+            ( precond->trisolver == Magma_ISAI  ||
+              precond->trisolver == Magma_JACOBI ) )
+        {
                 // simple solution: copy
                 info = info + magma_zmtranspose( precond->LD, &precond->LDT, queue );
                 info = info + magma_zmtranspose( precond->UD, &precond->UDT, queue );

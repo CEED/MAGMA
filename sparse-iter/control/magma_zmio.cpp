@@ -138,10 +138,12 @@ magma_int_t read_z_csr_from_mtx(
         goto cleanup;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode)
-           || mm_is_pattern(matcode) || mm_is_complex(matcode) )
-             && mm_is_coordinate(matcode)
-             && mm_is_sparse(matcode) ) )
+    if ( ! ( ( mm_is_real(matcode)    ||
+               mm_is_integer(matcode) ||
+               mm_is_pattern(matcode) ||
+               mm_is_complex(matcode) ) &&
+             mm_is_coordinate(matcode)  &&
+             mm_is_sparse(matcode) ) )
     {
         mm_snprintf_typecode( buffer, sizeof(buffer), matcode );
         printf("\n%% Sorry, MAGMA-sparse does not support Market Market type: [%s]\n", buffer );
@@ -985,10 +987,12 @@ magma_z_csr_mtx(
         goto cleanup;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode)
-           || mm_is_pattern(matcode) || mm_is_complex(matcode) )
-             && mm_is_coordinate(matcode)
-             && mm_is_sparse(matcode) ) )
+    if ( ! ( ( mm_is_real(matcode)    ||
+               mm_is_integer(matcode) ||
+               mm_is_pattern(matcode) ||
+               mm_is_complex(matcode) ) &&
+             mm_is_coordinate(matcode)  &&
+             mm_is_sparse(matcode) ) )
     {
         mm_snprintf_typecode( buffer, sizeof(buffer), matcode );
         printf("\n%% Sorry, MAGMA-sparse does not support Market Market type: [%s]\n", buffer );
@@ -1270,10 +1274,12 @@ magma_z_csr_mtxsymm(
         goto cleanup;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode)
-           || mm_is_pattern(matcode) || mm_is_complex(matcode) )
-             && mm_is_coordinate(matcode)
-             && mm_is_sparse(matcode) ) )
+    if ( ! ( ( mm_is_real(matcode) ||
+               mm_is_integer(matcode) ||
+               mm_is_pattern(matcode) ||
+               mm_is_complex(matcode) ) &&
+             mm_is_coordinate(matcode)  &&
+             mm_is_sparse(matcode) ) )
     {
         mm_snprintf_typecode( buffer, sizeof(buffer), matcode );
         printf("\n%% Sorry, MAGMA-sparse does not support Market Market type: [%s]\n", buffer );

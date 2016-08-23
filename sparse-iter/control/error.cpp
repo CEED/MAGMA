@@ -20,7 +20,7 @@
     
     @return MAGMA error
     
-    @ingroup magma_util
+    @ingroup magma_error_internal
     ********************************************************************/
 extern "C" magma_int_t
 cusparse2magma_error( cusparseStatus_t status )

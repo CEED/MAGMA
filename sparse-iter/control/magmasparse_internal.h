@@ -43,7 +43,8 @@ magma_int_t cusparse2magma_error( cusparseStatus_t status );
             return info;
         }
     
-    @ingroup internal
+    @see CHECK_CUSPARSE
+    @ingroup magma_error_internal
     ********************************************************************/
 #define CHECK( err )             \
     do {                         \
@@ -61,7 +62,7 @@ magma_int_t cusparse2magma_error( cusparseStatus_t status );
     then does goto cleanup.
     
     @see CHECK
-    @ingroup internal
+    @ingroup magma_error_internal
     ********************************************************************/
 #define CHECK_CUSPARSE( err )                   \
     do {                                        \
