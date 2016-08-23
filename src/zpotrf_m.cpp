@@ -15,7 +15,7 @@
 //#include "../testing/flops.h"
 #include "magma_timer.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
@@ -74,8 +74,8 @@
                    positive definite, and the factorization could not be
                    completed.
 
-    @ingroup magma_zposv_comp
-    ********************************************************************/
+    @ingroup magma_potrf
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_m(
     magma_int_t ngpu,

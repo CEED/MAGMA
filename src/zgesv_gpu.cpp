@@ -9,7 +9,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGESV solves a system of linear equations
@@ -62,8 +62,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgesv_driver
-    ********************************************************************/
+    @ingroup magma_gesv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgesv_gpu(
     magma_int_t n, magma_int_t nrhs,

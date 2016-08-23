@@ -11,7 +11,8 @@
 */
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
-/**
+
+/***************************************************************************//**
     Purpose
     -------
     ZGESV solves a system of linear equations
@@ -74,9 +75,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_driver
-    ********************************************************************/
-
+    @ingroup magma_gesv_rbt_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgesv_rbt_batched(
                   magma_int_t n, magma_int_t nrhs,

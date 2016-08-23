@@ -16,7 +16,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLAQPS computes a step of QR factorization with column pivoting
@@ -113,8 +113,8 @@
     lddf    INTEGER
             The leading dimension of the array dF. LDDF >= max(1,N).
 
-    @ingroup magma_zgeqp3_aux
-    ********************************************************************/
+    @ingroup magma_laqps
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zlaqps(
     magma_int_t m, magma_int_t n, magma_int_t offset,

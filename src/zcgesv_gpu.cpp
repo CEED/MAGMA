@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZCGESV computes the solution to a complex system of linear equations
@@ -138,8 +138,8 @@
                   but the factor U is exactly singular, so the solution
                   could not be computed.
 
-    @ingroup magma_zgesv_driver
-    ********************************************************************/
+    @ingroup magma_gesv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zcgesv_gpu(
     magma_trans_t trans, magma_int_t n, magma_int_t nrhs,

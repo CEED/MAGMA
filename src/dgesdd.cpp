@@ -19,7 +19,7 @@
 
 const char* dgesdd_path = "none";
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DGESDD computes the singular value decomposition (SVD) of a real
@@ -183,8 +183,8 @@ const char* dgesdd_path = "none";
     Ming Gu and Huan Ren, Computer Science Division, University of
     California at Berkeley, USA
 
-    @ingroup magma_dgesvd_driver
-    ********************************************************************/
+    @ingroup magma_gesdd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dgesdd(
     magma_vec_t jobz, magma_int_t m, magma_int_t n,

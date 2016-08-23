@@ -16,7 +16,7 @@
 
 #define REAL
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DTREVC3 computes some or all of the right and/or left eigenvectors of
@@ -162,8 +162,8 @@
     magnitude has magnitude 1; here the magnitude of a complex number
     (x,y) is taken to be |x| + |y|.
 
-    @ingroup magma_dgeev_comp
-    ********************************************************************/
+    @ingroup magma_trevc
+*******************************************************************************/
 extern "C"
 magma_int_t magma_dtrevc3(
     magma_side_t side, magma_vec_t howmany,

@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEQRS solves the least squares problem
@@ -84,8 +84,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgels_comp
-    ********************************************************************/
+    @ingroup magma_geqrs
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgeqrs_gpu(
     magma_int_t m, magma_int_t n, magma_int_t nrhs,

@@ -228,8 +228,8 @@ magma_zgetrf_m(
             time_set += timer_stop( time );
     
             timer_start( time );
-            /* == --------------------------------------------------------------- == */
-            /* == loop around the previous big-panels to update the new big-panel == */
+            /* --------------------------------------------------------------- */
+            /* loop around the previous big-panels to update the new big-panel */
             for( offset = 0; offset < min(m,I); offset += NB ) {
                 NBk = min( m-offset, NB );
                 /* start sending the first tile from the previous big-panels to gpus */
@@ -256,7 +256,7 @@ magma_zgetrf_m(
                                         queues[d][1] );
                 }
                 
-                /* == going through each block-column of previous big-panels == */
+                /* going through each block-column of previous big-panels */
                 for( jj=0, ib=offset/nb; jj < NBk; jj += nb, ib++ ) {
                     ii   = offset+jj;
                     rows = maxm - ii;
@@ -359,7 +359,7 @@ magma_zgetrf_m(
 } /* magma_zgetrf_m */
 
 
-// ----------------------------------------------------------------------
+/******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrf_piv(
     magma_int_t m, magma_int_t n, magma_int_t NB,
@@ -398,7 +398,7 @@ magma_zgetrf_piv(
 } /* magma_zgetrf_piv */
 
 
-// ----------------------------------------------------------------------
+/******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrf2_piv(
     magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t end,

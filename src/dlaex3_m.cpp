@@ -27,7 +27,7 @@ magma_int_t magma_get_dlaex3_m_nb() { return 1024; }
 }  // end extern "C"
 #endif
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DLAEX3 finds the roots of the secular equation, as defined by the
@@ -185,8 +185,8 @@ magma_int_t magma_get_dlaex3_m_nb() { return 1024; }
     at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    @ingroup magma_dsyev_aux
-    ********************************************************************/
+    @ingroup magma_laex3
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dlaex3_m(
     magma_int_t ngpu,
@@ -336,9 +336,9 @@ magma_dlaex3_m(
     //
 
 #ifdef _OPENMP
-    /////////////////////////////////////////////////////////////////////////////////
-    //openmp implementation
-    /////////////////////////////////////////////////////////////////////////////////
+    // -------------------------------------------------------------------------
+    // openmp implementation
+    // -------------------------------------------------------------------------
     magma_timer_t time=0;
     timer_start( time );
 
@@ -459,9 +459,9 @@ magma_dlaex3_m(
     timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
 
 #else
-    /////////////////////////////////////////////////////////////////////////////////
+    // -------------------------------------------------------------------------
     // Non openmp implementation
-    /////////////////////////////////////////////////////////////////////////////////
+    // -------------------------------------------------------------------------
     magma_timer_t time=0;
     timer_start( time );
 

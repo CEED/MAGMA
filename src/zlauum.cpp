@@ -13,7 +13,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLAUUM computes the product U * U^H or L^H * L, where the triangular
@@ -56,8 +56,8 @@
       -     = 0: successful exit
       -     < 0: if INFO = -k, the k-th argument had an illegal value
 
-    @ingroup magma_zposv_aux
-    ***************************************************************************/
+    @ingroup magma_lauum
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zlauum(
     magma_uplo_t uplo, magma_int_t n,

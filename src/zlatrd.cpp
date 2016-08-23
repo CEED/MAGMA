@@ -16,7 +16,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLATRD reduces NB rows and columns of a complex Hermitian matrix A to
@@ -166,8 +166,8 @@
     an element of the original matrix that is unchanged, and vi denotes
     an element of the vector defining H(i).
 
-    @ingroup magma_zheev_aux
-    ********************************************************************/
+    @ingroup magma_latrd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zlatrd(
     magma_uplo_t uplo, magma_int_t n, magma_int_t nb,

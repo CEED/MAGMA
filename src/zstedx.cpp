@@ -12,7 +12,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZSTEDX computes some eigenvalues and eigenvectors of a
@@ -127,8 +127,8 @@
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
 
-    @ingroup magma_zheev_comp
-    ********************************************************************/
+    @ingroup magma_stedx
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zstedx(
     magma_range_t range, magma_int_t n, double vl, double vu,

@@ -38,8 +38,8 @@ static void magma_ztile_bulge_computeT_parallel(
     magmaDoubleComplex *T, magma_int_t ldt,
     magma_int_t n, magma_int_t nb, magma_int_t Vblksiz);
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/******************************************************************************/
 typedef struct magma_zbulge_data_s {
     magma_int_t threads_num;
     magma_int_t n;
@@ -59,6 +59,8 @@ typedef struct magma_zbulge_data_s {
     pthread_barrier_t myptbarrier;
 } magma_zbulge_data;
 
+
+/******************************************************************************/
 void magma_zbulge_data_init(
     magma_zbulge_data *zbulge_data_S,
     magma_int_t threads_num, magma_int_t n, magma_int_t nb, magma_int_t nbtiles,
@@ -87,28 +89,33 @@ void magma_zbulge_data_init(
     pthread_barrier_init(&(zbulge_data_S->myptbarrier), NULL, (unsigned) zbulge_data_S->threads_num);
 }
 
+
+/******************************************************************************/
 void magma_zbulge_data_destroy(magma_zbulge_data *zbulge_data_S)
 {
     pthread_barrier_destroy(&(zbulge_data_S->myptbarrier));
 }
 
+
+/******************************************************************************/
 typedef struct magma_zbulge_id_data_s {
     magma_int_t id;
     magma_zbulge_data* data;
 } magma_zbulge_id_data;
 
+
+/******************************************************************************/
 void magma_zbulge_id_data_init(magma_zbulge_id_data *id_data, magma_int_t id, magma_zbulge_data* data)
 {
     id_data->id = id;
     id_data->data = data;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
+/***************************************************************************//**
     Purpose
     -------
-
+    Reduces Hermitian band matrix to real symmetric tridiagonal.
 
     Arguments
     ---------
@@ -176,8 +183,8 @@ void magma_zbulge_id_data_init(magma_zbulge_id_data *id_data, magma_int_t id, ma
             The leading dimension of T.
             LDT > Vblksiz
 
-    @ingroup magma_zheev_2stage
-    ********************************************************************/
+    @ingroup magma_hetrd_hb2st
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_hb2st(
     magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
@@ -308,8 +315,8 @@ magma_zhetrd_hb2st(
     return MAGMA_SUCCESS;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/******************************************************************************/
 static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 {
     magma_int_t my_core_id  = ((magma_zbulge_id_data*)arg) -> id;
@@ -383,8 +390,6 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 #endif
 #endif
 
-
-
     /* compute the Q1 overlapped with the bulge chasing+T.
     * if all_cores_num=1 it call Q1 on GPU and then bulgechasing.
     * otherwise the first thread run Q1 on GPU and
@@ -443,7 +448,8 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
     return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************************/
 #define expertmyss_cond_wait(m, n, val) \
 do { \
     while (prog[(m)] != (val)) { \
@@ -518,9 +524,7 @@ do { \
 } while(0)
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 static void magma_ztile_bulge_parallel(
     magma_int_t my_core_id, magma_int_t cores_num,
     magmaDoubleComplex *A, magma_int_t lda,
@@ -662,11 +666,11 @@ static void magma_ztile_bulge_parallel(
     /* finalize static sched */
     //myss_finalize(); // initialized at top level so freed there
 
-
     magma_free_cpu(work);
 } // END FUNCTION
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/******************************************************************************/
 #define V(m)     &(V[(m)])
 #define TAU(m)   &(TAU[(m)])
 #define T(m)   &(T[(m)])
@@ -696,8 +700,6 @@ static void magma_ztile_bulge_computeT_parallel(
     if (my_core_id == 0)
         printf("  COMPUTE T parallel threads %lld with  n %lld   nb %lld   Vblksiz %lld\n", (long long) cores_num, (long long) n, (long long) nb, (long long) Vblksiz );
     #endif
-
-
 
     /*========================================
      * compute the T's in parallel.
@@ -741,7 +743,7 @@ static void magma_ztile_bulge_computeT_parallel(
         }
     }
 }
+
 #undef V
 #undef TAU
 #undef T
-////////////////////////////////////////////////////////////////////////////////////////////////////

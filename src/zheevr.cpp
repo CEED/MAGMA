@@ -12,7 +12,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEEVR computes selected eigenvalues and, optionally, eigenvectors
@@ -232,8 +232,8 @@
        Ken Stanley, Computer Science Division, University of
          California at Berkeley, USA
 
-    @ingroup magma_zheev_driver
-    ********************************************************************/
+    @ingroup magma_heevr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zheevr(
     magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,

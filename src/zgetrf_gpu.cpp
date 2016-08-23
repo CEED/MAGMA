@@ -13,7 +13,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRF computes an LU factorization of a general M-by-N matrix A
@@ -62,8 +62,8 @@
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrf
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrf_gpu(
     magma_int_t m, magma_int_t n,

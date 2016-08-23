@@ -16,7 +16,7 @@
 
 #define FAST_HEMV
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHETRD reduces a complex Hermitian matrix A to real symmetric
@@ -134,8 +134,8 @@
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
 
-    @ingroup magma_zheev_comp
-    ********************************************************************/
+    @ingroup magma_hetrd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhetrd(
     magma_uplo_t uplo, magma_int_t n,

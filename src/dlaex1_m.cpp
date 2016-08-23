@@ -11,7 +11,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DLAEX1 computes the updated eigensystem of a diagonal
@@ -139,8 +139,8 @@
        at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    @ingroup magma_dsyev_aux
-    ********************************************************************/
+    @ingroup magma_laex1
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dlaex1_m(
     magma_int_t ngpu,

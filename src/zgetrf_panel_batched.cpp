@@ -10,9 +10,9 @@
 
    @precisions normal z -> s d c
 */
-
 #include "magma_internal.h"
-/**
+
+/***************************************************************************//**
     Purpose
     -------
     This is an internal routine that might have many assumption.
@@ -122,8 +122,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrf_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrf_recpanel_batched(
     magma_int_t m, magma_int_t n, magma_int_t min_recpnb,    
@@ -241,6 +241,3 @@ magma_zgetrf_recpanel_batched(
     magma_free(dipiv_displ);
     return 0;
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////

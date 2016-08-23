@@ -20,7 +20,7 @@ const char* zgesvd_path = "none";
 // Version 2 - MAGMA
 #define VERSION 2
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGESVD computes the singular value decomposition (SVD) of a complex
@@ -204,8 +204,8 @@ const char* zgesvd_path = "none";
                   did not converge to zero. See the description of RWORK
                   above for details.
 
-    @ingroup magma_zgesvd_driver
-    ********************************************************************/
+    @ingroup magma_gesvd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgesvd(
     magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,

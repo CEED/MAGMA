@@ -17,7 +17,7 @@
 
 #define REAL
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DSYEVD computes all eigenvalues and, optionally, eigenvectors of a
@@ -127,8 +127,8 @@
 
     Modified description of INFO. Sven, 16 Feb 05.
 
-    @ingroup magma_dsyev_driver
-    ********************************************************************/
+    @ingroup magma_heevd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dsyevd_m(
     magma_int_t ngpu,

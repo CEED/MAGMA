@@ -17,7 +17,7 @@
 #include "magma_bulge.h"
 #include "trace.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHETRD_HE2HB reduces a complex Hermitian matrix A to real symmetric
@@ -172,8 +172,8 @@
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
 
-    @ingroup magma_zheev_2stage
-    ********************************************************************/
+    @ingroup magma_hetrd_he2hb
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu(
     magma_uplo_t uplo, magma_int_t n, magma_int_t nb,

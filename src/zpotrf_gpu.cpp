@@ -17,7 +17,7 @@
     #define magma_ztrsm magmablas_ztrsm
 // === End defining what BLAS to use =======================================
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
@@ -68,8 +68,8 @@
                   positive definite, and the factorization could not be
                   completed.
 
-    @ingroup magma_zposv_comp
-    ********************************************************************/
+    @ingroup magma_potrf
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_gpu(
     magma_uplo_t uplo, magma_int_t n,

@@ -15,7 +15,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEQP3 computes a QR factorization with column pivoting of a
@@ -92,8 +92,8 @@
     with v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
     A(i+1:m,i), and tau in TAU(i).
 
-    @ingroup magma_zgeqp3_comp
-    ********************************************************************/
+    @ingroup magma_geqp3
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgeqp3_gpu(
     magma_int_t m, magma_int_t n,

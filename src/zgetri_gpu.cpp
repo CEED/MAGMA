@@ -15,7 +15,7 @@
 #define magma_ztrsm magmablas_ztrsm
 // === End defining what BLAS to use ======================================
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRI computes the inverse of a matrix using the LU factorization
@@ -66,8 +66,8 @@
       -     > 0:  if INFO = i, U(i,i) is exactly zero; the matrix is
                   singular and its cannot be computed.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getri
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetri_gpu(
     magma_int_t n,

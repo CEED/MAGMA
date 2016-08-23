@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLAHRU is an auxiliary MAGMA routine that is used in ZGEHRD to update
@@ -63,8 +63,8 @@
     The difference is that here Am is computed on the GPU.
     M is renamed Am, G is renamed Ag.
 
-    @ingroup magma_zgeev_aux
-    ********************************************************************/
+    @ingroup magma_lahru
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zlahru_m(
     magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,

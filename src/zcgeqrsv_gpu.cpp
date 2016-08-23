@@ -13,7 +13,7 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZCGEQRSV solves the least squares problem
@@ -110,8 +110,8 @@
       -     = 0:  successful exit
       -     < 0:  if info = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgels_driver
-    ********************************************************************/
+    @ingroup magma_geqrsv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zcgeqrsv_gpu(
     magma_int_t m, magma_int_t n, magma_int_t nrhs,

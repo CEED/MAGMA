@@ -11,7 +11,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLATRSD solves one of the triangular systems with modified diagonal
@@ -177,8 +177,8 @@
     and we can safely call ZTRSV if 1/M(n) and 1/G(n) are both greater
     than max(underflow, 1/overflow).
 
-    @ingroup magma_zgeev_aux
-    ********************************************************************/
+    @ingroup magma_latrsd
+*******************************************************************************/
 extern "C"
 magma_int_t magma_zlatrsd(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag, magma_bool_t normin,

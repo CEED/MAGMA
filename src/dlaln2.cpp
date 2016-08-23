@@ -14,7 +14,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DLALN2 solves a system of the form
@@ -146,8 +146,8 @@
             NOTE: In the interests of speed, this routine does not
                   check the inputs for errors.
 
-    @ingroup magma_daux0
-    ********************************************************************/
+    @ingroup magma_laln2
+*******************************************************************************/
 extern "C"
 magma_int_t magma_dlaln2(
     magma_int_t trans, magma_int_t na, magma_int_t nw,

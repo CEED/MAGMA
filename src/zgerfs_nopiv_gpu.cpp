@@ -13,7 +13,7 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGERFS improves the computed solution to a system of linear equations.
@@ -106,8 +106,8 @@
                   but the factor U is exactly singular, so the solution
                   could not be computed.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_gerfs_nopiv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgerfs_nopiv_gpu(
     magma_trans_t trans, magma_int_t n, magma_int_t nrhs,

@@ -14,7 +14,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZUNMQR_GPU overwrites the general complex M-by-N matrix C with
@@ -96,8 +96,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zheev_2stage
-    ********************************************************************/
+    @ingroup magma_unmqr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zunmqr_2stage_gpu(
     magma_side_t side, magma_trans_t trans,

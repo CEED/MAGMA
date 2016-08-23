@@ -15,8 +15,7 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-///////////////////////////////////////////////////////////////////////////////////////
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRF computes an LU factorization of a general M-by-N matrix A without pivoting
@@ -71,8 +70,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrf_nopiv_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrf_nopiv_batched(
         magma_int_t m, magma_int_t n,

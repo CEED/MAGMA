@@ -10,7 +10,7 @@
        @precisions normal z -> s d c
 */
 #include "magma_internal.h"
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOSV computes the solution to a complex system of linear equations
@@ -83,8 +83,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zposv_driver
-    ********************************************************************/
+    @ingroup magma_posv_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zposv_batched(
                   magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,

@@ -13,10 +13,8 @@
 
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
-#define A(i, j)  (A + (i) + (j)*ldda)   // A(i, j) means at i row, j column
 
-///////////////////////////////////////////////////////////////////////////////////////
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETF2 computes an LU factorization of a general M-by-N matrix A without pivoting
@@ -84,9 +82,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_aux
-    ********************************************************************/
-
+    @ingroup magma_getf2_nopiv_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetf2_nopiv_batched(
     magma_int_t m, magma_int_t n,
@@ -98,6 +95,8 @@ magma_zgetf2_nopiv_batched(
     magma_int_t gbstep, 
     magma_int_t batchCount, magma_queue_t queue)
 {
+    #define A(i, j)  (A + (i) + (j)*ldda)
+    
     magma_int_t arginfo = 0;
     if (m < 0) {
         arginfo = -1;
@@ -170,6 +169,3 @@ magma_zgetf2_nopiv_batched(
 
     return 0;
 }
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////

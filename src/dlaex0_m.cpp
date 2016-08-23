@@ -12,7 +12,7 @@
 #include "magma_internal.h"
 #include "magma_timer.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DLAEX0 computes all eigenvalues and the choosen eigenvectors of a
@@ -95,8 +95,8 @@
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
 
-    @ingroup magma_dsyev_aux
-    ********************************************************************/
+    @ingroup magma_laex0
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dlaex0_m(
     magma_int_t ngpu,

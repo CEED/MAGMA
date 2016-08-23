@@ -1,50 +1,49 @@
 /*
- * Copyright (c) 2011      The University of Tennessee and The University
- *                         of Tennessee Research Foundation.  All rights
- *                         reserved.
- *
- *
- *     @author Azzam Haidar
- *     @author Stan Tomov
- *     @author Raffaele Solca
- *
- *     @precisions normal z -> s d c
- *
- */
+    -- MAGMA (version 2.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+       @author Azzam Haidar
+       @author Stan Tomov
+       @author Raffaele Solca
+  
+       @precisions normal z -> s d c
+*/
 #include <cuda_runtime.h>
 
 #include "magma_internal.h"
 #include "magma_bulge.h"
 #include "magma_zbulgeinc.h"
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// =============================================================================
 #ifdef HAVE_clBLAS
-#define dE(dev, i,j)  (dE[dev], (dE_offset + (i) + ldde*(j)))
+#define dE(dev,i,j)  (dE[dev], (dE_offset + (i) + ldde*(j)))
 #else
-#define dE(dev, i,j)  (dE[dev]+(i) + ldde*(j))
+#define dE(dev,i,j)  (dE[dev] + (i) + ldde*(j))
 #endif
 #define V(j)     (V+(j))
 #define T(j)     (T+(j))
-/***************************************************************************
- *  Parallel apply Q2 from bulgechasing symetric matrices - static scheduling
- *  Lower case is treated
- **/
-    /*
-     * side == magmaLeft:
-     *     meaning apply E = Q*E = (q_1*q_2*.....*q_n) * E ==> so
-     *     traverse Vs in reverse order (forward) from q_n to q_1 Also
-     *     E is splitten by block of col over cores because each apply
-     *     consist in a block of row (horizontal block)
-     */
-    /*
-     * side == magmaRight:
-     *     meaning apply E = E*Q = E * (q_1*q_2*.....*q_n) ==> so
-     *     traverse Vs in normal order (forward) from q_1 to q_n Also
-     *     E is splitten by block of row over core because each apply
-     *     consist in a block of col (vertical block)
-     */
-/***************************************************************************/
+
+/***************************************************************************//**
+    Parallel apply Q2 from bulgechasing symetric matrices - static scheduling
+    Lower case is treated
+    
+    side == magmaLeft:
+        meaning apply E = Q*E = (q_1*q_2*.....*q_n) * E ==> so
+        traverse Vs in reverse order (forward) from q_n to q_1 Also
+        E is splitten by block of col over cores because each apply
+        consist in a block of row (horizontal block)
+    
+    
+    side == magmaRight:
+        meaning apply E = E*Q = E * (q_1*q_2*.....*q_n) ==> so
+        traverse Vs in normal order (forward) from q_1 to q_n Also
+        E is splitten by block of row over core because each apply
+        consist in a block of col (vertical block)
+    
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zbulge_applyQ_v2_m(
     magma_int_t ngpu,
@@ -471,7 +470,7 @@ magma_zbulge_applyQ_v2_m(
     magma_setdevice( orig_dev );
     return *info;
 }
+
 #undef V
 #undef T
 #undef dE
-////////////////////////////////////////////////////////////////////////////////////////////////////

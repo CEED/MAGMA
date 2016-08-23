@@ -69,7 +69,7 @@ void magma_dirange(
 #endif
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DLAEX3 finds the roots of the secular equation, as defined by the
@@ -213,8 +213,8 @@ void magma_dirange(
     at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    @ingroup magma_dsyev_aux
-    ********************************************************************/
+    @ingroup magma_laex3
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dlaex3(
     magma_int_t k, magma_int_t n, magma_int_t n1,
@@ -317,9 +317,9 @@ magma_dlaex3(
     magma_dsetvector_async( lq2, Q2, 1, dQ2(0,0), 1, queue );
 
 #ifdef _OPENMP
-    /////////////////////////////////////////////////////////////////////////////////
+    // -------------------------------------------------------------------------
     // openmp implementation
-    /////////////////////////////////////////////////////////////////////////////////
+    // -------------------------------------------------------------------------
     //magma_timer_t time = 0;
     //timer_start( time );
 
@@ -440,11 +440,11 @@ magma_dlaex3(
     //timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
 
 #else
-    /////////////////////////////////////////////////////////////////////////////////
+    // -------------------------------------------------------------------------
     // Non openmp implementation
-    /////////////////////////////////////////////////////////////////////////////////
-   // magma_timer_t time = 0;
-   // timer_start( time );
+    // -------------------------------------------------------------------------
+    // magma_timer_t time = 0;
+    // timer_start( time );
 
     for (i = 0; i < k; ++i)
         dlamda[i] = lapackf77_dlamc3(&dlamda[i], &dlamda[i]) - dlamda[i];

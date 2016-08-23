@@ -20,7 +20,7 @@ const char* dgesvd_path = "none";
 // Version 2 - MAGMA
 #define VERSION 2
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DGESVD computes the singular value decomposition (SVD) of a real
@@ -201,8 +201,8 @@ const char* dgesvd_path = "none";
                 did not converge to zero. See the description of WORK
                 above for details.
     
-    @ingroup magma_dgesvd_driver
-    ********************************************************************/
+    @ingroup magma_gesvd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dgesvd(
     magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,

@@ -18,7 +18,7 @@
  */
 #define VERSION 2
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZUNMBR multiplies by Q or P as part of the SVD decomposition.
@@ -138,8 +138,8 @@
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
     
 
-    @ingroup magma_zgesvd_comp
-    ********************************************************************/
+    @ingroup magma_unmbr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zunmbr(
     magma_vect_t vect, magma_side_t side, magma_trans_t trans,

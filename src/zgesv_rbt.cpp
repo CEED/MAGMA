@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGESV_RBT solves a system of linear equations
@@ -66,8 +66,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgesv_driver
- ********************************************************************/
+    @ingroup magma_gesv_rbt
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgesv_rbt(
     magma_bool_t refine, magma_int_t n, magma_int_t nrhs,

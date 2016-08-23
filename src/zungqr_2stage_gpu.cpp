@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZUNGQR generates an M-by-N COMPLEX_16 matrix Q with orthonormal columns,
@@ -72,8 +72,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zheev_2stage
-    ********************************************************************/
+    @ingroup magma_ungqr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zungqr_2stage_gpu(
     magma_int_t m, magma_int_t n, magma_int_t k,

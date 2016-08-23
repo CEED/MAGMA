@@ -15,7 +15,7 @@
 #include "magma_internal.h"
 #include "trace.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHETRD reduces a complex Hermitian matrix A to real symmetric
@@ -141,8 +141,8 @@
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
 
-    @ingroup magma_zheev_comp
-    ********************************************************************/
+    @ingroup magma_hetrd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_mgpu(
     magma_int_t ngpu,
@@ -489,7 +489,7 @@ CLEANUP:
 } /* magma_zhetrd */
 
 
-// ----------------------------------------------------------------------
+/******************************************************************************/
 // TODO info is unused
 extern "C" magma_int_t
 magma_zhtodhe(
@@ -548,7 +548,7 @@ magma_zhtodhe(
 }
 
 
-// ----------------------------------------------------------------------
+/******************************************************************************/
 extern "C" void
 magma_zher2k_mgpu(
     magma_int_t ngpu,

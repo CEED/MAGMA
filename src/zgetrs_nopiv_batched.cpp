@@ -12,7 +12,7 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRS solves a system of linear equations
@@ -83,8 +83,8 @@
             Queue to execute in.
 
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrs_nopiv_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrs_nopiv_batched(
                   magma_trans_t trans, magma_int_t n, magma_int_t nrhs,

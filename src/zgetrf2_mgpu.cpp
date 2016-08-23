@@ -14,7 +14,7 @@
 #include "magma_timer.h"
 //#include "../testing/flops.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRF computes an LU factorization of a general M-by-N matrix A
@@ -99,8 +99,8 @@
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrf
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(
     magma_int_t ngpu,
@@ -181,7 +181,7 @@ magma_zgetrf2_mgpu(
                             queues[0][1] );
     trace_gpu_end( 0, 1 );
 
-    /* ------------------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------- */
     magma_timer_t time=0;
     timer_start( time );
 
@@ -359,7 +359,7 @@ magma_zgetrf2_mgpu(
             trace_gpu_end( d, 0 );
         }
     } /* end of for j=1..s */
-    /* ------------------------------------------------------------------------------ */
+    /* ---------------------------------------------------------------------- */
     
     /* Set the GPU number that holds the last panel */
     id = s % ngpu;

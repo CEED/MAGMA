@@ -12,7 +12,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRS solves a system of linear equations
@@ -62,8 +62,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrs_nopiv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetrs_nopiv_gpu(
     magma_trans_t trans, magma_int_t n, magma_int_t nrhs,

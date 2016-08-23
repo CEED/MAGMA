@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZUNGTR generates a complex unitary matrix Q which is defined as the
@@ -80,8 +80,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zheev_comp
-    ********************************************************************/
+    @ingroup magma_ungtr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zungtr(
     magma_uplo_t uplo, magma_int_t n,

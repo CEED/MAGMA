@@ -15,7 +15,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLABRD reduces the first NB rows and columns of a complex general
@@ -184,8 +184,8 @@
     vi denotes an element of the vector defining H(i), and ui an element
     of the vector defining G(i).
 
-    @ingroup magma_zgesvd_aux
-    ********************************************************************/
+    @ingroup magma_labrd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zlabrd_gpu(
     magma_int_t m, magma_int_t n, magma_int_t nb,

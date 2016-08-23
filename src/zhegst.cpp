@@ -14,7 +14,7 @@
 
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEGST reduces a complex Hermitian-definite generalized
@@ -77,8 +77,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zheev_comp
-    ********************************************************************/
+    @ingroup magma_hegst
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhegst(
     magma_int_t itype, magma_uplo_t uplo, magma_int_t n,

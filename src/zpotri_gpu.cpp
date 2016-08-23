@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOTRI computes the inverse of a real symmetric positive definite
@@ -47,8 +47,8 @@
       -     > 0:  if INFO = i, the (i,i) element of the factor U or L is
                   zero, and the inverse could not be computed.
 
-    @ingroup magma_zposv_comp
-    ********************************************************************/
+    @ingroup magma_potri
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zpotri_gpu(
     magma_uplo_t uplo, magma_int_t n,

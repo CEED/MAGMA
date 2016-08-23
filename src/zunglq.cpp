@@ -12,7 +12,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose:
     ---------
     ZUNGLQ generates an M-by-N complex matrix Q with orthonormal rows,
@@ -73,8 +73,8 @@
       -     = 0:  successful exit;
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgelqf_comp
-    ********************************************************************/
+    @ingroup magma_unglq
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zunglq(
     magma_int_t m, magma_int_t n, magma_int_t k,

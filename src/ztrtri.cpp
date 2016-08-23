@@ -13,7 +13,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZTRTRI computes the inverse of a real upper or lower triangular
@@ -62,8 +62,8 @@
       -     > 0: if INFO = i, A(i,i) is exactly zero.  The triangular
                     matrix is singular and its inverse cannot be computed.
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_trtri
+*******************************************************************************/
 extern "C" magma_int_t
 magma_ztrtri(
     magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,

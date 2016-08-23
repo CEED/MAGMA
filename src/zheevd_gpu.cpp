@@ -19,7 +19,7 @@
 #define COMPLEX
 #define FAST_HEMV
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEEVD_GPU computes all eigenvalues and, optionally, eigenvectors of a
@@ -150,8 +150,8 @@
 
     Modified description of INFO. Sven, 16 Feb 05.
 
-    @ingroup magma_zheev_driver
-    ********************************************************************/
+    @ingroup magma_heevd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zheevd_gpu(
     magma_vec_t jobz, magma_uplo_t uplo,

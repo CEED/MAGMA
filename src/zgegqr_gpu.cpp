@@ -18,7 +18,7 @@
 #define magma_ztrsm magmablas_ztrsm
 // === End defining what BLAS to use ======================================
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEGQR orthogonalizes the N vectors given by a complex M-by-N matrix A:
@@ -86,8 +86,8 @@
                   positive definite, so the factorization could not be
                   completed, and the solution has not been computed.
 
-    @ingroup magma_zgeqrf_comp
-    ********************************************************************/
+    @ingroup magma_gegqr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgegqr_gpu(
     magma_int_t ikind, magma_int_t m, magma_int_t n,
@@ -126,7 +126,7 @@ magma_zgegqr_gpu(
     magma_queue_create( cdev, &queue );
 
     if (ikind == 1) {
-        // === Iterative, based on SVD ============================================================
+        // === Iterative, based on SVD =========================================
         magmaDoubleComplex *U, *VT, *vt, *R, *G, *hwork, *tau;
         double *S;
 
@@ -202,10 +202,10 @@ magma_zgegqr_gpu(
         #ifdef COMPLEX
         magma_free_cpu( rwork );
         #endif
-        // ================== end of ikind == 1 ===================================================
+        // ================== end of ikind == 1 ================================
     }
     else if (ikind == 2) {
-        // ================== LAPACK based      ===================================================
+        // ================== LAPACK based      ================================
         magma_int_t min_mn = min(m, n);
         magma_int_t nb = n;
 
@@ -220,10 +220,10 @@ magma_zgegqr_gpu(
         magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn, queue );
         magma_zgetmatrix( n, n, ddA, n, work, n, queue );
         magma_zungqr_gpu( m, n, n, dA, ldda, tau, dT, nb, info );
-        // ================== end of ikind == 2 ===================================================
+        // ================== end of ikind == 2 ================================
     }
     else if (ikind == 3) {
-        // ================== MGS               ===================================================
+        // ================== MGS               ================================
         for (j = 0; j < n; j++) {
             for (i = 0; i < j; i++) {
                 *work(i, j) = magma_zdotc( m, dA(0,i), 1, dA(0,j), 1, queue );
@@ -237,10 +237,10 @@ magma_zgegqr_gpu(
             *work(j,j) = MAGMA_Z_MAKE( sqrt(MAGMA_Z_REAL( *work(j,j) )), 0. );
             magma_zscal( m, 1./ *work(j,j), dA(0,j), 1, queue );
         }
-        // ================== end of ikind == 3 ===================================================
+        // ================== end of ikind == 3 ================================
     }
     else if (ikind == 4) {
-        // ================== Cholesky QR       ===================================================
+        // ================== Cholesky QR       ================================
         magma_zgemm( MagmaConjTrans, MagmaNoTrans, n, n, m, c_one,
                      dA, ldda, dA, ldda, c_zero, dwork, n, queue );
         magma_zgetmatrix( n, n, dwork, n, work, n, queue );
@@ -248,7 +248,7 @@ magma_zgegqr_gpu(
         magma_zsetmatrix( n, n, work, n, dwork, n, queue );
         magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                      m, n, c_one, dwork, n, dA, ldda, queue );
-        // ================== end of ikind == 4 ===================================================
+        // ================== end of ikind == 4 ================================
     }
              
     magma_queue_destroy( queue );

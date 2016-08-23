@@ -13,7 +13,7 @@
  */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEEVX computes selected eigenvalues and, optionally, eigenvectors
@@ -165,8 +165,8 @@
       -     > 0:  if INFO = i, then i eigenvectors failed to converge.
                   Their indices are stored in array IFAIL.
 
-    @ingroup magma_zheev_driver
-    ********************************************************************/
+    @ingroup magma_heevx
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zheevx(
     magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,

@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZCGETRS solves a system of linear equations
@@ -79,8 +79,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getrs
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zcgetrs_gpu(
     magma_trans_t trans, magma_int_t n, magma_int_t nrhs,

@@ -17,7 +17,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEEVDX computes selected eigenvalues and, optionally, eigenvectors
@@ -173,8 +173,8 @@
 
     Modified description of INFO. Sven, 16 Feb 05.
 
-    @ingroup magma_zheev_driver
-    ********************************************************************/
+    @ingroup magma_heevdx
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zheevdx(
     magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,

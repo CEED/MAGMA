@@ -13,7 +13,7 @@
 #include "magma_internal.h"
 #include "trace.h"
 
-/**
+/***************************************************************************//**
     Purpose
     =======
 
@@ -68,8 +68,8 @@
                   positive definite, and the factorization could not be
                   completed.
 
-    @ingroup magma_zhesv_comp
-    ******************************************************************* */
+    @ingroup magma_hetrf_nopiv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhetrf_nopiv(
     magma_uplo_t uplo, magma_int_t n,

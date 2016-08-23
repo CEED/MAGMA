@@ -17,7 +17,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEGVDX computes selected eigenvalues and, optionally, eigenvectors
@@ -208,8 +208,8 @@
     bounds reference to A - reported by Ralf Meyer).  Also corrected the
     description of INFO and the test on ITYPE. Sven, 16 Feb 05.
 
-    @ingroup magma_zhegv_driver
-    ********************************************************************/
+    @ingroup magma_hegvdx
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhegvdx(
     magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,

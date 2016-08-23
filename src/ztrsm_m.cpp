@@ -14,7 +14,7 @@
 extern "C" magma_int_t
 magma_get_ztrsm_m_nb() { return 128; }
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZTRSM solves one of the matrix equations
@@ -112,8 +112,8 @@ magma_get_ztrsm_m_nb() { return 128; }
             in the calling (sub) program. LDB must be at least
             max( 1, m ).
 
-    @ingroup magma_zblas3
-    ********************************************************************/
+    @ingroup magma_trsm
+*******************************************************************************/
 extern "C" magma_int_t
 magma_ztrsm_m(
     magma_int_t ngpu,

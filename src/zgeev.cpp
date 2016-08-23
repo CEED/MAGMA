@@ -30,7 +30,7 @@
  */
 #define TREVC_VERSION 4
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEEV computes for an N-by-N complex nonsymmetric matrix A, the
@@ -127,8 +127,8 @@
                   elements and i+1:N of w contain eigenvalues which have
                   converged.
 
-    @ingroup magma_zgeev_driver
-    ********************************************************************/
+    @ingroup magma_geev
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgeev(
     magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,

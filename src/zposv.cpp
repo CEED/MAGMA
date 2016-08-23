@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOSV computes the solution to a complex system of linear equations
@@ -71,8 +71,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zposv_driver
-    ********************************************************************/
+    @ingroup magma_posv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zposv(
     magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,

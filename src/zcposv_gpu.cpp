@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZCPOSV computes the solution to a complex system of linear equations
@@ -128,8 +128,8 @@
                   factorization could not be completed, and the solution
                   has not been computed.
 
-    @ingroup magma_zposv_driver
-    ********************************************************************/
+    @ingroup magma_posv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zcposv_gpu(
     magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,

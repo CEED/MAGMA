@@ -31,7 +31,7 @@
  */
 #define TREVC_VERSION 4
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DGEEV computes for an N-by-N real nonsymmetric matrix A, the
@@ -131,8 +131,8 @@
                   elements and i+1:N of W contain eigenvalues which have
                   converged.
 
-    @ingroup magma_dgeev_driver
-    ********************************************************************/
+    @ingroup magma_geev
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dgeev_m(
     magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,

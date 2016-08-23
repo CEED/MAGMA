@@ -12,7 +12,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZHEGVR computes all the eigenvalues, and optionally, the eigenvectors
@@ -260,8 +260,8 @@
        Ken Stanley, Computer Science Division, University of
          California at Berkeley, USA
 
-    @ingroup magma_zhegv_driver
-    ********************************************************************/
+    @ingroup magma_hegvr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhegvr(
     magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,

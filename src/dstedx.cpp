@@ -11,7 +11,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DSTEDX computes some eigenvalues and, optionally, eigenvectors of a
@@ -125,8 +125,8 @@
        at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    @ingroup magma_dsyev_comp
-    ********************************************************************/
+    @ingroup magma_stedx
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dstedx(
     magma_range_t range, magma_int_t n, double vl, double vu,

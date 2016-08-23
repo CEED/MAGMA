@@ -14,7 +14,7 @@
 #define COMPLEX
 
 
-/**
+/***************************************************************************//**
     Purpose
     =======
  
@@ -71,8 +71,8 @@
                   has been completed, but the block diagonal matrix D is
                   exactly singular, and division by zero will occur if it
                   is used to solve a system of equations.
-    @ingroup magma_zhesv_comp
-    ********************************************************************/
+    @ingroup magma_hetrf_aasen
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                    magmaDoubleComplex *A, magma_int_t lda, 

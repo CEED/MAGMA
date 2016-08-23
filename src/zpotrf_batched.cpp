@@ -16,8 +16,7 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-///////////////////////////////////////////////////////////////////////////////////////
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
@@ -79,8 +78,8 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zposv_comp
-    ********************************************************************/
+    @ingroup magma_potrf_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_lg_batched(
     magma_uplo_t uplo, magma_int_t n,
@@ -283,8 +282,9 @@ fin:
 
     return arginfo;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/******************************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_batched(
     magma_uplo_t uplo, magma_int_t n,

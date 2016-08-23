@@ -15,7 +15,7 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
@@ -119,10 +119,8 @@
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
 
-    @ingroup magma_zgeqrf_comp
-    ********************************************************************/
-
-
+    @ingroup magma_geqrf_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgeqrf_expert_batched(
     magma_int_t m, magma_int_t n, 
@@ -132,7 +130,7 @@ magma_zgeqrf_expert_batched(
     magmaDoubleComplex **dtau_array, magma_int_t provide_RT,
     magma_int_t *info_array, magma_int_t batchCount, magma_queue_t queue)
 {
-#define dA(i, j)  (dA + (i) + (j)*ldda)   // A(i, j) means at i row, j column
+    #define dA(i, j)  (dA + (i) + (j)*ldda)
     
     /* Local Parameter */
     magma_int_t nb = magma_get_zgeqrf_batched_nb(m);

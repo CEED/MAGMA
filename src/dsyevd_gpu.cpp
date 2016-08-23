@@ -19,7 +19,7 @@
 #define REAL
 #define FAST_SYMV
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DSYEVD_GPU computes all eigenvalues and, optionally, eigenvectors of
@@ -133,8 +133,8 @@
 
     Modified description of INFO. Sven, 16 Feb 05.
 
-    @ingroup magma_dsyev_driver
-    ********************************************************************/
+    @ingroup magma_heevd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dsyevd_gpu(
     magma_vec_t jobz, magma_uplo_t uplo,

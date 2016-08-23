@@ -19,7 +19,7 @@
 #define REAL
 #define FAST_SYMV
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DSYEVDX computes selected eigenvalues and, optionally, eigenvectors
@@ -165,8 +165,8 @@
 
     Modified description of INFO. Sven, 16 Feb 05.
 
-    @ingroup magma_dsyev_driver
-    ********************************************************************/
+    @ingroup magma_heevdx
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dsyevdx_gpu(
     magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,

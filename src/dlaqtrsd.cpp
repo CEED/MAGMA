@@ -14,7 +14,7 @@
 // Version 2 is MAGMA  dlaln2, which is exactly the same, but thread safe.
 #define VERSION 2
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DLAQTRSD is used by DTREVC to solve one of the (singular) quasi-triangular
@@ -89,8 +89,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -k, the k-th argument had an illegal value
 
-    @ingroup magma_dgeev_aux
-    ********************************************************************/
+    @ingroup magma_laqtrsd
+*******************************************************************************/
 extern "C"
 magma_int_t magma_dlaqtrsd(
     magma_trans_t trans, magma_int_t n,

@@ -14,7 +14,7 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETRI computes the inverse of a matrix using the LU factorization
@@ -76,8 +76,8 @@
     queue   magma_queue_t
             Queue to execute in.
                   
-    @ingroup magma_zgesv_comp
-    ********************************************************************/
+    @ingroup magma_getri_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetri_outofplace_batched( magma_int_t n, 
                   magmaDoubleComplex **dA_array, magma_int_t ldda,
@@ -87,7 +87,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                   magma_int_t batchCount, magma_queue_t queue)
 {
     /* Local variables */
-  
     magma_int_t info = 0;
     if (n < 0)
         info = -1;

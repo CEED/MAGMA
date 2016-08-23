@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOTRS solves a system of linear equations A*X = B with a Hermitian
@@ -56,8 +56,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zposv_comp
-    ********************************************************************/
+    @ingroup magma_potrs
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zpotrs_gpu(
     magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,

@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGETF2_NOPIV computes an LU factorization of a general m-by-n
@@ -55,8 +55,8 @@
                  singular, and division by zero will occur if it is used
                  to solve a system of equations.
 
-    @ingroup magma_zgesv_aux
-    ********************************************************************/
+    @ingroup magma_getf2_nopiv
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgetf2_nopiv(
     magma_int_t m, magma_int_t n,

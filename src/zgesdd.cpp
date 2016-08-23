@@ -19,7 +19,7 @@
 
 const char* zgesdd_path = "none";
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGESDD computes the singular value decomposition (SVD) of a complex
@@ -196,8 +196,8 @@ const char* zgesdd_path = "none";
     Ming Gu and Huan Ren, Computer Science Division, University of
     California at Berkeley, USA
 
-    @ingroup magma_zgesvd_driver
-    ********************************************************************/
+    @ingroup magma_gesdd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgesdd(
     magma_vec_t jobz, magma_int_t m, magma_int_t n,

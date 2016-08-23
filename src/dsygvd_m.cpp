@@ -18,7 +18,7 @@
 
 #define REAL
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     DSYGVD computes all the eigenvalues, and optionally, the eigenvectors
@@ -165,8 +165,8 @@
     bounds reference to A - reported by Ralf Meyer).  Also corrected the
     description of INFO and the test on ITYPE. Sven, 16 Feb 05.
 
-    @ingroup magma_dsygv_driver
-    ********************************************************************/
+    @ingroup magma_hegvd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_dsygvd_m(
     magma_int_t ngpu,

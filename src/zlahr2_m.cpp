@@ -12,7 +12,7 @@
 
 #define COMPLEX
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)
@@ -122,8 +122,8 @@
     Science Technical Report, UT-CS-09-642 (also LAPACK Working Note 219),
     May 24, 2009.
 
-    @ingroup magma_zgeev_aux
-    ********************************************************************/
+    @ingroup magma_lahr2
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zlahr2_m(
     magma_int_t n, magma_int_t k, magma_int_t nb,

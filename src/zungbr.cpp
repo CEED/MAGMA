@@ -12,7 +12,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZUNGBR generates one of the complex unitary matrices Q or P**H
@@ -101,8 +101,8 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgesvd_comp
-    ********************************************************************/
+    @ingroup magma_ungbr
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zungbr(
     magma_vect_t vect, magma_int_t m, magma_int_t n, magma_int_t k,

@@ -17,6 +17,8 @@
 #define  C(i, j) ( C[(j)*ldc  + (i)])
 #define  D(i)    ( D[(i)*incD] )
 
+
+/******************************************************************************/
 // TODO: change alpha and beta to be double, per BLAS, instead of double-complex
 // trailing submatrix update with inner-blocking
 magma_int_t zherk_d(
@@ -93,6 +95,7 @@ magma_int_t zherk_d(
 }
 
 
+/******************************************************************************/
 // TODO: change alpha and beta to be double, per BLAS, instead of double-complex
 // trailing submatrix update with inner-blocking, using workshpace that
 // stores D*L'
@@ -151,6 +154,7 @@ magma_int_t zherk_d_workspace(
 }
 
 
+/******************************************************************************/
 // diagonal factorization with inner-block
 magma_int_t zhetrf_diag_nopiv(
     magma_uplo_t uplo, magma_int_t n,
@@ -173,7 +177,6 @@ magma_int_t zhetrf_diag_nopiv(
     if (n == 1)
         return info;
 
-    /**/
     magmaDoubleComplex *Ak1k = NULL;
     magmaDoubleComplex *Akk = NULL;
     double alpha;
@@ -252,6 +255,7 @@ magma_int_t zhetrf_diag_nopiv(
 }
 
 
+/******************************************************************************/
 // main routine
 extern "C" magma_int_t
 magma_zhetrf_nopiv_cpu(

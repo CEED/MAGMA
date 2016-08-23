@@ -13,7 +13,7 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZPOTRS solves a system of linear equations A*X = B with a Hermitian
@@ -65,8 +65,8 @@
             Queue to execute in.
 
 
-    @ingroup magma_zposv_comp
-    ********************************************************************/
+    @ingroup magma_potrs_batched
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zpotrs_batched(
                   magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,

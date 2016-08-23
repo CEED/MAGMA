@@ -12,7 +12,7 @@
 */
 #include "magma_internal.h"
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     ZGEHRD2 reduces a COMPLEX_16 general matrix A to upper Hessenberg form H by
@@ -114,8 +114,8 @@
     Science Technical Report, UT-CS-09-642 (also LAPACK Working Note 219),
     May 24, 2009.
 
-    @ingroup magma_zgeev_comp
-    ********************************************************************/
+    @ingroup magma_gehrd
+*******************************************************************************/
 extern "C" magma_int_t
 magma_zgehrd2(
     magma_int_t n, magma_int_t ilo, magma_int_t ihi,
