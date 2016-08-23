@@ -165,8 +165,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
         // Azzam : optimization can be done:
         //          2- compute invdiagL invdiagU only one time
 
-
-        //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 1\n",j);
         // solve dwork = L^-1 * I
         magmablas_zlaset_batched( MagmaFull, j, ib, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork_array, n, batchCount, queue );
