@@ -95,6 +95,9 @@
     lddf    INTEGER
             The leading dimension of the array F. LDDF >= max(1,N).
 
+    @param
+    dlsticcs    TODO: undocumented
+
     @param[in]
     queue   magma_queue_t
             Queue to execute in.
