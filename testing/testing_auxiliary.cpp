@@ -16,14 +16,14 @@
 #include "../control/magma_internal.h"  // internal header
 
 
-////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 // warn( condition ) is like assert, but doesn't abort. Also counts number of failures.
 magma_int_t gFailures = 0;
 
 void warn_helper( int cond, const char* str, const char* file, int line )
 {
     if ( ! cond ) {
-        printf( "WARNING: %s:%d: assertion %s failed\n", file, line, str );
+        printf( "*** testing_auxiliary error: %s:%d: assertion %s failed\n", file, line, str );
         gFailures += 1;
     }
 }
@@ -31,7 +31,7 @@ void warn_helper( int cond, const char* str, const char* file, int line )
 #define warn(x) warn_helper( (x), #x, __FILE__, __LINE__ )
 
 
-////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 void test_num_gpus()
 {
     printf( "%%=====================================================================\n%s\n", __func__ );
@@ -105,7 +105,7 @@ void test_num_gpus()
 }
 
 
-////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 void test_num_threads()
 {
     printf( "%%=====================================================================\n%s\n", __func__ );
@@ -225,9 +225,10 @@ void test_num_threads()
 }
 
 
-////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
 void test_xerbla()
 {
+    printf( "%%=====================================================================\n%s\n", __func__ );
     magma_int_t info;
     info = -MAGMA_ERR_DEVICE_ALLOC;  magma_xerbla( __func__, -(info) );
     info = -MAGMA_ERR_HOST_ALLOC;    magma_xerbla( __func__, -(info) );
@@ -245,15 +246,77 @@ void test_xerbla()
 }
 
 
-////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+void test_indices()
+{
+    printf( "%%=====================================================================\n%s\n", __func__ );
+    // example given in magma_indices_1D_bcyclic() docs
+    int dj0=0, dj1=0;
+    
+    // -----
+    magma_indices_1D_bcyclic( 10, 3, 0, 13, 69, &dj0, &dj1 );
+    warn( dj0 == 10 );
+    warn( dj1 == 29 );
+
+    magma_indices_1D_bcyclic( 10, 3, 1, 13, 69, &dj0, &dj1 );
+    warn( dj0 ==  3 );
+    warn( dj1 == 20 );
+
+    magma_indices_1D_bcyclic( 10, 3, 2, 13, 69, &dj0, &dj1 );
+    warn( dj0 ==  0 );
+    warn( dj1 == 20 );
+    
+    // -----
+    magma_indices_1D_bcyclic( 10, 3, 0, 13, 70, &dj0, &dj1 );
+    warn( dj0 == 10 );
+    warn( dj1 == 30 );
+
+    magma_indices_1D_bcyclic( 10, 3, 1, 13, 70, &dj0, &dj1 );
+    warn( dj0 ==  3 );
+    warn( dj1 == 20 );
+
+    magma_indices_1D_bcyclic( 10, 3, 2, 13, 70, &dj0, &dj1 );
+    warn( dj0 ==  0 );
+    warn( dj1 == 20 );
+    
+    // -----
+    magma_indices_1D_bcyclic( 10, 3, 0, 13, 71, &dj0, &dj1 );
+    warn( dj0 == 10 );
+    warn( dj1 == 30 );
+
+    magma_indices_1D_bcyclic( 10, 3, 1, 13, 71, &dj0, &dj1 );
+    warn( dj0 ==  3 );
+    warn( dj1 == 21 );
+
+    magma_indices_1D_bcyclic( 10, 3, 2, 13, 71, &dj0, &dj1 );
+    warn( dj0 ==  0 );
+    warn( dj1 == 20 );
+    
+    // -----
+    magma_indices_1D_bcyclic( 10, 3, 0, 13, 72, &dj0, &dj1 );
+    warn( dj0 == 10 );
+    warn( dj1 == 30 );
+
+    magma_indices_1D_bcyclic( 10, 3, 1, 13, 72, &dj0, &dj1 );
+    warn( dj0 ==  3 );
+    warn( dj1 == 22 );
+
+    magma_indices_1D_bcyclic( 10, 3, 2, 13, 72, &dj0, &dj1 );
+    warn( dj0 ==  0 );
+    warn( dj1 == 20 );
+}
+
+
+/******************************************************************************/
 int main( int argc, char** argv )
 {
     test_num_gpus();
     test_num_threads();
     test_xerbla();
+    test_indices();
     
     if ( gFailures > 0 ) {
-        printf( "\n%lld tests failed.\n", (long long) gFailures );
+        printf( "\n*** %lld tests failed.\n", (long long) gFailures );
     }
     else {
         printf( "\nAll tests passed.\n" );
