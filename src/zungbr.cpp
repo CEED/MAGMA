@@ -120,12 +120,12 @@ magma_zungbr(
     
     // Local variables
     bool lquery, wantq;
-    magma_int_t i, iinfo, j, lwkopt, mn;
+    magma_int_t i, iinfo, j, lwkmin, lwkopt, min_mn;
     
     // Test the input arguments
     *info = 0;
     wantq = (vect == MagmaQ);
-    mn = min( m, n );
+    min_mn = min( m, n );
     lquery = (lwork == -1);
     if ( ! wantq && vect != MagmaP ) {
         *info = -1;
@@ -154,6 +154,8 @@ magma_zungbr(
                 magma_int_t m1 = m-1;
                 lapackf77_zungqr( &m1, &m1, &m1, A(1,1), &lda, tau, work, &ineg_one, &iinfo );
             }
+            lwkopt = MAGMA_Z_REAL( work[0] );
+            lwkmin = min_mn;
         }
         else {
             if (k < n) {
@@ -162,10 +164,10 @@ magma_zungbr(
             else if (n > 1) {
                 magma_zunglq( n-1, n-1, n-1, A(1,1), lda, tau, work, -1, &iinfo );
             }
+            lwkopt = MAGMA_Z_REAL( work[0] );
+            lwkmin = lwkopt;
         }
-        lwkopt = MAGMA_Z_REAL( work[0] );
-        lwkopt = max( lwkopt, mn );
-        if (lwork < lwkopt && ! lquery) {
+        if (lwork < lwkmin && ! lquery) {
             *info = -9;
         }
     }
