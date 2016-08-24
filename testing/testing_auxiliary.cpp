@@ -251,7 +251,7 @@ void test_indices()
 {
     printf( "%%=====================================================================\n%s\n", __func__ );
     // example given in magma_indices_1D_bcyclic() docs
-    int dj0=0, dj1=0;
+    magma_int_t dj0=0, dj1=0;
     
     // -----
     magma_indices_1D_bcyclic( 10, 3, 0, 13, 69, &dj0, &dj1 );
