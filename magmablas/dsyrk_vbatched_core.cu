@@ -12,7 +12,7 @@
        @author Ahmad Abdelfattah
        
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_d
 

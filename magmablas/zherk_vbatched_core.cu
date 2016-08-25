@@ -13,7 +13,7 @@
        
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_templates.h"
 
 #define PRECISION_z
