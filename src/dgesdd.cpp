@@ -642,7 +642,7 @@ magma_dgesdd(
         if (minwrk == 1) {
             minwrk = maxwrk;
         }
-        assert( minwrk <= maxwrk );
+        maxwrk = max( maxwrk, minwrk );
         
         work[1] = magma_dmake_lwork( maxwrk );
 
