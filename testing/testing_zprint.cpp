@@ -19,6 +19,10 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#if defined(__unix__) || defined(__APPLE__)
+#define REDIRECT
+#include <unistd.h>
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zprint
@@ -37,6 +41,17 @@ int main( int argc, char** argv)
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
+
+    #ifdef REDIRECT
+        // dup/dup2 aren't available on Windows to restore stdout
+        // save stdout and redirect to file
+        const char* fname = "testing_zprint.out";
+        printf( "redirecting output to %s\n", fname );
+        fflush( stdout );
+        int stdout_save = dup( fileno(stdout) );
+        FILE* f = freopen( fname, "w", stdout );
+        TESTING_CHECK( f == NULL );
+    #endif
 
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -68,6 +83,22 @@ int main( int argc, char** argv)
             magma_free( dA );
         }
     }
+
+    #ifdef REDIRECT
+        // restore stdout
+        fflush( stdout );
+        dup2( stdout_save, fileno(stdout) );
+        close( stdout_save );
+
+        // compare output file to reference
+        printf( "diff testing_zprint.ref testing_zprint.out\n" );
+        fflush( stdout );
+
+        int err = system( "diff testing_zprint.ref testing_zprint.out" );
+        bool okay = (err == 0);
+        status += ! okay;
+        printf( "diff %s\n", (okay ? "ok" : "failed") );
+    #endif
 
     opts.cleanup();
     TESTING_CHECK( magma_finalize() );
