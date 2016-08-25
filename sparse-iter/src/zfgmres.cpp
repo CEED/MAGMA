@@ -278,6 +278,7 @@ magma_zfgmres(
                 }
             }
             if (rel_resid <= solver_par->rtol || betanom <= solver_par->atol ){
+                info = MAGMA_SUCCESS;
                 break;
             }
         }
