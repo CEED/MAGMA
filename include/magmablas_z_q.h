@@ -629,16 +629,6 @@ magmablas_ztrsv_outofplace(
     magma_int_t flag );
 
 void
-magmablas_ztrsv_work_batched(
-    magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
-    magma_int_t n,
-    magmaDoubleComplex_ptr *dA_array, magma_int_t lda,
-    magmaDoubleComplex_ptr *db_array, magma_int_t incb,
-    magmaDoubleComplex_ptr *dx_array,
-    magma_int_t batchCount,
-    magma_queue_t queue );
-
-void
 magmablas_zgemv_q(
     magma_trans_t trans, magma_int_t m, magma_int_t n, 
     magmaDoubleComplex alpha,
