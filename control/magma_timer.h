@@ -50,6 +50,26 @@ static inline void timer_start( magma_timer_t &t )
 
 
 /***************************************************************************//**
+    @param[out]
+    t       On output, set to current time.
+    
+    @param[in]
+    queue  Queue to sync with, before getting time.
+    
+    If ENABLE_TIMER is not defined, does nothing.
+    
+    @ingroup magma_timer
+*******************************************************************************/
+static inline void timer_sync_start( magma_timer_t &t, magma_queue_t queue )
+{
+    #if defined(ENABLE_TIMER)
+    magma_queue_sync( queue );
+    t = magma_wtime();
+    #endif
+}
+
+
+/***************************************************************************//**
     @param[in,out]
     t       On input, time when timer_start() was called.
             On output, set to (current time - start time).
@@ -72,6 +92,41 @@ static inline void timer_start( magma_timer_t &t )
 static inline magma_timer_t timer_stop( magma_timer_t &t )
 {
     #if defined(ENABLE_TIMER)
+    t = magma_wtime() - t;
+    return t;
+    #else
+    return 0;
+    #endif
+}
+
+
+/***************************************************************************//**
+    @param[in,out]
+    t       On input, time when timer_start() was called.
+            On output, set to (current time - start time).
+    
+    @param[in]
+    queue  Queue to sync with, before getting time.
+
+    @return t, to sum up times:
+    
+        magma_timer_t time, time_sum=0;
+        for( ... ) {
+            timer_start( time );
+            ...do timed operations...
+            time_sum += timer_stop( time );
+        
+            ...do other operations...
+        }
+    
+    If ENABLE_TIMER is not defined, returns 0.
+    
+    @ingroup magma_timer
+*******************************************************************************/
+static inline magma_timer_t timer_sync_stop( magma_timer_t &t, magma_queue_t queue )
+{
+    #if defined(ENABLE_TIMER)
+    magma_queue_sync( queue );
     t = magma_wtime() - t;
     return t;
     #else
