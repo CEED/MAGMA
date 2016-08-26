@@ -21,7 +21,6 @@ my $beta     = 0;
 # Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
 my @files2delete = qw(
     ReleaseChecklist
-    Makefile.gen
     Makefile.internal
     contrib
     control/sizeptr
@@ -50,19 +49,19 @@ my @files2delete = qw(
     sparse-iter/src/zparict.cpp
     sparse-iter/src/ziteric.cpp
     
-    sparse-iter/control/magma_zmdynamicilu_tools.cpp  
-    sparse-iter/control/magma_zmpilut_tools.cpp       
+    sparse-iter/control/magma_zmdynamicilu_tools.cpp
+    sparse-iter/control/magma_zmpilut_tools.cpp
     sparse-iter/control/magma_zmpilut_tools_nolist.cpp
-    sparse-iter/control/magma_zgeisai_tools.cpp	     
+    sparse-iter/control/magma_zgeisai_tools.cpp
     
     sparse-iter/blas/zgeisai.cu
-    sparse-iter/blas/zgeisai_8.cu      
-    sparse-iter/blas/zgeisai_16.cu     
-    sparse-iter/blas/zgeisai_32.cu     
-    sparse-iter/blas/zgeisai_trsv.cu   
-    sparse-iter/blas/zgeblockstruct.cu	
+    sparse-iter/blas/zgeisai_8.cu
+    sparse-iter/blas/zgeisai_16.cu
+    sparse-iter/blas/zgeisai_32.cu
+    sparse-iter/blas/zgeisai_trsv.cu
+    sparse-iter/blas/zgeblockstruct.cu
     sparse-iter/blas/zgeisai_maxblock.cu
-    sparse-iter/blas/zgeisai_32_develop.cu 
+    sparse-iter/blas/zgeisai_32_develop.cu
     
     sparse-iter/testing/test_matrices
 
@@ -71,8 +70,20 @@ my @files2delete = qw(
     testing/fortran2.cpp
     testing/testing_zgetrf_f.f
     testing/testing_zgetrf_gpu_f.cuf
-    tools
+
+    tools/MakeMagmaRelease.pl
+    tools/checklist.csh
+    tools/checklist_builds.sh
+    tools/checklist_ceildiv.pl
+    tools/compare_prototypes.pl
+    tools/find_obj_files.sh
+    tools/fortran_wrappers.pl
+    tools/magmasubs.pyc
+    tools/parse-magma.py
+    tools/trim_spaces.pl
+    tools/wdiff.pl
 );
+# note: keep tools/{codegen.py, magmasubs.py}
 
 
 sub myCmd
