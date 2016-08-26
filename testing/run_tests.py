@@ -6,7 +6,7 @@
 # Univ. of Colorado, Denver
 # @date
 
-## @file run_tests.py
+## @file
 #  @author Mark Gates
 #
 # Script to run testers with various matrix sizes.
