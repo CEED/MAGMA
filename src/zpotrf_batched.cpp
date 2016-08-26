@@ -211,7 +211,7 @@ magma_zpotrf_lg_batched(
 #endif            
 #if 1
             //real_Double_t gpu_time;
-            //gpu_time = magma_sync_wtime(NULL);
+            //gpu_time = magma_sync_wtime(queue);
             if ( (n-j-ib) > 0) {
                 use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaConjTrans, n-j-ib, n-j-ib, ib);
                 if (use_stream)
@@ -253,7 +253,7 @@ magma_zpotrf_lg_batched(
                                           batchCount, queue );
                 }
             } 
-            //gpu_time = magma_sync_wtime(NULL) - gpu_time;
+            //gpu_time = magma_sync_wtime(queue) - gpu_time;
             //real_Double_t flops = (n-j-ib) * (n-j-ib) * ib / 1e9 * batchCount;
             //real_Double_t gpu_perf = flops / gpu_time;
             //printf("Rows= %lld, Colum=%lld, herk time = %7.2fms, Gflops= %7.2f\n",
