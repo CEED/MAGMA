@@ -10,12 +10,6 @@
 */
 #include "magmasparse_internal.h"
 
-#include <cuda.h>  // for CUDA_VERSION
-
-
-
-
-
 /**
     Purpose
     -------
