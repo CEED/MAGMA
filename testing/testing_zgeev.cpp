@@ -102,7 +102,7 @@ int main( int argc, char** argv)
     }
     
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = std::abs( opts.ngpu );
+    magma_int_t abs_ngpu = abs( opts.ngpu );
     
     printf("%% jobvl = %s, jobvr = %s, ngpu = %lld\n",
            lapack_vec_const(opts.jobvl), lapack_vec_const(opts.jobvr),

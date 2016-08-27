@@ -19,8 +19,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>
-
 // includes, project
 #include "magma_v2.h"
 #include "magma_lapack.h"
@@ -72,7 +70,7 @@ int main( int argc, char** argv)
         range = MagmaRangeI;
 
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = std::abs( opts.ngpu );
+    magma_int_t abs_ngpu = abs( opts.ngpu );
     
     printf("%% itype = %lld, jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %lld\n",
            (long long) opts.itype, lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),

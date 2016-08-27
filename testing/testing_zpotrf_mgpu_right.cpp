@@ -14,8 +14,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>
-
 /* includes, project */
 #include "flops.h"
 #include "magma_v2.h"
@@ -48,7 +46,7 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
     ngpu0 = opts.ngpu;
 
     printf("%% ngpu = %lld, uplo = %s\n", (long long) opts.ngpu, lapack_uplo_const(opts.uplo) );

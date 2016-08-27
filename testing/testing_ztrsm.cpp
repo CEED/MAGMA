@@ -14,8 +14,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>
-
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -64,7 +62,7 @@ int main( int argc, char** argv)
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = std::abs( opts.ngpu );
+    magma_int_t abs_ngpu = abs( opts.ngpu );
     
     printf("%% side = %s, uplo = %s, transA = %s, diag = %s, ngpu = %lld\n",
            lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),

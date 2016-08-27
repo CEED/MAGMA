@@ -18,8 +18,6 @@
 #include <math.h>
 #include <assert.h>
 
-#include <algorithm>
-
 #include <cuda_runtime.h>  // for cudaEventCreateWithFlags; TODO replace
 
 // includes, project
@@ -55,7 +53,7 @@ int main( int argc, char** argv)
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     

@@ -18,8 +18,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>
-
 // make sure that asserts are enabled
 #undef NDEBUG
 #include <assert.h>
@@ -128,7 +126,7 @@ int main( int argc, char** argv )
             cublasIzamax( opts.handle, int(m), dA(0,j), 1, &i2 );
             // todo need sync here?
             assert( i1 == i2 );
-            error += std::abs( i1 - i2 );
+            error += abs( i1 - i2 );
         }
         total_error += error;
         gflops = (double)m * k / 1e9;

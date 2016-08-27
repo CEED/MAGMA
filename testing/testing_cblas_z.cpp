@@ -15,8 +15,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>
-
 #ifdef HAVE_CBLAS
 #include <cblas.h>
 #endif
@@ -140,7 +138,7 @@ int main( int argc, char** argv )
     magma_int_t ninc = sizeof(inc)/sizeof(*inc);
     magma_int_t maxinc = 0;
     for( i=0; i < ninc; ++i ) {
-        maxinc = max( maxinc, std::abs(inc[i]) );
+        maxinc = max( maxinc, abs(inc[i]) );
     }
     
     printf( "!! Calling these CBLAS and Fortran BLAS sometimes crashes (segfaults), which !!\n"

@@ -16,8 +16,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>
-
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -53,7 +51,7 @@ int main( int argc, char** argv)
     double eps = lapackf77_dlamch( "E" );
     
     // pass ngpu = -1 to test multi-GPU code using 1 gpu
-    magma_int_t abs_ngpu = std::abs( opts.ngpu );
+    magma_int_t abs_ngpu = abs( opts.ngpu );
     
     printf("%% version %lld, ngpu = %lld\n", (long long) opts.version, (long long) abs_ngpu);
     

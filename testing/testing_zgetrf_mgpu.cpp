@@ -14,8 +14,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>
-
 // includes, project
 #include "flops.h"
 #include "magma_v2.h"
@@ -167,7 +165,7 @@ int main( int argc, char** argv )
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
-    opts.ngpu = std::abs( opts.ngpu );  // always uses multi-GPU code
+    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
