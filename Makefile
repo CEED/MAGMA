@@ -634,6 +634,7 @@ $(sparse_testers): %: %.$(o_ext)
 INSTALL_FLAGS := $(filter-out \
 	-DMAGMA_NOAFFINITY -DMAGMA_SETAFFINITY -DMAGMA_WITH_ACML -DMAGMA_WITH_MKL -DUSE_FLOCK \
 	-DMIN_CUDA_ARCH=100 -DMIN_CUDA_ARCH=200 -DMIN_CUDA_ARCH=300 \
+	-DMIN_CUDA_ARCH=350 -DMIN_CUDA_ARCH=500 -DMIN_CUDA_ARCH=600 \
 	-DHAVE_CUBLAS \
 	-fno-strict-aliasing -fPIC -O0 -O1 -O2 -O3 -pedantic -std=c99 -stdc++98 -stdc++11 \
 	-Wall -Wshadow -Wno-long-long, $(CFLAGS))
@@ -641,23 +642,23 @@ INSTALL_FLAGS := $(filter-out \
 INSTALL_LDFLAGS := $(filter-out -fPIC -Wall, $(LDFLAGS))
 
 install_dirs:
-	mkdir -p $(prefix)
-	mkdir -p $(prefix)/include
-	mkdir -p $(prefix)/lib
-	mkdir -p $(prefix)/lib/pkgconfig
+	mkdir -p $(DESTDIR)$(prefix)
+	mkdir -p $(DESTDIR)$(prefix)/include
+	mkdir -p $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
+	mkdir -p $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)/pkgconfig
 
 install: lib sparse-lib install_dirs
 	# MAGMA
-	cp include/*.h              $(prefix)/include
-	cp sparse-iter/include/*.h  $(prefix)/include
-	cp $(libs)                  $(prefix)/lib
+	cp include/*.h              $(DESTDIR)$(prefix)/include
+	cp sparse-iter/include/*.h  $(DESTDIR)$(prefix)/include
+	cp $(libs)                  $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
 	# pkgconfig
 	cat lib/pkgconfig/magma.pc.in                   | \
 	sed -e s:@INSTALL_PREFIX@:"$(prefix)":          | \
 	sed -e s:@CFLAGS@:"$(INSTALL_FLAGS) $(INC)":    | \
 	sed -e s:@LIBS@:"$(INSTALL_LDFLAGS) $(LIBS)":   | \
 	sed -e s:@MAGMA_REQUIRED@::                       \
-	    > $(prefix)/lib/pkgconfig/magma.pc
+	    > $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)/pkgconfig/magma.pc
 
 
 # ----------------------------------------
