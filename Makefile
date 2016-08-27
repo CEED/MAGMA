@@ -197,9 +197,9 @@ include $(Makefiles)
 # objects
 
 ifeq ($(FORT),no_fortran)
-liblapacktest_all := $(filter %_no_fortran.cpp, $(liblapacktest_all))
+liblapacktest_all2 := $(filter %_no_fortran.cpp, $(liblapacktest_all))
 else
-liblapacktest_all := $(filter-out %_no_fortran.cpp, $(liblapacktest_all))
+liblapacktest_all2 := $(filter-out %_no_fortran.cpp, $(liblapacktest_all))
 endif
 
 ifeq ($(FORT),no_fortran)
@@ -211,7 +211,7 @@ libmagma_obj       := $(addsuffix .$(o_ext), $(basename $(libmagma_all)))
 libsparse_obj      := $(addsuffix .$(o_ext), $(basename $(libsparse_all)))
 libblas_fix_obj    := $(addsuffix .$(o_ext), $(basename $(libblas_fix_src)))
 libtest_obj        := $(addsuffix .$(o_ext), $(basename $(libtest_all)))
-liblapacktest_obj  := $(addsuffix .$(o_ext), $(basename $(liblapacktest_all)))
+liblapacktest_obj  := $(addsuffix .$(o_ext), $(basename $(liblapacktest_all2)))
 testing_obj        := $(addsuffix .$(o_ext), $(basename $(testing_all)))
 sparse_testing_obj := $(addsuffix .$(o_ext), $(basename $(sparse_testing_all)))
 
@@ -225,7 +225,7 @@ deps += $(addsuffix .d, $(basename $(libmagma_all)))
 deps += $(addsuffix .d, $(basename $(libsparse_all)))
 deps += $(addsuffix .d, $(basename $(libblas_fix_src)))
 deps += $(addsuffix .d, $(basename $(libtest_all)))
-deps += $(addsuffix .d, $(basename $(lapacktest_all)))
+deps += $(addsuffix .d, $(basename $(lapacktest_all2)))
 deps += $(addsuffix .d, $(basename $(testing_all)))
 deps += $(addsuffix .d, $(basename $(sparse_testing_all)))
 
@@ -719,6 +719,7 @@ echo:
 	@echo "====="
 	@echo "liblapacktest_src  $(liblapacktest_src)\n"
 	@echo "liblapacktest_all  $(liblapacktest_all)\n"
+	@echo "liblapacktest_all2 $(liblapacktest_all2)\n"
 	@echo "liblapacktest_obj  $(liblapacktest_obj)\n"
 	@echo "liblapacktest_a    $(liblapacktest_a)\n"
 	@echo "====="
