@@ -39,6 +39,28 @@ endif()
 
 
 # ----------------------------------------
+# use C++11 and C99
+# see http://stackoverflow.com/questions/10851247/how-to-activate-c-11-in-cmake
+include(CheckCXXCompilerFlag)
+include(CheckCCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Some code may not compile.")
+endif()
+
+CHECK_C_COMPILER_FLAG("-std=c99" COMPILER_SUPPORTS_C99)
+if(COMPILER_SUPPORTS_C99)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+else()
+    message(STATUS "The compiler ${CMAKE_C_COMPILER} has no C99 support. Some code may not compile.")
+endif()
+
+# ----------------------------------------
 # check Fortran name mangling
 if ( USE_FORTRAN )
 	include( FortranCInterface )
@@ -84,6 +106,9 @@ if ( CUDA_FOUND )
 	# NV_COMP  is compute_xx for highest requested version
 	set( NV_SM    "" )
 	set( NV_COMP  "" )
+
+        # -std=c++11 messes with nvcc, so don't propagate CXXFLAGS to nvcc
+        set( CUDA_PROPAGATE_HOST_FLAGS OFF )
 	
 	message( "   GPU_TARGET ${GPU_TARGET}" )
 	if ( ${GPU_TARGET} MATCHES Fermi )
@@ -207,7 +232,7 @@ if ( WIN32 )
 else()
 	# Primarily for gcc / nvcc:
 	# Ignore unused static functions in headers.
-	set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wno-unused-function -std=c99" )
+	set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wno-unused-function" )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-function" )
 endif()
 
