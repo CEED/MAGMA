@@ -114,6 +114,7 @@ extern "C" {
 #define lapackf77_zlarfb   FORTRAN_NAME( zlarfb, ZLARFB )
 #define lapackf77_zlarfg   FORTRAN_NAME( zlarfg, ZLARFG )
 #define lapackf77_zlarft   FORTRAN_NAME( zlarft, ZLARFT )
+#define lapackf77_zlarfx   FORTRAN_NAME( zlarfx, ZLARFX )
 #define lapackf77_zlarnv   FORTRAN_NAME( zlarnv, ZLARNV )
 #define lapackf77_zlartg   FORTRAN_NAME( zlartg, ZLARTG )
 #define lapackf77_zlascl   FORTRAN_NAME( zlascl, ZLASCL )
@@ -156,7 +157,6 @@ extern "C" {
 #define lapackf77_zget22   FORTRAN_NAME( zget22, ZGET22 )
 #define lapackf77_zhet21   FORTRAN_NAME( zhet21, ZHET21 )
 #define lapackf77_zhst01   FORTRAN_NAME( zhst01, ZHST01 )
-#define lapackf77_zlarfx   FORTRAN_NAME( zlarfx, ZLARFX )
 #define lapackf77_zlarfy   FORTRAN_NAME( zlarfy, ZLARFY )
 #define lapackf77_zlatms   FORTRAN_NAME( zlatms, ZLATMS )
 #define lapackf77_zqpt01   FORTRAN_NAME( zqpt01, ZQPT01 )
@@ -788,6 +788,12 @@ void   lapackf77_zlarft( const char *direct, const char *storev,
                          const magmaDoubleComplex *tau,
                          magmaDoubleComplex *T, const magma_int_t *ldt );
 
+void   lapackf77_zlarfx( const char *side, const magma_int_t *m, const magma_int_t *n,
+                         const magmaDoubleComplex *V,
+                         const magmaDoubleComplex *tau,
+                         magmaDoubleComplex *C, const magma_int_t *ldc,
+                         magmaDoubleComplex *work );
+
 void   lapackf77_zlarnv( const magma_int_t *idist, magma_int_t *iseed, const magma_int_t *n,
                          magmaDoubleComplex *x );
 
@@ -1194,12 +1200,6 @@ void   lapackf77_zunt01( const char *rowcol, const magma_int_t *m, const magma_i
 void   lapackf77_zlarfy( const char *uplo, const magma_int_t *n,
                          magmaDoubleComplex *V, const magma_int_t *incv,
                          magmaDoubleComplex *tau,
-                         magmaDoubleComplex *C, const magma_int_t *ldc,
-                         magmaDoubleComplex *work );
-
-void   lapackf77_zlarfx( const char *side, const magma_int_t *m, const magma_int_t *n,
-                         const magmaDoubleComplex *V,
-                         const magmaDoubleComplex *tau,
                          magmaDoubleComplex *C, const magma_int_t *ldc,
                          magmaDoubleComplex *work );
 
