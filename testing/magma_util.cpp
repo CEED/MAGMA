@@ -533,7 +533,10 @@ void magma_opts::parse_opts( int argc, char** argv )
             i += 1;
             char *token;
             char *arg = strdup( argv[i] );
-            while( (token = strsep( &arg, ", " )) != NULL ) {
+            for (token = strtok( arg, ", " );
+                 token != NULL;
+                 token = strtok( NULL, ", " ))
+            {
                 if ( *token == '\0' ) { /* ignore empty tokens */ }
                 else if ( strcmp( token, "all"       ) == 0 ) { this->svd_work.push_back( MagmaSVD_all        ); }
                 else if ( strcmp( token, "query"     ) == 0 ) { this->svd_work.push_back( MagmaSVD_query      ); }
