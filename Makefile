@@ -10,7 +10,10 @@ include make.inc
 CC         ?= cc
 CXX        ?= c++
 NVCC       ?= nvcc
-FORT       ?= no_fortran
+FORT       ?=
+ifeq ($(FORT),)
+    $(warning No Fortran compiler was given in FORT in make.inc. Some testers will not be able to check their results.)
+endif
 
 ARCH       ?= ar
 ARCHFLAGS  ?= cr
@@ -196,13 +199,13 @@ include $(Makefiles)
 # ----------------------------------------
 # objects
 
-ifeq ($(FORT),no_fortran)
+ifeq ($(FORT),)
 liblapacktest_all2 := $(filter %_no_fortran.cpp, $(liblapacktest_all))
 else
 liblapacktest_all2 := $(filter-out %_no_fortran.cpp, $(liblapacktest_all))
 endif
 
-ifeq ($(FORT),no_fortran)
+ifeq ($(FORT),)
 libmagma_all := $(filter-out %.f %.f90 %.F90, $(libmagma_all))
 testing_all  := $(filter-out %.f %.f90 %.F90, $(testing_all))
 endif
