@@ -14,7 +14,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
+#if defined(__unix__) || defined(__APPLE__)
 #include <unistd.h>  // unlink
+// on Windows, _unlink is in stdio.h; testings.h defines unlink as _unlink
+#endif
 
 // includes, project
 #include "magma_v2.h"
