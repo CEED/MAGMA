@@ -29,12 +29,12 @@ set(CMAKE_SUPPRESS_REGENERATION on)
 # (out-of-source is cleaner, too)
 string( COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" MAGMA_COMPILE_INPLACE )
 if( MAGMA_COMPILE_INPLACE )
-	message(FATAL_ERROR "Compiling MAGMA with CMake requires an out-of-source build. To proceed:
-  rm -rf CMakeCache.txt CMakeFiles/   # delete files in ${CMAKE_SOURCE_DIR}
-  mkdir build
-  cd build
-  cmake ..
-  make" )
+	message( FATAL_ERROR "Compiling MAGMA with CMake requires an out-of-source build. To proceed:
+    rm -rf CMakeCache.txt CMakeFiles/   # delete files in ${CMAKE_SOURCE_DIR}
+    mkdir build
+    cd build
+    cmake ..
+    make" )
 endif()
 
 
@@ -46,18 +46,18 @@ include(CheckCCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 else()
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} doesn't support the -std=c++11 flag. Some code may not compile.")
+	message( WARNING "The compiler ${CMAKE_CXX_COMPILER} doesn't support the -std=c++11 flag. Some code may not compile.")
 endif()
 
 CHECK_C_COMPILER_FLAG("-std=c99" COMPILER_SUPPORTS_C99)
 if(COMPILER_SUPPORTS_C99)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 else()
-    message(STATUS "The compiler ${CMAKE_C_COMPILER} doesn't support the -std=c99 flag. Some code may not compile.")
+	message( WARNING "The compiler ${CMAKE_C_COMPILER} doesn't support the -std=c99 flag. Some code may not compile.")
 endif()
 
 
@@ -68,9 +68,9 @@ if ( USE_FORTRAN )
 	FortranCInterface_HEADER( ${CMAKE_SOURCE_DIR}/include/magma_mangling_cmake.h MACRO_NAMESPACE MAGMA_ )
 else()
 	# set one of -DADD_, -DUPCASE, or -DNOCHANGE. See README.
-	message( "-- Building without Fortran compiler" )
+	message( STATUS "Building without Fortran compiler" )
 	set( FORTRAN_CONVENTION "-DADD_" CACHE STRING "Fortran calling convention, one of -DADD_, -DNOCHANGE, -DUPCASE" )
-	message( "   Using ${FORTRAN_CONVENTION} for Fortran calling convention" )
+	message( STATUS "    Using ${FORTRAN_CONVENTION} for Fortran calling convention" )
 	set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${FORTRAN_CONVENTION}" )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FORTRAN_CONVENTION}" )
 	# see also NVCC_FLAGS below
@@ -81,9 +81,9 @@ endif()
 # locate OpenMP
 find_package( OpenMP )
 if ( OPENMP_FOUND )
-	message( "-- Found OpenMP" )
-	message( "   OpenMP_C_FLAGS   ${OpenMP_C_FLAGS}" )
-	message( "   OpenMP_CXX_FLAGS ${OpenMP_CXX_FLAGS}" )
+	message( STATUS "Found OpenMP" )
+	message( STATUS "    OpenMP_C_FLAGS   ${OpenMP_C_FLAGS}" )
+	message( STATUS "    OpenMP_CXX_FLAGS ${OpenMP_CXX_FLAGS}" )
 	set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
 endif()
@@ -94,11 +94,11 @@ endif()
 set( GPU_TARGET "Fermi Kepler" CACHE STRING "CUDA architectures to compile for; one or more of Fermi, Kepler, or Maxwell" )
 find_package( CUDA )
 if ( CUDA_FOUND )
-	message( "-- Found CUDA ${CUDA_VERSION}" )
-	message( "   CUDA_INCLUDE_DIRS:   ${CUDA_INCLUDE_DIRS}"   )
-	message( "   CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY}" )
-	#message( "   CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
-	#message( "   CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
+	message( STATUS "Found CUDA ${CUDA_VERSION}" )
+	message( STATUS "    CUDA_INCLUDE_DIRS:   ${CUDA_INCLUDE_DIRS}"   )
+	message( STATUS "    CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY}" )
+	#message( STATUS "    CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
+	#message( STATUS "    CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
 	include_directories( ${CUDA_INCLUDE_DIRS} )
 
 	# NVCC options for the different cards
@@ -118,20 +118,17 @@ if ( CUDA_FOUND )
 		set( CUDA_PROPAGATE_HOST_FLAGS OFF )
 	endif()
 	
-	message( "   GPU_TARGET ${GPU_TARGET}" )
 	if ( ${GPU_TARGET} MATCHES Fermi )
-	    set( GPU_TARGET "${GPU_TARGET} sm20" )
+		set( GPU_TARGET "${GPU_TARGET} sm20" )
 	endif()
 	
 	if ( ${GPU_TARGET} MATCHES Kepler )
-	    set( GPU_TARGET "${GPU_TARGET} sm30 sm35" )
+		set( GPU_TARGET "${GPU_TARGET} sm30 sm35" )
 	endif()
 	
 	if ( ${GPU_TARGET} MATCHES Maxwell )
-	    set( GPU_TARGET "${GPU_TARGET} sm50" )
+		set( GPU_TARGET "${GPU_TARGET} sm50" )
 	endif()
-	
-	message( "   GPU_TARGET_NEW ${GPU_TARGET}" )
 	
 	if ( ${GPU_TARGET} MATCHES sm20 )
 		if ( NOT MIN_ARCH )
@@ -139,7 +136,7 @@ if ( CUDA_FOUND )
 		endif()
 		set( NV_SM "${NV_SM} -gencode arch=compute_20,code=sm_20" )
 		set( NV_COMP        "-gencode arch=compute_20,code=compute_20" )
-		message( "   compile for CUDA arch 2.x (Fermi)" )
+		message( STATUS "    compile for CUDA arch 2.x (Fermi)" )
 	endif()
 	
 	if ( ${GPU_TARGET} MATCHES sm30 )
@@ -148,7 +145,7 @@ if ( CUDA_FOUND )
 		endif()
 		set( NV_SM "${NV_SM} -gencode arch=compute_30,code=sm_30" )
 		set( NV_COMP        "-gencode arch=compute_30,code=compute_30" )
-		message( "   compile for CUDA arch 3.0 (Kepler)" )
+		message( STATUS "    compile for CUDA arch 3.0 (Kepler)" )
 	endif()
 	
 	if ( ${GPU_TARGET} MATCHES sm35 )
@@ -157,7 +154,7 @@ if ( CUDA_FOUND )
 		endif()
 		set( NV_SM "${NV_SM} -gencode arch=compute_35,code=sm_35" )
 		set( NV_COMP        "-gencode arch=compute_35,code=compute_35" )
-		message( "   compile for CUDA arch 3.5 (Kepler)" )
+		message( STATUS "    compile for CUDA arch 3.5 (Kepler)" )
 	endif()
 	
 	if ( ${GPU_TARGET} MATCHES sm50 )
@@ -166,7 +163,7 @@ if ( CUDA_FOUND )
 		endif()
 		set( NV_SM "${NV_SM} -gencode arch=compute_50,code=sm_50" )
 		set( NV_COMP        "-gencode arch=compute_50,code=compute_50" )
-		message( "   compile for CUDA arch 5.0 (Maxwell)" )
+		message( STATUS "    compile for CUDA arch 5.0 (Maxwell)" )
 	endif()
 	
 	if ( NOT MIN_ARCH )
@@ -175,6 +172,7 @@ if ( CUDA_FOUND )
 	
 	set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -DHAVE_CUBLAS ${NV_SM} ${NV_COMP} ${FORTRAN_CONVENTION}" )
 	add_definitions( "-DHAVE_CUBLAS -DMIN_CUDA_ARCH=${MIN_ARCH}" )
+	message( STATUS "Define -DHAVE_CUBLAS -DMIN_CUDA_ARCH=${MIN_ARCH}" )
 endif()
 
 
@@ -182,32 +180,37 @@ endif()
 # locate LAPACK libraries
 set( LAPACK_LIBRARIES "" CACHE STRING "Libraries for LAPACK and BLAS, to manually override search" )
 if ( "${LAPACK_LIBRARIES}" STREQUAL "" )
-	message( "-- Searching for BLAS and LAPACK. To override, set LAPACK_LIBRARIES using ccmake." )
+	message( STATUS "Searching for BLAS and LAPACK. To override, set LAPACK_LIBRARIES using ccmake." )
 	find_package( LAPACK )
 else()
-	message( "-- User set LAPACK_LIBRARIES. To change, edit LAPACK_LIBRARIES using ccmake (set to empty to enable search)." )
+	message( STATUS "User set LAPACK_LIBRARIES. To change, edit LAPACK_LIBRARIES using ccmake (set to empty to enable search)." )
 	# Check existence -- but this may be okay, if the user entered, e.g., -llapack instead of /path/to/lapack.a
 	foreach( LIB ${LAPACK_LIBRARIES} )
 		if ( NOT EXISTS ${LIB} )
-			message( "\n      Warning: file ${LIB} does not exist.\n" )
+			message( WARNING "\n      Warning: file ${LIB} does not exist.\n" )
 		endif()
 	endforeach()
 endif()
-message( "   BLAS_LIBRARIES:      ${BLAS_LIBRARIES}"      )
-message( "   LAPACK_LIBRARIES:    ${LAPACK_LIBRARIES}"    )
+message( STATUS "    BLAS_LIBRARIES:      ${BLAS_LIBRARIES}"      )
+message( STATUS "    LAPACK_LIBRARIES:    ${LAPACK_LIBRARIES}"    )
 
 # If using MKL, add it to includes and define MAGMA_WITH_MKL
 # Initially, this gets MKLROOT from environment, but then the user can edit it.
 set( MKLROOT $ENV{MKLROOT} CACHE STRING "MKL installation directory" )
 if ( NOT "${MKLROOT}" STREQUAL "" )
-	message( "-- MKLROOT set to ${MKLROOT}. To change, edit MKLROOT using ccmake." )
+	message( STATUS "MKLROOT set to ${MKLROOT}. To change, edit MKLROOT using ccmake." )
+	if ( NOT LAPACK_LIBRARIES MATCHES mkl_core )
+		message( WARNING "MKLROOT set, but LAPACK_LIBRARIES doesn't contain mkl_core; ignoring MKLROOT." )
+	else()
 		if ( NOT EXISTS "${MKLROOT}" )
 			message( FATAL_ERROR "MKLROOT ${MKLROOT} directory does not exist." )
 		endif()
 		include_directories( ${MKLROOT}/include )
 		add_definitions( -DMAGMA_WITH_MKL )
+		message( STATUS "Define -DMAGMA_WITH_MKL" )
+	endif()
 else()
-	message( "-- MKLROOT not set. To change, set MKLROOT using ccmake." )
+	message( STATUS "MKLROOT not set. To change, set MKLROOT using ccmake." )
 endif()
 
 
@@ -245,17 +248,20 @@ else()
 endif()
 
 if ( CMAKE_HOST_APPLE )
-	# 64-bit veclib has issues; substitute correct functions from LAPACK.
+	# 64-bit veclib (Accelerate) has issues; substitute correct functions from LAPACK.
 	# (The issue is single precision functions that return doubles;
 	# if a consistent prototype is used, the problem goes away in C,
 	# but this is not feasible in Fortran.)
+	if ( "${LAPACK_LIBRARIES}" MATCHES "Accelerate" )
 		if ( USE_FORTRAN )
-		message( "-- MacOS X: adding blas_fix library" )
+			message( STATUS "MacOS X: adding blas_fix library" )
 			add_library( blas_fix ${libblas_fix_src} )
 			list( APPEND LIBS blas_fix )
+			set( blas_fix blas_fix )
 		else()
-		message( "\n      Warning: cannot compile blas_fix library for MacOS X without Fortran compiler.\n" )
+			message( WARNING "\n      Warning: cannot compile blas_fix library for MacOS X without Fortran compiler.\n" )
 		endif()
+	endif()
 	
 	set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -DMAGMA_NOAFFINITY" )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAGMA_NOAFFINITY" )
@@ -413,10 +419,22 @@ endforeach()
 
 
 # ----------------------------------------
-message( "-- Flags" )
-message( "   CFLAGS       ${CMAKE_C_FLAGS}" )
-message( "   CXXFLAGS     ${CMAKE_CXX_FLAGS}" )
-message( "   NFLAGS       ${CUDA_NVCC_FLAGS}" )
-message( "   FFLAGS       ${CMAKE_Fortran_FLAGS}" )
-message( "   LIBS         ${LIBS}" )
-message( "   LIBS_SPARSE  ${LIBS_SPARSE}" )
+# what to install
+install( TARGETS magma magma_sparse ${blas_fix}
+         RUNTIME DESTINATION bin
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib )
+file( GLOB headers include/*.h sparse-iter/include/*.h )
+install( FILES ${headers}
+         DESTINATION include )
+
+# ----------------------------------------
+get_directory_property( compile_definitions COMPILE_DEFINITIONS )
+
+message( STATUS "Flags" )
+message( STATUS "    CFLAGS       ${CMAKE_C_FLAGS}" )
+message( STATUS "    CXXFLAGS     ${CMAKE_CXX_FLAGS}" )
+message( STATUS "    NFLAGS       ${CUDA_NVCC_FLAGS}" )
+message( STATUS "    FFLAGS       ${CMAKE_Fortran_FLAGS}" )
+message( STATUS "    LIBS         ${LIBS}" )
+message( STATUS "    LIBS_SPARSE  ${LIBS_SPARSE}" )
