@@ -180,7 +180,7 @@ const char* magma_strerror( magma_int_t err )
         case MAGMA_ERR_NAN:
             return "NaN detected";
         
-        // some sparse-iter errors
+        // some MAGMA-sparse errors
         case MAGMA_SLOW_CONVERGENCE:
             return "stopping criterion not reached within iterations";
         

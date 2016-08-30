@@ -15,8 +15,8 @@ svn st -vq \
 
 setenv FILES        `egrep -v checklist files.txt`
 setenv HEADERS      `egrep '\.h$' files.txt`
-setenv MAKEFILES    `egrep Makefile files.txt | egrep -v sparse-iter`
-setenv MAKEFILES_SP `egrep Makefile files.txt | egrep    sparse-iter`
+setenv MAKEFILES    `egrep Makefile files.txt | egrep -v sparse`
+setenv MAKEFILES_SP `egrep Makefile files.txt | egrep    sparse`
 
 echo "============================================================ required fixes"
 
@@ -89,16 +89,16 @@ echo
 
 # fixed
 echo "========== define PRECISION_{s, d, c, z} outside s, d, c, z files, resp.   *** required fix ***"
-egrep '^ *# *define +PRECISION_s' */[dcz]*.{h,c,cu,cpp} sparse-iter/*/[dcz]*.{h,c,cu,cpp} sparse-iter/*/magma_[dcz]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_s'
-egrep '^ *# *define +PRECISION_d' */[scz]*.{h,c,cu,cpp} sparse-iter/*/[scz]*.{h,c,cu,cpp} sparse-iter/*/magma_[scz]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_d'
-egrep '^ *# *define +PRECISION_c' */[sdz]*.{h,c,cu,cpp} sparse-iter/*/[sdz]*.{h,c,cu,cpp} sparse-iter/*/magma_[sdz]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_c|scnrm2.cu'
-egrep '^ *# *define +PRECISION_z' */[sdc]*.{h,c,cu,cpp} sparse-iter/*/[sdc]*.{h,c,cu,cpp} sparse-iter/*/magma_[sdc]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_z|dznrm2.cu'
+egrep '^ *# *define +PRECISION_s' */[dcz]*.{h,c,cu,cpp} sparse/*/[dcz]*.{h,c,cu,cpp} sparse/*/magma_[dcz]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_s'
+egrep '^ *# *define +PRECISION_d' */[scz]*.{h,c,cu,cpp} sparse/*/[scz]*.{h,c,cu,cpp} sparse/*/magma_[scz]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_d'
+egrep '^ *# *define +PRECISION_c' */[sdz]*.{h,c,cu,cpp} sparse/*/[sdz]*.{h,c,cu,cpp} sparse/*/magma_[sdz]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_c|scnrm2.cu'
+egrep '^ *# *define +PRECISION_z' */[sdc]*.{h,c,cu,cpp} sparse/*/[sdc]*.{h,c,cu,cpp} sparse/*/magma_[sdc]*.{h,c,cu,cpp} -l | egrep -v 'zm[sdc]dot|core_z|dznrm2.cu'
 echo
 
 # fixed
 echo "========== define {REAL,COMPLEX} outside {[sd],[cz]} files, resp.          *** required fix ***"
-egrep '^ *# *define +REAL'    */[cz]*.{h,c,cu,cpp} sparse-iter/*/[cz]*.{h,c,cu,cpp} sparse-iter/*/magma_[cz]*.{h,c,cu,cpp} -l | egrep -v 'cblas_[sd].cpp'
-egrep '^ *# *define +COMPLEX' */[sd]*.{h,c,cu,cpp} sparse-iter/*/[sd]*.{h,c,cu,cpp} sparse-iter/*/magma_[sd]*.{h,c,cu,cpp} -l
+egrep '^ *# *define +REAL'    */[cz]*.{h,c,cu,cpp} sparse/*/[cz]*.{h,c,cu,cpp} sparse/*/magma_[cz]*.{h,c,cu,cpp} -l | egrep -v 'cblas_[sd].cpp'
+egrep '^ *# *define +COMPLEX' */[sd]*.{h,c,cu,cpp} sparse/*/[sd]*.{h,c,cu,cpp} sparse/*/magma_[sd]*.{h,c,cu,cpp} -l
 echo
 
 # fixed

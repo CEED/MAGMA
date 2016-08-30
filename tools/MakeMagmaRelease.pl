@@ -40,30 +40,30 @@ my @files2delete = qw(
     quark
     scripts
 
-    sparse-iter/python
+    sparse/python
     
-    sparse-iter/src/ziterict.cpp
-    sparse-iter/src/zgeisai.cpp
-    sparse-iter/src/zsyisai.cpp
-    sparse-iter/src/zparilut.cpp
-    sparse-iter/src/zparict.cpp
-    sparse-iter/src/ziteric.cpp
+    sparse/src/ziterict.cpp
+    sparse/src/zgeisai.cpp
+    sparse/src/zsyisai.cpp
+    sparse/src/zparilut.cpp
+    sparse/src/zparict.cpp
+    sparse/src/ziteric.cpp
     
-    sparse-iter/control/magma_zmdynamicilu_tools.cpp
-    sparse-iter/control/magma_zmpilut_tools.cpp
-    sparse-iter/control/magma_zmpilut_tools_nolist.cpp
-    sparse-iter/control/magma_zgeisai_tools.cpp
+    sparse/control/magma_zmdynamicilu_tools.cpp
+    sparse/control/magma_zmpilut_tools.cpp
+    sparse/control/magma_zmpilut_tools_nolist.cpp
+    sparse/control/magma_zgeisai_tools.cpp
     
-    sparse-iter/blas/zgeisai.cu
-    sparse-iter/blas/zgeisai_8.cu
-    sparse-iter/blas/zgeisai_16.cu
-    sparse-iter/blas/zgeisai_32.cu
-    sparse-iter/blas/zgeisai_trsv.cu
-    sparse-iter/blas/zgeblockstruct.cu
-    sparse-iter/blas/zgeisai_maxblock.cu
-    sparse-iter/blas/zgeisai_32_develop.cu
+    sparse/blas/zgeisai.cu
+    sparse/blas/zgeisai_8.cu
+    sparse/blas/zgeisai_16.cu
+    sparse/blas/zgeisai_32.cu
+    sparse/blas/zgeisai_trsv.cu
+    sparse/blas/zgeblockstruct.cu
+    sparse/blas/zgeisai_maxblock.cu
+    sparse/blas/zgeisai_32_develop.cu
     
-    sparse-iter/testing/test_matrices
+    sparse/testing/test_matrices
 
     src/obsolete
     testing/*.txt

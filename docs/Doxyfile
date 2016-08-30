@@ -799,9 +799,9 @@ INPUT                  = \
 	../include                        \
 	../interface_cuda                 \
 	../magmablas                      \
-	../sparse-iter/src                \
-	../sparse-iter/control            \
-	../sparse-iter/blas               \
+	../sparse/src                     \
+	../sparse/control                 \
+	../sparse/blas                    \
 	../testing/run_tests.py           \
 
 # This tag can be used to specify the character encoding of the source files

@@ -28,12 +28,12 @@ targets := \
 	lib                  \
 	magmablas            \
 	shared               \
+	sparsela             \
 	sparse               \
-	sparse-iter          \
-	sparse-iter/blas     \
-	sparse-iter/control  \
-	sparse-iter/src      \
-	sparse-iter/testing  \
+	sparse/blas          \
+	sparse/control       \
+	sparse/src           \
+	sparse/testing       \
 	sparse-lib           \
 	sparse-shared        \
 	sparse-static        \

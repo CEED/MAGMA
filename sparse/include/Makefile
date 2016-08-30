@@ -3,7 +3,7 @@
 
 top  := ../..
 pwd  := $(shell pwd)
-cdir := sparse-iter/control
+cdir := sparse/include
 
 default: $(cdir)
 

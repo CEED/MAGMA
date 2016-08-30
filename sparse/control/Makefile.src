@@ -8,7 +8,7 @@
 
 # push previous directory
 dir_stack := $(dir_stack) $(cdir)
-cdir      := sparse-iter/control
+cdir      := sparse/control
 # ----------------------------------------------------------------------
 
 

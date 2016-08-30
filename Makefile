@@ -179,12 +179,12 @@ subdirs := \
 	magmablas       \
 	testing         \
 	testing/lin     \
-	sparse-iter     \
-	sparse-iter/blas    \
-	sparse-iter/control \
-	sparse-iter/include \
-	sparse-iter/src     \
-	sparse-iter/testing \
+	sparse     	\
+	sparse/blas    	\
+	sparse/control 	\
+	sparse/include 	\
+	sparse/src     	\
+	sparse/testing 	\
 
 Makefiles := $(addsuffix /Makefile.src, $(subdirs))
 
@@ -263,8 +263,8 @@ MAGMA_INC  = -I./include
 $(libmagma_obj):       MAGMA_INC += -I./control
 $(libtest_obj):        MAGMA_INC += -I./testing
 $(testing_obj):        MAGMA_INC += -I./testing
-$(libsparse_obj):      MAGMA_INC += -I./control -I./sparse-iter/include -I./sparse-iter/control
-$(sparse_testing_obj): MAGMA_INC += -I./sparse-iter/include -I./sparse-iter/control -I./testing
+$(libsparse_obj):      MAGMA_INC += -I./control -I./sparse/include -I./sparse/control
+$(sparse_testing_obj): MAGMA_INC += -I./sparse/include -I./sparse/control -I./testing
 
 
 # ----- headers
@@ -354,11 +354,11 @@ endif
 
 .DEFAULT_GOAL := all
 
-all: dense sparse
+all: dense sparsela
 
 dense: lib test
 
-sparse: sparse-lib sparse-test
+sparsela: sparse-lib sparse-test
 
 # lib defined below in shared libraries, depending on fPIC
 
@@ -366,7 +366,7 @@ test: testing
 
 testers_f: $(testers_f)
 
-sparse-test: sparse-iter/testing
+sparse-test: sparse/testing
 
 # cleangen is defined in Makefile.gen; cleanall also does cleanmake in Makefile.internal
 cleanall: clean cleangen
@@ -455,9 +455,9 @@ interface_cuda_obj := $(filter interface_cuda/%.o, $(libmagma_obj))
 magmablas_obj      := $(filter      magmablas/%.o, $(libmagma_obj))
 src_obj            := $(filter            src/%.o, $(libmagma_obj))
 
-sparse_control_obj := $(filter sparse-iter/control/%.o, $(libsparse_obj))
-sparse_blas_obj    := $(filter    sparse-iter/blas/%.o, $(libsparse_obj))
-sparse_src_obj     := $(filter     sparse-iter/src/%.o, $(libsparse_obj))
+sparse_control_obj := $(filter sparse/control/%.o, $(libsparse_obj))
+sparse_blas_obj    := $(filter    sparse/blas/%.o, $(libsparse_obj))
+sparse_src_obj     := $(filter     sparse/src/%.o, $(libsparse_obj))
 
 # ----------
 # sub-directory builds
@@ -475,15 +475,15 @@ src:                 $(src_obj)
 
 testing:             $(testers)
 
-sparse-iter:         sparse
+sparse:         sparsela
 
-sparse-iter/blas:    $(sparse_blas_obj)
+sparse/blas:    $(sparse_blas_obj)
 
-sparse-iter/control: $(sparse_control_obj)
+sparse/control: $(sparse_control_obj)
 
-sparse-iter/src:     $(sparse_src_obj)
+sparse/src:     $(sparse_src_obj)
 
-sparse-iter/testing: $(sparse_testers)
+sparse/testing: $(sparse_testers)
 
 # ----------
 # sub-directory clean
@@ -513,22 +513,22 @@ testing/lin/clean:
 	-rm -f $(liblapacktest_a) $(liblapacktest_obj)
 
 # hmm... what should lib/clean do? just the libraries, not objects?
-lib/clean: blas_fix/clean sparse-iter/clean
+lib/clean: blas_fix/clean sparse/clean
 	-rm -f $(libmagma_a) $(libmagma_so) $(libmagma_obj)
 
-sparse-iter/clean: sparse-iter/testing/clean
+sparse/clean: sparse/testing/clean
 	-rm -f $(libsparse_a) $(libsparse_so) $(libsparse_obj)
 
-sparse-iter/blas/clean:
+sparse/blas/clean:
 	-rm -f $(sparse_blas_obj)
 
-sparse-iter/control/clean:
+sparse/control/clean:
 	-rm -f $(sparse_control_obj)
 
-sparse-iter/src/clean:
+sparse/src/clean:
 	-rm -f $(sparse_src_obj)
 
-sparse-iter/testing/clean:
+sparse/testing/clean:
 	-rm -f $(sparse_testers) $(sparse_testing_obj)
 
 
@@ -653,7 +653,7 @@ install_dirs:
 install: lib sparse-lib install_dirs
 	# MAGMA
 	cp include/*.h              $(DESTDIR)$(prefix)/include
-	cp sparse-iter/include/*.h  $(DESTDIR)$(prefix)/include
+	cp sparse/include/*.h  $(DESTDIR)$(prefix)/include
 	cp $(libs)                  $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
 	# pkgconfig
 	cat lib/pkgconfig/magma.pc.in                   | \
