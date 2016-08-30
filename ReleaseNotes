@@ -24,12 +24,13 @@ Included are routines for the following algorithms:
 Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
- 2.1.0 - Aug 26, 2016
+ 2.1.0 - Aug 30, 2016
     * Added variable size batched routines:
       magmablas_[sdcz]{gemm, gemv, syrk, herk, syr2k, her2k}_vbatched
     * Improved performance of SVD routines, and fixed workspace size bugs.
     * More robust error checking for BLAS routines.
     * Expanded and reorganized documentation.
+    * Improved install (added DESTDIR, LIB_SUFFIX to Makefile; added install to CMake).
 
     MAGMA sparse
     * Added a preconditioned QMR iterative solver (PQMR) including a kernel-merged version.
