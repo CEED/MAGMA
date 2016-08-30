@@ -18,7 +18,7 @@
 #include <utility>  // pair
 
 #include "magmasparse_internal.h"
-#include "mmio.h"
+#include "magmasparse_mmio.h"
 
 
 /**
