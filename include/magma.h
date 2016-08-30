@@ -36,6 +36,6 @@
 #include "magma_s.h"
 #include "magma_zc.h"
 #include "magma_ds.h"
-#include "auxiliary.h"
+#include "magma_auxiliary.h"
 
 #endif        //  #ifndef MAGMA_H
