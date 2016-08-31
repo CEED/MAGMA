@@ -631,40 +631,7 @@ magma_zmLdiagadd(
  -- MAGMA_SPARSE iterative dynamic ILU
 */
 // #ifdef _OPENMP
-/*
-magma_int_t
-magma_zparict_insert(
-    magma_int_t tri,
-    magma_int_t num_rm,
-    magma_index_t *rm_loc,
-    magma_z_matrix *LU_new,
-    magma_z_matrix *LU,
-    omp_lock_t *rowlock,
-    magma_queue_t queue );
 
-
-magma_int_t
-magma_zparict_insert_U(
-    magma_int_t tri,
-    magma_int_t num_rm,
-    magma_index_t *rm_loc,
-    magma_z_matrix *LU_new,
-    magma_z_matrix *LU,
-    omp_lock_t *rowlock,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zparict_insert_LU(
-    magma_int_t tri,
-    magma_int_t num_rm,
-    magma_index_t *rm_loc,
-    magma_index_t *rm_loc2,
-    magma_z_matrix *LU_new,
-    magma_z_matrix *L,
-    magma_z_matrix *U,
-    omp_lock_t *rowlock,
-    magma_queue_t queue );
-    */
 magma_int_t
 magma_zparilut_insert_LU(
     magma_int_t num_rm,
@@ -706,80 +673,9 @@ magma_zparilut_reorder(
     magma_queue_t queue );
 
 magma_int_t
-magma_zparilut_copy(
-    magma_z_matrix LU,
-    magma_z_matrix *LUCSR,
-    magma_queue_t queue );
-/*
-magma_int_t
-magma_zparilut_rm_thrs(
-    magmaDoubleComplex *thrs,
-    magma_int_t *num_rm,
-    magma_z_matrix *LU,    
-    magma_z_matrix *LU_new,
-    magma_index_t *rm_loc,
-    omp_lock_t *rowlock,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zparilut_rm_thrs_U(
-    magmaDoubleComplex *thrs,
-    magma_int_t *num_rm,
-    magma_z_matrix *U,
-    magma_z_matrix *LU_new,
-    magma_index_t *rm_loc,
-    omp_lock_t *rowlock,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zparilut_rm_thrs_LU(
-    magmaDoubleComplex *thrs,
-    magma_int_t *num_rm,
-    magma_z_matrix *L,
-    magma_z_matrix *U,
-    magma_z_matrix *LU_new,
-    magma_index_t *rm_loc,
-    omp_lock_t *rowlock,
-    magma_queue_t queue );
-    */
-magma_int_t
 magma_zparict_sweep(
     magma_z_matrix *A,
     magma_z_matrix *LU,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zparict_residuals(
-    magma_z_matrix A,
-    magma_z_matrix LU,
-    magma_z_matrix *LU_new,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zmeliminate_duplicates(
-    magma_int_t num_rm,
-    magma_z_matrix *LU_new,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zparict_candidates(
-    magma_z_matrix LU,
-    magma_z_matrix *LU_new,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zmilu0_candidates(
-    magma_z_matrix A,
-    magma_z_matrix L,
-    magma_z_matrix U,
-    magma_z_matrix *LU_new,
-    magma_queue_t queue );
-
-magma_int_t
-magma_ziterictsetup(
-    magma_z_matrix A,
-    magma_z_matrix b,
-    magma_z_preconditioner *precond,
     magma_queue_t queue );
 
 magma_int_t
@@ -845,13 +741,6 @@ magma_zparilut_colmajorup(
     magma_queue_t queue );
 
 magma_int_t
-magma_zparictsetup(
-    magma_z_matrix A,
-    magma_z_matrix b,
-    magma_z_preconditioner *precond,
-    magma_queue_t queue );
-
-magma_int_t
 magma_zparilutsetup(
     magma_z_matrix A,
     magma_z_matrix b,
@@ -871,27 +760,6 @@ magma_zparilut_insert(
     magma_z_matrix *UR,
     magma_queue_t queue );
 
-magma_int_t
-magma_zparilut_insertsort(
-    magma_int_t *num_rmL,
-    magma_int_t *num_rmU,
-    magma_index_t *addL,
-    magma_index_t *addU,
-    magma_z_matrix *L_new,
-    magma_z_matrix *U_new,
-    magma_z_matrix *L,
-    magma_z_matrix *U,
-    magma_z_matrix *UR,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zparilut_rmsort(
-    magmaDoubleComplex *thrs,
-    magma_int_t *num_rm,
-    magma_z_matrix *LU,
-    magma_z_matrix *LU_new,
-    magma_index_t *rm_loc,
-    magma_queue_t queue );
 
 magma_int_t
 magma_zparilut_candidates(
@@ -912,29 +780,10 @@ magma_zparilut_candidates_linkedlist(
     magma_queue_t queue );
 
 magma_int_t
-magma_zparilut_candlist(
-    magma_z_matrix L,
-    magma_z_matrix U,
-    magma_z_matrix UR,
-    magma_z_matrix *L_new,
-    magma_z_matrix *U_new,
-    magma_queue_t queue );
-
-magma_int_t
 magma_zparilut_rm_thrs(
     magmaDoubleComplex *thrs,
     magma_int_t *num_rm,
     magma_z_matrix *LU,
-    magma_z_matrix *LU_new,
-    magma_index_t *rm_loc,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zparilut_rm_thrsrc(
-    magmaDoubleComplex *thrs,
-    magma_int_t *num_rm,
-    magma_z_matrix *LU,
-    magma_z_matrix *LUC,
     magma_z_matrix *LU_new,
     magma_index_t *rm_loc,
     magma_queue_t queue );
@@ -948,14 +797,6 @@ magma_zparilut_count(
 magma_int_t
 magma_zparilut_randlist(
     magma_z_matrix *LU,
-    magma_queue_t queue );
-
-
-magma_int_t
-magma_zparilut_select_candidates(
-    magma_int_t *num_rm,
-    magma_int_t *rm_loc,
-    magma_z_matrix *L_new,
     magma_queue_t queue );
 
 magma_int_t
@@ -1183,37 +1024,30 @@ magma_zisai_generator_regs(
     magmaDoubleComplex *rhs,    
     magma_queue_t queue );
 
-magma_int_t
-magma_zisai_generator_regs2(
-    magma_uplo_t uplotype,
-    magma_trans_t transtype,
-    magma_diag_t diagtype,
-    magma_z_matrix L,
-    magma_z_matrix *M,
-    magma_index_t *sizes,
-    magma_index_t *locations,
-    magmaDoubleComplex *trisystems,
-    magmaDoubleComplex *rhs,    
-    magma_queue_t queue );
-
-magma_int_t
-magma_zisai_generator_regs3(
-    magma_uplo_t uplotype,
-    magma_trans_t transtype,
-    magma_diag_t diagtype,
-    magma_z_matrix L,
-    magma_z_matrix *M,
-    magma_index_t *sizes,
-    magma_index_t *locations,
-    magmaDoubleComplex *trisystems,
-    magmaDoubleComplex *rhs,    
-    magma_queue_t queue );
-
 // #endif
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE function definitions / Data on CPU
 */
 
+
+/* ////////////////////////////////////////////////////////////////////////////
+ -- MAGMA_SPARSE supernodal and RCM reordering
+*/
+magma_int_t
+magma_zmsupernodal(
+    magma_int_t *max_bs,
+    magma_z_matrix A,
+    magma_z_matrix *S,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmvarsizeblockstruct(
+    magma_int_t n,
+    magma_int_t *bs,
+    magma_int_t bsl,
+    magma_uplo_t uplotype,
+    magma_z_matrix *A,
+    magma_queue_t queue );
 
 
 

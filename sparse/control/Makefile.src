@@ -44,6 +44,8 @@ libsparse_src += \
 	$(cdir)/mmio.cpp                      \
 	$(cdir)/magma_zgeisai_tools.cpp	      \
 	$(cdir)/magma_zparilut_tools.cpp      \
+	$(cdir)/magma_zmsupernodal.cpp        \
+
 
 # dummy to compensate for routines not included in release
 libsparse_src += \

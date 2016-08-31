@@ -17,7 +17,7 @@
 #define WARP_SIZE 32
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     Takes a sparse matrix and generates
@@ -164,7 +164,7 @@ magma_zmprepare_batched(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     Does all triangular solves
@@ -250,7 +250,7 @@ magma_zmtrisolve_batched(
 
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     Inserts the values into the preconditioner matrix
@@ -325,7 +325,7 @@ magma_zmbackinsert_batched(
 }
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     Checks for a matrix whether the batched ISAI works for a given
@@ -389,7 +389,7 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
     Generates a block-diagonal sparsity pattern with block-size bs

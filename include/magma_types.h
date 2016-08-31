@@ -545,7 +545,8 @@ typedef enum {
     Magma_LSQR         = 504,
     Magma_PARILUT      = 505,
     Magma_ISAI         = 506,
-    Magma_CUSOLVE      = 507
+    Magma_CUSOLVE      = 507,
+    Magma_VBJACOBI     = 508
 } magma_solver_type;
 
 typedef enum {

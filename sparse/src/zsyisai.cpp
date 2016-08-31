@@ -17,7 +17,7 @@
 #define PRECISION_z
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
 
@@ -82,10 +82,6 @@ magma_zicisaisetup(
     // CHECK( magma_zmalloc( &trisystems_d, min(320000,A.num_rows) *warpsize*warpsize ) ); // fixed size - go recursive
     // CHECK( magma_zmalloc( &rhs_d, A.num_rows*warpsize ) );
     
-    if( precond->trisolver == Magma_JACOBI ){
-        precond->pattern = -precond->pattern;    
-    }
-    
     for( magma_int_t i=0; i<A.num_rows; i++ ){
             maxsize = sizes_h[i] = 0;
     }
@@ -96,9 +92,9 @@ magma_zicisaisetup(
     CHECK( magma_zmtranspose( precond->L, &MT, queue ) );
     
     // SPAI for L 
-    if( precond->pattern <= 0 ){ // block diagonal structure
+    if( precond->trisolver == Magma_JACOBI ){ // block diagonal structure
         if( precond->pattern == 0 ){
-            precond->pattern = -1;    
+            precond->pattern = 1;    
         }
         // magma_zmisai_blockstruct_gpu( A.num_rows, -precond->pattern, offset, MagmaLower, &QT, queue );
         // magma_z_mvisu(QT, queue );
@@ -108,7 +104,21 @@ magma_zicisaisetup(
         magma_zmfree( &MT, queue );
         CHECK( magma_zmtranspose( QT, &MT, queue ) );
         magma_zmfree( &QT, queue );
-    } else {
+    } else if( precond->trisolver == Magma_VBJACOBI ){ // block diagonal structure with variable blocksize
+        CHECK( magma_z_mtransfer( MT, &QT, Magma_DEV, Magma_CPU, queue ) );
+        magma_zmfree( &MT, queue );
+        CHECK( magma_zmsupernodal( &precond->pattern, QT, &MT, queue ) );
+        magma_zmfree( &QT, queue );
+        CHECK( magma_zmconvert( MT, &QT, Magma_CSR, Magma_CSRL, queue ) );
+        magma_zmfree( &MT, queue );
+        CHECK( magma_zmconvert( QT, &MT, Magma_CSR, Magma_CSR, queue ) );
+        magma_zmfree( &QT, queue );
+        CHECK( magma_z_mtransfer( MT, &QT, Magma_CPU, Magma_DEV, queue ) );
+        magma_zmfree( &MT, queue );
+        CHECK( magma_zmtranspose( QT, &MT, queue ) );
+        magma_zmfree( &QT, queue );
+        
+    } else if( precond->trisolver == Magma_ISAI ){
         if( precond->pattern == 100 ){
             CHECK( magma_zgeisai_maxblock( LT, &MT, queue ) );
         } else {
