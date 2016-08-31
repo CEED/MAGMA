@@ -788,14 +788,14 @@ magma_zparilut_zero(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_sweep(
+magma_zparilut_sweep(
     magma_z_matrix *A,
     magma_z_matrix *L,
     magma_z_matrix *U,
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_residuals(
+magma_zparilut_residuals(
     magma_z_matrix A,
     magma_z_matrix L,
     magma_z_matrix U,
@@ -803,14 +803,14 @@ magma_zmpilut_residuals(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_sweep_list(
+magma_zparilut_sweep_list(
     magma_z_matrix *A,
     magma_z_matrix *L,
     magma_z_matrix *U,
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_residuals_list(
+magma_zparilut_residuals_list(
     magma_z_matrix A,
     magma_z_matrix L,
     magma_z_matrix U,
@@ -818,14 +818,14 @@ magma_zmpilut_residuals_list(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_sweep_linkedlist(
+magma_zparilut_sweep_linkedlist(
     magma_z_matrix *A,
     magma_z_matrix *L,
     magma_z_matrix *U,
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_residuals_linkedlist(
+magma_zparilut_residuals_linkedlist(
     magma_z_matrix A,
     magma_z_matrix L,
     magma_z_matrix U,
@@ -833,13 +833,13 @@ magma_zmpilut_residuals_linkedlist(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_colmajor(
+magma_zparilut_colmajor(
     magma_z_matrix A,
     magma_z_matrix *AC,
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_colmajorup(
+magma_zparilut_colmajorup(
     magma_z_matrix A,
     magma_z_matrix *AC,
     magma_queue_t queue );
@@ -859,7 +859,7 @@ magma_zparilutsetup(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_insert(
+magma_zparilut_insert(
     magma_int_t *num_rmL,
     magma_int_t *num_rmU,
     magma_index_t *rm_locL,
@@ -872,7 +872,7 @@ magma_zmpilut_insert(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_insertsort(
+magma_zparilut_insertsort(
     magma_int_t *num_rmL,
     magma_int_t *num_rmU,
     magma_index_t *addL,
@@ -885,7 +885,7 @@ magma_zmpilut_insertsort(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_rmsort(
+magma_zparilut_rmsort(
     magmaDoubleComplex *thrs,
     magma_int_t *num_rm,
     magma_z_matrix *LU,
@@ -894,7 +894,7 @@ magma_zmpilut_rmsort(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_candidates(
+magma_zparilut_candidates(
     magma_z_matrix L,
     magma_z_matrix U,
     magma_z_matrix UR,
@@ -903,7 +903,7 @@ magma_zmpilut_candidates(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_candidates_linkedlist(
+magma_zparilut_candidates_linkedlist(
     magma_z_matrix L,
     magma_z_matrix U,
     magma_z_matrix UR,
@@ -912,7 +912,7 @@ magma_zmpilut_candidates_linkedlist(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_candlist(
+magma_zparilut_candlist(
     magma_z_matrix L,
     magma_z_matrix U,
     magma_z_matrix UR,
@@ -921,7 +921,7 @@ magma_zmpilut_candlist(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_rm_thrs(
+magma_zparilut_rm_thrs(
     magmaDoubleComplex *thrs,
     magma_int_t *num_rm,
     magma_z_matrix *LU,
@@ -930,7 +930,7 @@ magma_zmpilut_rm_thrs(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_rm_thrsrc(
+magma_zparilut_rm_thrsrc(
     magmaDoubleComplex *thrs,
     magma_int_t *num_rm,
     magma_z_matrix *LU,
@@ -940,7 +940,7 @@ magma_zmpilut_rm_thrsrc(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_count(
+magma_zparilut_count(
     magma_z_matrix L,
     magma_int_t *num,
     magma_queue_t queue );
@@ -952,21 +952,21 @@ magma_zparilut_randlist(
 
 
 magma_int_t
-magma_zmpilut_select_candidates(
+magma_zparilut_select_candidates(
     magma_int_t *num_rm,
     magma_int_t *rm_loc,
     magma_z_matrix *L_new,
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_select_candidates_L(
+magma_zparilut_select_candidates_L(
     magma_int_t *num_rm,
     magma_index_t *rm_loc,
     magma_z_matrix *L_new,
     magma_queue_t queue );
 
 magma_int_t
-magma_zmpilut_select_candidates_U(
+magma_zparilut_select_candidates_U(
     magma_int_t *num_rm,
     magma_index_t *rm_loc,
     magma_z_matrix *L_new,

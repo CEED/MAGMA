@@ -17,7 +17,8 @@
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     Screens the new candidates for duplicates and sets the value for those 
@@ -48,7 +49,7 @@
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zmeliminate_duplicates(
@@ -261,7 +262,8 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     Inserts for the iterative dynamic ILU an new element in the (empty) place 
@@ -311,7 +313,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_insert_LU(
@@ -570,7 +572,8 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     Inserts for the iterative dynamic ILU an new element in the (empty) place 
@@ -628,7 +631,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparict_insert_LU(
@@ -875,7 +878,8 @@ cleanup:
 }
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     Inserts for the iterative dynamic ILU an new element in the (empty) place 
@@ -923,7 +927,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparict_insert(
@@ -1077,7 +1081,8 @@ cleanup:
 }
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     Inserts for the iterative dynamic ILU an new element in the (empty) place 
@@ -1125,7 +1130,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparict_insert_U(
@@ -1287,7 +1292,8 @@ cleanup:
 }
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine removes matrix entries from the structure that are smaller
@@ -1326,7 +1332,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_rm_thrs(
@@ -1407,7 +1413,8 @@ magma_zparilut_rm_thrs(
 }
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine removes matrix entries from the structure that are smaller
@@ -1446,7 +1453,7 @@ magma_zparilut_rm_thrs(
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_rm_thrs_U(
@@ -1591,7 +1598,8 @@ magma_zparilut_rm_thrs_U(
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine removes matrix entries from the structure that are smaller
@@ -1635,7 +1643,7 @@ magma_zparilut_rm_thrs_U(
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_rm_thrs_LU(
@@ -1738,7 +1746,8 @@ magma_zparilut_rm_thrs_LU(
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine computes the threshold for removing num_rm elements.
@@ -1767,7 +1776,7 @@ magma_zparilut_rm_thrs_LU(
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_set_thrs(
@@ -1801,7 +1810,8 @@ cleanup:
 }
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This is a debugging routine, randomizing a linked list.
@@ -1818,7 +1828,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_randlist(
@@ -1953,7 +1963,8 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine approximates the threshold for removing num_rm elements.
@@ -1982,7 +1993,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_set_approx_thrs(
@@ -2072,7 +2083,8 @@ cleanup:
 }
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine approximates the threshold for removing num_rm elements.
@@ -2101,7 +2113,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_LU_approx_thrs(
@@ -2175,7 +2187,8 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine approximates the threshold for removing num_rm elements.
@@ -2204,7 +2217,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 /*
 extern "C" magma_int_t
 magma_zparilut_set_multi_thrs(
@@ -2263,7 +2276,8 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This function does an iterative ILU sweep.
@@ -2290,7 +2304,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparict_sweep(
@@ -2361,7 +2375,8 @@ magma_zparict_sweep(
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This function computes the residuals for the candidates.
@@ -2387,7 +2402,7 @@ magma_zparict_sweep(
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparict_residuals(
@@ -2450,7 +2465,8 @@ magma_zparict_residuals(
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This function identifies the candidates.
@@ -2472,7 +2488,7 @@ magma_zparict_residuals(
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparict_candidates(
@@ -2613,7 +2629,8 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This function identifies the candidates like they appear as ILU1 fill-in.
@@ -2639,7 +2656,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zmilu0_candidates(
@@ -3073,7 +3090,8 @@ cleanup:
 
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine converts a matrix back to CSR.
@@ -3096,7 +3114,7 @@ cleanup:
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_copy(
@@ -3126,7 +3144,8 @@ magma_zparilut_copy(
 }
 
 
-/**
+/***************************************************************************//**
+
     Purpose
     -------
     This routine sets the list etries of A to zero.
@@ -3144,7 +3163,7 @@ magma_zparilut_copy(
                 Queue to execute in.
 
     @ingroup magmasparse_zaux
-    ********************************************************************/
+*******************************************************************************/
 
 extern "C" magma_int_t
 magma_zparilut_zero(

@@ -19,7 +19,7 @@
 #define PRECISION_z
 
 
-/**
+/***************************************************************************//**
     Purpose
     -------
 
@@ -56,7 +56,7 @@
                 Queue to execute in.
 
     @ingroup magmasparse_zgepr
-    ********************************************************************/
+*******************************************************************************/
 extern "C"
 magma_int_t
 magma_zparilutsetup(
@@ -125,7 +125,7 @@ magma_zparilutsetup(
     
     
     start = magma_sync_wtime( queue );
-    magma_zmpilut_colmajor( U, &UR, queue );
+    magma_zparilut_colmajor( U, &UR, queue );
     end = magma_sync_wtime( queue );
     //magma_free_cpu( UR.row );
     //magma_free_cpu( UR.list );
@@ -172,11 +172,11 @@ magma_zparilutsetup(
         rm_locU[z] = U.nnz+z;
     }
 
-    magma_zmpilut_sweep_list( &hA, &L, &U, queue );
-    magma_zmpilut_sweep_list( &hA, &L, &U, queue );
-    magma_zmpilut_sweep_list( &hA, &L, &U, queue );
-    magma_zmpilut_sweep_list( &hA, &L, &U, queue );
-    magma_zmpilut_sweep_list( &hA, &L, &U, queue );
+    magma_zparilut_sweep_list( &hA, &L, &U, queue );
+    magma_zparilut_sweep_list( &hA, &L, &U, queue );
+    magma_zparilut_sweep_list( &hA, &L, &U, queue );
+    magma_zparilut_sweep_list( &hA, &L, &U, queue );
+    magma_zparilut_sweep_list( &hA, &L, &U, queue );
     
     nnzL=L.nnz;
     nnzU=U.nnz;
@@ -185,7 +185,7 @@ magma_zparilutsetup(
     
      
      start = magma_sync_wtime( queue );
-     magma_zmpilut_colmajorup( U, &UR, queue );
+     magma_zparilut_colmajorup( U, &UR, queue );
      end = magma_sync_wtime( queue );
      
       for( magma_int_t z=0; z<A.nnz; z++ ){
@@ -205,12 +205,12 @@ magma_zparilutsetup(
         U_new.nnz = 0;
         
         start = magma_sync_wtime( queue );
-        magma_zmpilut_colmajorup( U, &UR, queue );  
+        magma_zparilut_colmajorup( U, &UR, queue );  
         end = magma_sync_wtime( queue ); t_rowmajor=end-start;
         
         start = magma_sync_wtime( queue );
         if( reorder == 0 ){
-            magma_zmpilut_candidates_linkedlist(
+            magma_zparilut_candidates_linkedlist(
             L,
             U,
             UR,
@@ -218,7 +218,7 @@ magma_zparilutsetup(
             &U_new,
             queue );
         } else {
-            magma_zmpilut_candidates_linkedlist(
+            magma_zparilut_candidates_linkedlist(
             L,
             U,
             UR,
@@ -230,13 +230,13 @@ magma_zparilutsetup(
         
         if( reorder == 1 ){
             // start = magma_sync_wtime( queue );
-            // magma_zmpilut_residuals_linkedlist( hA, L, U, &L_new, queue );
-            // magma_zmpilut_residuals_linkedlist( hA, L, U, &U_new, queue );
+            // magma_zparilut_residuals_linkedlist( hA, L, U, &L_new, queue );
+            // magma_zparilut_residuals_linkedlist( hA, L, U, &U_new, queue );
             // end = magma_sync_wtime( queue ); t_res=end-start;
             // printf("residuals unordered:%.2e\n", t_res);
             start = magma_sync_wtime( queue );
-            magma_zmpilut_residuals_list( hA, L, U, &L_new, queue );
-            magma_zmpilut_residuals_list( hA, L, U, &U_new, queue );
+            magma_zparilut_residuals_list( hA, L, U, &L_new, queue );
+            magma_zparilut_residuals_list( hA, L, U, &U_new, queue );
             end = magma_sync_wtime( queue ); t_res=end-start;
             // printf("residuals ordered:%.2e\n", t_res);
         } else {
@@ -248,8 +248,8 @@ magma_zparilutsetup(
             // magma_zparilut_randlist( &U, queue );
             
             start = magma_sync_wtime( queue );
-            magma_zmpilut_residuals_linkedlist( hA, L, U, &L_new, queue );
-            magma_zmpilut_residuals_linkedlist( hA, L, U, &U_new, queue );
+            magma_zparilut_residuals_linkedlist( hA, L, U, &L_new, queue );
+            magma_zparilut_residuals_linkedlist( hA, L, U, &U_new, queue );
             end = magma_sync_wtime( queue ); t_res=end-start;
         }
         
@@ -262,12 +262,12 @@ magma_zparilutsetup(
         num_rmUt = num_rmU;
         
         start = magma_sync_wtime( queue );
-        magma_zmpilut_select_candidates_L( &num_rmL, rm_locL, &L_new, queue );
-        magma_zmpilut_select_candidates_U( &num_rmU, rm_locU, &U_new, queue );
+        magma_zparilut_select_candidates_L( &num_rmL, rm_locL, &L_new, queue );
+        magma_zparilut_select_candidates_U( &num_rmU, rm_locU, &U_new, queue );
         end = magma_sync_wtime( queue ); t_select=end-start;
         
         start = magma_sync_wtime( queue );
-        magma_zmpilut_insert(
+        magma_zparilut_insert(
              &num_rmL,
              &num_rmU,
              rm_locL,
@@ -291,7 +291,7 @@ magma_zparilutsetup(
             // L.nnz = L.nnz + num_rmL;
             // U.nnz = U.nnz + num_rmU;  
             // start = magma_sync_wtime( queue );
-            // magma_zmpilut_sweep_linkedlist( &hA, &L, &U, queue );
+            // magma_zparilut_sweep_linkedlist( &hA, &L, &U, queue );
             // end = magma_sync_wtime( queue ); t_sweep1=end-start;
             // printf(" only sweep time: %.2e\n", t_sweep1 );
             start = magma_sync_wtime( queue );
@@ -300,7 +300,7 @@ magma_zparilutsetup(
             end = magma_sync_wtime( queue ); t_reorder1=end-start;
             // printf(" reorder time: %.2e\n", t_reorder1 );
             start = magma_sync_wtime( queue );
-            magma_zmpilut_sweep_list( &hA, &L, &U, queue );
+            magma_zparilut_sweep_list( &hA, &L, &U, queue );
             end = magma_sync_wtime( queue ); t_sweep1=end-start;
             // printf(" only ordered sweep time: %.2e\n", t_sweep1 );
             // printf(" reorder +sweep time: %.2e\n\n", t_reorder1+t_sweep1 );
@@ -321,7 +321,7 @@ magma_zparilutsetup(
             //magma_zparilut_reorder( &U, queue ); 
             //magma_z_mvisu( U, queue );
             start = magma_sync_wtime( queue );
-            magma_zmpilut_sweep_linkedlist( &hA, &L, &U, queue );
+            magma_zparilut_sweep_linkedlist( &hA, &L, &U, queue );
             end = magma_sync_wtime( queue ); t_sweep1=end-start;
             start = magma_sync_wtime( queue );
             end = magma_sync_wtime( queue ); 
@@ -358,8 +358,8 @@ magma_zparilutsetup(
    // magma_queue_t queue )
         
         start = magma_sync_wtime( queue );
-        magma_zmpilut_rm_thrs( &thrsL, &num_rmL, &L, &L_new, rm_locL, queue );
-        magma_zmpilut_rm_thrs( &thrsU, &num_rmU, &U, &U_new, rm_locU, queue );
+        magma_zparilut_rm_thrs( &thrsL, &num_rmL, &L, &L_new, rm_locL, queue );
+        magma_zparilut_rm_thrs( &thrsU, &num_rmU, &U, &U_new, rm_locU, queue );
         end = magma_sync_wtime( queue ); t_rm=end-start;
         
         
@@ -367,7 +367,7 @@ magma_zparilutsetup(
             // start = magma_sync_wtime( queue );
             // L.nnz = L.nnz - num_rmL;
             // U.nnz = U.nnz - num_rmU;
-            // magma_zmpilut_sweep_linkedlist( &hA, &L, &U, queue );
+            // magma_zparilut_sweep_linkedlist( &hA, &L, &U, queue );
             // end = magma_sync_wtime( queue ); t_sweep2=end-start;
             // printf(" only sweep time: %.2e\n", t_sweep2 );
             start = magma_sync_wtime( queue );
@@ -376,7 +376,7 @@ magma_zparilutsetup(
             end = magma_sync_wtime( queue ); t_reorder2=end-start;
             // printf(" reorder time: %.2e\n", t_reorder2 );
             start = magma_sync_wtime( queue );
-            magma_zmpilut_sweep_list( &hA, &L, &U, queue );
+            magma_zparilut_sweep_list( &hA, &L, &U, queue );
             end = magma_sync_wtime( queue ); t_sweep2=end-start;
             // printf(" only ordered sweep time: %.2e\n", t_sweep2 );
             // printf(" reorder +sweep time: %.2e\n", t_reorder2+t_sweep2 );
@@ -395,7 +395,7 @@ magma_zparilutsetup(
             // magma_zparilut_randlist( &U, queue );
             
             start = magma_sync_wtime( queue );
-            magma_zmpilut_sweep_linkedlist( &hA, &L, &U, queue );
+            magma_zparilut_sweep_linkedlist( &hA, &L, &U, queue );
             end = magma_sync_wtime( queue ); t_sweep2=end-start;
             start = magma_sync_wtime( queue );
             magma_zparilut_reorder( &L, queue );
@@ -421,13 +421,13 @@ magma_zparilutsetup(
     }
     //##########################################################################
 
-    magma_zmpilut_sweep_list( &hA, &L, &U, queue );
-    magma_zmpilut_sweep_list( &hA, &L, &U, queue );
+    magma_zparilut_sweep_list( &hA, &L, &U, queue );
+    magma_zparilut_sweep_list( &hA, &L, &U, queue );
 
     L.nnz=L.nnz-num_rmL;
     U.nnz=U.nnz-num_rmU;
-    magma_zmpilut_count( L, &L.nnz, queue);
-    magma_zmpilut_count( U, &U.nnz, queue);
+    magma_zparilut_count( L, &L.nnz, queue);
+    magma_zparilut_count( U, &U.nnz, queue);
 
     
     magma_zmfree( &hAT, queue );

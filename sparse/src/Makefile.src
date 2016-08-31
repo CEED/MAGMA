@@ -90,18 +90,16 @@ libsparse_src += \
 	$(cdir)/ziterilu.cpp                  \
 	$(cdir)/zcustomic.cpp                 \
 	$(cdir)/zcustomilu.cpp                \
-#	$(cdir)/zparilut.cpp                  \
-#	$(cdir)/zparict.cpp                   \
-#	$(cdir)/zdummy.cpp                    \
+	$(cdir)/zparilut.cpp                  \
 
 # incomplete sparse approximate inverse
 libsparse_src += \
-#   $(cdir)/zgeisai.cpp                   \
-#   $(cdir)/zsyisai.cpp                   \
+    $(cdir)/zgeisai.cpp                   \
+    $(cdir)/zsyisai.cpp                   \
 
 # dummy to compensate for routines not included in release
 libsparse_src += \
-	$(cdir)/zdummy.cpp                    \
+#	$(cdir)/zdummy.cpp                    \
 
 
 # orthogonalization schemes and wrappers to dense MAGMA
