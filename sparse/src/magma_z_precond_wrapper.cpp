@@ -203,6 +203,7 @@ magma_z_precondsetup(
         if ( precond->trisolver == Magma_ISAI  ||
              precond->trisolver == Magma_JACOBI ||
              precond->trisolver == Magma_VBJACOBI ){
+            info = magma_zcumiccsetup( A, precond, queue );
             info = magma_zicisaisetup( A, b, precond, queue );
         } else {
             info = magma_zcumiccsetup( A, precond, queue );
