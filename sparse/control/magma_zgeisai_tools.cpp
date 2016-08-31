@@ -91,8 +91,6 @@ magma_zmprepare_batched(
     magma_int_t info = 0;
     
     magma_int_t warpsize = WARP_SIZE;
-    magma_int_t ione     = 1;
-    
     
     #pragma omp parallel for
     for( magma_int_t i=0; i<L.num_rows*warpsize*warpsize; i++ ){
@@ -143,7 +141,6 @@ magma_zmprepare_batched(
                 // printf("k:%d<%d l:%d<%d\n",k,L.row[ locations[ j ]+1 ],l,(i+1)*warpsize );
                 
                 if( locations[ l ] == L.col[k] ){ //match
-                    magma_int_t loc = i*warpsize*warpsize + j*warpsize + idx;
                     // printf("match: %d = %d insert %.2f at %d\n",locations[ l ], L.col[k], L.val[ k ], loc);
                     trisystems[ i*warpsize*warpsize + j*warpsize + idx ] 
                                                             = L.val[ k ];
@@ -162,33 +159,7 @@ magma_zmprepare_batched(
             
         }
     }
-    /*
-    // lets see how it looks like
-    for(magma_int_t i=0; i<1; i++){
-        printf("###################################\n");
-        printf("length[%d] = %d\n locations:\n", i, sizes[i]);
-        for(magma_int_t j=0; j<warpsize; j++){
-            printf("%d\t", locations[i*warpsize+j]);
-        }  
-        
-        printf("\n\n stream:\n");
-        for(magma_int_t j=0; j<warpsize; j++){
-            for(magma_int_t k=0; k<warpsize; k++){
-                printf("%2.2f\t", trisystems[i*warpsize*warpsize + j + k*warpsize]);
-            }  
-            printf("\n");
-        }  
-        printf("\n rhs:\n");
-        for(magma_int_t j=0; j<warpsize; j++){
-            printf("%2.2f\t", rhs[i*warpsize+j]);
-        } 
-        
-        printf("\n###################################\n\n\n");
-    }   
-    */
     
-    
-cleanup:
     return info;
 }
 
@@ -272,33 +243,7 @@ magma_zmtrisolve_batched(
                            &trisystems[i*warpsize*warpsize], &warpsize,
                            &rhs[i*warpsize], &ione );
     }
-    /*    // lets see how it looks like
-    for(magma_int_t i=0; i<L.num_rows; i++){
-        printf("###################################\n");
-        printf("length[%d] = %d\n", i, sizes[i]); 
-        printf("locations:\n");
-        for(magma_int_t j=0; j<warpsize; j++){
-            printf("%d\t", locations[i*warpsize+j]);
-        }  
-        
-        printf("\n\n stream:\n");
-        for(magma_int_t j=0; j<warpsize; j++){
-            for(magma_int_t k=0; k<warpsize; k++){
-                printf("%2.2f\t", trisystems[i*warpsize*warpsize + j + k*warpsize]);
-            }  
-            printf("\n");
-        }  
-        printf("\n rhs:\n");
-        for(magma_int_t j=0; j<warpsize; j++){
-            printf("%2.2f\t", rhs[i*warpsize+j]);
-        } 
-        printf("\n");
-        
-        printf("\n###################################\n\n\n");
-    }  */
     
-    
-cleanup:
     return info;
 }
 
@@ -368,7 +313,6 @@ magma_zmbackinsert_batched(
     magma_int_t info = 0;
     
     magma_int_t warpsize = WARP_SIZE;
-    magma_int_t ione     = 1;
     
     #pragma omp parallel for
     for(magma_int_t i=0; i<M->num_rows; i++){
@@ -377,8 +321,6 @@ magma_zmbackinsert_batched(
         }
     }
     
-    
-cleanup:
     return info;
 }
 
@@ -493,9 +435,7 @@ magma_zmisai_blockstruct(
 {
     magma_int_t info = 0;
     
-    real_Double_t start, end;
-    
-    magma_int_t i, k, j, nnz_diag, nnz_offd, diagblocks;
+    magma_int_t i, k, j;
     
     A->val = NULL;
     A->col = NULL;
@@ -518,8 +458,6 @@ magma_zmisai_blockstruct(
     CHECK( magma_index_malloc_cpu( &A->row, A->num_rows+1 ));
     CHECK( magma_index_malloc_cpu( &A->col, A->nnz ));
         
-    diagblocks = magma_ceildiv(n,bs);
-    
     // default: every row has bs elements
     #pragma omp parallel for
     for( i=0; i<offs; i++ ){
@@ -625,10 +563,7 @@ magma_zmisai_blockstruct(
 
     CHECK( magma_zmcsrcompressor( A, queue ) );
 
-    // magma_z_mvisu( *A, queue );
-    
 cleanup:
-
     return info;
     
 }
