@@ -981,7 +981,6 @@ magma_zparilut_insert(
         //printf("%%candidate for U: (%d,%d) tid %d\n", new_row, new_col, id);
         if( new_row < new_col ){
         printf("%% illegal candidate %d for U: (%d,%d)'\n", el, new_row, new_col);
-        //exit(-1);
         }
         //printf("%% candidate %d for U: (%d,%d)'\n", el, new_row, new_col);
         magma_index_t old_rowstart = U->row[ new_row ];
@@ -1306,10 +1305,6 @@ magma_zparilut_candidates_linkedlist(
         // loop first element over row - only for elements smaller the diagonal
         do{
             magma_index_t col1 = UR.col[ el1 ];
-            //if( col1 < row ){
-            //    printf("row:%d col1:%d\n", row, col1);
-            //    exit(-1);
-            //}
             // now check the upper triangular
             magma_index_t start2 = UR.row[ col1 ];
             magma_index_t el2 = start2;
@@ -1597,11 +1592,6 @@ magma_zparilut_candidates_linkedlist(
         // loop first element over row - only for elements smaller the diagonal
         do{
             magma_index_t col1 = UR.col[ el1 ];
-            //if( col1 < row ){
-            //    printf("row:%d col1:%d\n", row, col1);
-            //    exit(-1);
-            //}
-                
               
           // printf("row:%d el:%d\n", row, el1);
             // first check the lower triangular
@@ -1703,10 +1693,6 @@ magma_zparilut_candidates_linkedlist(
         // loop first element over row - only for elements smaller the diagonal
         do{
             magma_index_t col1 = UR.col[ el1 ];
-            //if( col1 < row ){
-            //    printf("row:%d col1:%d\n", row, col1);
-            //    exit(-1);
-            //}
             // now check the upper triangular
             magma_index_t start2 = UR.row[ col1 ];
             magma_index_t el2 = start2;
@@ -2007,17 +1993,20 @@ magma_zparilut_count(
             if(check == 1 ){
                 if( L.col[i] > r ){
                     printf("error here: (%d,%d)\n",r, L.col[i]);
-                    exit(-1);   
+                    info = -1;
+                    break;
                 }
             } else if(check == -1 ){
                 if( L.col[i] < r ){
                     printf("error here: (%d,%d)\n",r, L.col[i]);
-                    exit(-1);   
+                    info = -1;
+                    break;
                 }
             }
             if( nexti != 0 && L.col[i] >  L.col[nexti] ){
                 printf("error here: %d(%d,%d) -> %d(%d,%d) \n",i,L.rowidx[i], L.col[i], nexti,L.rowidx[nexti], L.col[nexti] );
-                exit(-1);   
+                info = -1;
+                break; 
             }
 
             (*num)++;

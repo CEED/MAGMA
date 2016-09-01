@@ -279,13 +279,6 @@ magma_zparilutsetup(
              &UR,
              queue );
         end = magma_sync_wtime( queue ); t_insert=end-start;
-//                   for(int z=0; z<L.nnz; z++){
-//              if(magma_z_isnan_inf( L.val[z] ) ){
-// printf("error: %d (%d,%d) %.2e\n", z, L.rowidx[z],L.col[z],L.val[z]);
-// exit(-1);
-//             }
-//             
-//     }  
         
         if( reorder > 1 ){
             // L.nnz = L.nnz + num_rmL;
