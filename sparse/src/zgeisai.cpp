@@ -100,7 +100,7 @@ magma_ziluisaisetup(
         CHECK( magma_zmtranspose( QT, &MT, queue ) );
         magma_zmfree( &QT, queue );
     } else if( precond->trisolver == Magma_VBJACOBI ){ // block diagonal structure with variable blocksize
-        CHECK( magma_z_mtransfer( MT, &QT, Magma_DEV, Magma_CPU, queue ) );
+        CHECK( magma_z_mtransfer( A, &QT, A.memory_location, Magma_CPU, queue ) );
         magma_zmfree( &MT, queue );
         CHECK( magma_zmsupernodal( &precond->pattern, QT, &MT, queue ) );
         magma_zmfree( &QT, queue );
@@ -190,7 +190,7 @@ magma_ziluisaisetup(
         magma_zmfree( &QT, queue );
         
     } else if( precond->trisolver == Magma_VBJACOBI ){ // block diagonal structure with variable blocksize
-        CHECK( magma_z_mtransfer( MT, &QT, Magma_DEV, Magma_CPU, queue ) );
+        CHECK( magma_z_mtransfer( A, &QT, A.memory_location, Magma_CPU, queue ) );
         magma_zmfree( &MT, queue );
         CHECK( magma_zmsupernodal( &precond->pattern, QT, &MT, queue ) );
         magma_zmfree( &QT, queue );
@@ -354,7 +354,7 @@ magma_ziluisaisetup_t(
         CHECK( magma_zmtranspose( QT, &MT, queue ) );
         magma_zmfree( &QT, queue );
     } else if( precond->trisolver == Magma_VBJACOBI ){ // block diagonal structure with variable blocksize
-        CHECK( magma_z_mtransfer( MT, &QT, Magma_DEV, Magma_CPU, queue ) );
+        CHECK( magma_z_mtransfer( A, &QT, A.memory_location, Magma_CPU, queue ) );
         magma_zmfree( &MT, queue );
         CHECK( magma_zmsupernodal( &precond->pattern, QT, &MT, queue ) );
         magma_zmfree( &QT, queue );
@@ -429,7 +429,7 @@ magma_ziluisaisetup_t(
         magma_zmfree( &QT, queue );
         
     } else if( precond->trisolver == Magma_VBJACOBI ){ // block diagonal structure with variable blocksize
-        CHECK( magma_z_mtransfer( MT, &QT, Magma_DEV, Magma_CPU, queue ) );
+        CHECK( magma_z_mtransfer( A, &QT, A.memory_location, Magma_CPU, queue ) );
         magma_zmfree( &MT, queue );
         CHECK( magma_zmsupernodal( &precond->pattern, QT, &MT, queue ) );
         magma_zmfree( &QT, queue );
