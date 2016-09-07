@@ -52,7 +52,8 @@ magma_zmsupernodal(
       
     magma_int_t info = 0;
     
-    magma_int_t *blocksizes, *blocksizes2, *start, *v, blockcount=0, blockcount2=0;
+    magma_int_t *blocksizes=NULL, *blocksizes2=NULL, *start=NULL, *v=NULL;
+    magma_int_t blockcount=0, blockcount2=0;
     
     int maxblocksize = *max_bs;
     int current_size = 0;
