@@ -58,10 +58,10 @@ magma_zmsupernodal(
     int maxblocksize = *max_bs;
     int current_size = 0;
     
-    CHECK( magma_imalloc_cpu( &v, A.num_rows ));
-    CHECK( magma_imalloc_cpu( &start, A.num_rows ));
-    CHECK( magma_imalloc_cpu( &blocksizes, A.num_rows ));
-    CHECK( magma_imalloc_cpu( &blocksizes2, A.num_rows ));
+    CHECK( magma_imalloc_cpu( &v, A.num_rows+10 ));
+    CHECK( magma_imalloc_cpu( &start, A.num_rows+10 ));
+    CHECK( magma_imalloc_cpu( &blocksizes, A.num_rows+10 ));
+    CHECK( magma_imalloc_cpu( &blocksizes2, A.num_rows+10 ));
 
     v[0] = 1;
     
