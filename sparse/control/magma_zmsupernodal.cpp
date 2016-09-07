@@ -127,6 +127,10 @@ cleanup:
     magma_free_cpu( blocksizes );
     magma_free_cpu( blocksizes2 );
     magma_free_cpu( start );
+    v = NULL;
+    blocksizes = NULL;
+    blocksizes2 = NULL;
+    start = NULL;
     
     return info;
     
